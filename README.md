@@ -2,11 +2,11 @@
 Monophonic MIDI-controlled Sound Synthesizer application runs on PIC32MX microcontroller.
 
 Overview
-````````
+
 The "REMI" Synth Module is a monophonic MIDI-controlled sound synthesizer designed primarily for use with electronic wind instument (EWI) MIDI controllers. Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a keyboard with classic MIDI output. Using a low-cost USB-MIDI adapter/cable, the synth can also be controlled by a computer running music software, for example a MIDI sequencer. 
 
 Features
-````````
+
     . High quality audio output: 40kHz sample rate, 32-bit precision DSP
     . High accuracy oscillator pitch for musical application
     . Dual wave-table sound synthesis with mix-ratio modulation (morphing)
