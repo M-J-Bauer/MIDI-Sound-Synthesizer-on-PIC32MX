@@ -3,11 +3,7 @@ Monophonic MIDI-controlled Sound Synthesizer application runs on PIC32MX microco
 
 Overview
 ````````
-The "REMI" Synth Module is a monophonic MIDI-controlled sound synthesizer designed primarily for use with electronic wind instument (EWI) MIDI controllers.
-
-Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a keyboard with classic MIDI output. 
-
-Using a low-cost MIDI-USB adapter/cable, the synth can also be controlled by a computer running music software, for example a MIDI sequencer. 
+The "REMI" Synth Module is a monophonic MIDI-controlled sound synthesizer designed primarily for use with electronic wind instument (EWI) MIDI controllers. Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a keyboard with classic MIDI output. Using a low-cost USB-MIDI adapter/cable, the synth can also be controlled by a computer running music software, for example a MIDI sequencer. 
 
 Features
 ````````
@@ -24,7 +20,7 @@ Features
     . Filter frequency control by Expression (CC2), Ampld Env, Mod'n (CC1) or LFO
     . Reverberation effect
 
-Note, in particular, that the "GUI" (front-panel GLCD module & push-buttons) is optional. The synth may be operated using the CLI
+Note, in particular, that the "GUI" (front-panel LCD module & push-buttons) is optional. The synth may be operated using the CLI
 (PC terminal) alone, allowing simplified construction.
 
 For details of the project, please visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth.htm
