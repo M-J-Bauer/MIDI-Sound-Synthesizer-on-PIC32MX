@@ -191,7 +191,7 @@ void  RemiSynthAudioInit(void)
  */
 void  RemiSynthPrepare()
 {
-    static  prepDone = FALSE;
+    static  bool prepDone = FALSE;
     float   res, res_sq, freq_rat;
     float   rvbDecayFactor;
     float   pi_2 = 2.0f * 3.14159265f;
