@@ -24,7 +24,7 @@ Note, in particular, that the "GUI" (front-panel LCD module & push-buttons) is o
 (PC terminal) alone, allowing simplified construction.
 
 A PIC32MX on-chip timer module is used to generate a PWM audio output signal. The PWM "DAC" has a resolution of 11 bits,
-which gives adequate sound quality. For improved sound quality, an external 12-bit or 16-bit SPI DAC chip may be addeed.
+which gives adequate sound quality. For improved sound quality, an external 12-bit or 16-bit SPI DAC chip may be added.
 Software DSP computations use 32-bit normalized fixed-point numbers with 20-bit fractional part, allowing the application
 to run on 32-bit microcontrollers without hardware floating-point capability.
 
