@@ -23,6 +23,14 @@ Features
 Note, in particular, that the "GUI" (front-panel LCD module & push-buttons) is optional. The synth may be operated using the CLI
 (PC terminal) alone, allowing simplified construction.
 
+A PIC32MX on-chip timer module is used to generate a PWM audio output signal. The PWM "DAC" has a resolution of 11 bits,
+which gives adequate sound quality. For improved sound quality, an external 12-bit or 16-bit SPI DAC chip may be addeed.
+Software DSP computations use 32-bit normalized fixed-point numbers with 20-bit fractional part, allowing the application
+to run on 32-bit microcontrollers without hardware floating-point capability.
+
+The "synth engine" code has been migrated successfully to a Teensy 3.2 microcontroller, on which the author's "REMI 3" (all-in-one EWI) is based. 
+(The Teensy 3.2 MCU has an on-chip 12-bit DAC.)
+
 For details of the project, please visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth.htm
 
 See also: User Guide (PDF in the repository)
