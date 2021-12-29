@@ -25,4 +25,4 @@ Note, in particular, that the "GUI" (front-panel LCD module & push-buttons) is o
 
 For details of the project, please visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth.htm
 
-See also: User Guide (PDF)
+See also: User Guide (PDF in the repository)
