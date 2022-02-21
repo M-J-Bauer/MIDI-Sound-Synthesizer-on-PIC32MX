@@ -1,11 +1,11 @@
 # MIDI-Sound-Synthesizer-on-PIC32MX
 Monophonic MIDI-controlled Sound Synthesizer application runs on PIC32MX microcontroller, easily adaptable to other devices.
 
-Overview
+# Overview
 
 The "REMI" Synth Module is a monophonic MIDI-controlled sound synthesizer designed primarily for use with electronic wind instument (EWI) MIDI controllers. Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a keyboard with classic MIDI output. Using a low-cost USB-MIDI adapter/cable, the synth can also be controlled by a computer running music software, for example a MIDI sequencer. 
 
-Features
+# Features
 
     . High quality audio output: 40kHz sample rate, 32-bit precision DSP
     . High accuracy oscillator pitch for musical application
@@ -31,6 +31,6 @@ to run on 32-bit microcontrollers without hardware floating-point capability.
 The "synth engine" code has been migrated successfully to a Teensy 3.2 microcontroller, on which the author's "REMI 3" (all-in-one EWI) is based. 
 (The Teensy 3.2 MCU has an on-chip 12-bit DAC.)
 
-For details of the project, please visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth.htm
+For details of the project, please visit the web page: http://www.mjbauer.biz/Build_the_REMI_synth.htm
 
 See also: User Guide (PDF in the repository)
