@@ -18,35 +18,28 @@
 #include "remi_synth2_GUI.h"
 
 PRIVATE  void  DisplayTitleBar(uint16 scnIndex);
-
 PRIVATE  void  ScreenFunc_Startup(bool);
 PRIVATE  void  ScreenFunc_SelfTestReport(bool);
 PRIVATE  void  ScreenFunc_Home(bool);
-PRIVATE  void  ScreenFunc_SetupMidiInParams(bool);
-PRIVATE  void  ScreenFunc_SetupMidiOutParams(bool);
 PRIVATE  void  ScreenFunc_PresetEditMenu(bool);
-PRIVATE  void  ScreenFunc_MiscControlsMenu(bool);
-
-PRIVATE  void  ScreenFunc_SetMidiInMode(bool);
-PRIVATE  void  ScreenFunc_SetMidiInChannel(bool);
-PRIVATE  void  ScreenFunc_SetMidiInPressureCC(bool);
-PRIVATE  void  ScreenFunc_SetMidiInModulationCC(bool);
-
-PRIVATE  void  ScreenFunc_SetMidiOutMode(bool);
-PRIVATE  void  ScreenFunc_SetMidiOutChannel(bool);
-PRIVATE  void  ScreenFunc_SetMidiOutPressureCC(bool);
-PRIVATE  void  ScreenFunc_SetMidiOutModulationCC(bool);
-
 PRIVATE  void  ScreenFunc_EditPresetPatch(bool);
 PRIVATE  void  ScreenFunc_EditPresetMidiProgram(bool);
 PRIVATE  void  ScreenFunc_EditPresetVibratoMode(bool);
 PRIVATE  void  ScreenFunc_EditPresetTranspose(bool);
 
-PRIVATE  void  ScreenFunc_EditReverbAtten(bool);
-PRIVATE  void  ScreenFunc_EditReverbMix(bool);
-
+PRIVATE  void  ScreenFunc_MainSettingsMenu(bool isNewScreen);
+PRIVATE  void  ScreenFunc_SetMidiInMode(bool);
+PRIVATE  void  ScreenFunc_SetMidiInChannel(bool);
+PRIVATE  void  ScreenFunc_SetMidiInExpression(bool);
+PRIVATE  void  ScreenFunc_SetMidiOutEnable(bool);
+PRIVATE  void  ScreenFunc_SetPitchBendMode(bool isNewScreen);
 PRIVATE  void  ScreenFunc_SystemInfoPage1(bool);
 PRIVATE  void  ScreenFunc_SystemInfoPage2(bool);
+PRIVATE  void  ScreenFunc_ValidateReverbAtten(bool);
+PRIVATE  void  ScreenFunc_ValidateReverbMix(bool);
+
+PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen);
+PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen);
 PRIVATE  void  ScreenFunc_CustomFuncMenu(bool);
 PRIVATE  void  ScreenFunc_DataEntry(bool);
 PRIVATE  void  ScreenFunc_DataEntryTest(bool);
@@ -67,7 +60,7 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
     {
         SCN_SELFTEST_REPORT,         // screen ID
         ScreenFunc_SelfTestReport,   // screen update function
-        "SELF-TEST Failed"           // title bar text
+        " SELF-TEST FAIL"             // title bar text
     },
     {
         SCN_HOME,
@@ -75,109 +68,94 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
         NULL                         // title bar text (none)
     },
     {
-        SCN_SETUP_MIDI_IN,
-        ScreenFunc_SetupMidiInParams,
-        "MIDI IN CONFIG."            // title bar text  SCN_MISC_CONTROL_MENU
-    },
-    {
-        SCN_SETUP_MIDI_OUT,
-        ScreenFunc_SetupMidiOutParams,
-        "MIDI OUT CONFIG."  
-    },
-    {
-        SCN_MISC_CONTROL_MENU,
-        ScreenFunc_MiscControlsMenu,
-        "MISC. CONTROLS"  
+        SCN_MAIN_SETTINGS_MENU,
+        ScreenFunc_MainSettingsMenu,
+        " SETTINGS MENU"
     },
     {
         SCN_PRESET_EDIT_MENU,
         ScreenFunc_PresetEditMenu,
-        "PRESET ## PARAMs"
+        " PRESET # PARAMs"
     },
     {
         SCN_SET_MIDI_IN_MODE,
         ScreenFunc_SetMidiInMode,
-        "SET MIDI IN MODE"
+        " MIDI IN MODE"
     },
     {
         SCN_SET_MIDI_IN_CHANNEL,
         ScreenFunc_SetMidiInChannel,
-        "SET MIDI IN CHANNEL"
+        " MIDI IN CHANNEL"
     },
     {
-        SCN_SET_MIDI_IN_PRESS_CC,
-        ScreenFunc_SetMidiInPressureCC,
-        "SET PRESSURE CC #"
+        SCN_SET_MIDI_IN_EXPRESS,
+        ScreenFunc_SetMidiInExpression,
+        " EXPRESSION CC #"
     },
     {
-        SCN_SET_MIDI_IN_MODLN_CC,
-        ScreenFunc_SetMidiInModulationCC,
-        "SET MODULATION CC #"
+        SCN_SET_MIDI_OUT_ENABLE,
+        ScreenFunc_SetMidiOutEnable,
+        " MIDI OUT ENABLE"
     },
     {
-        SCN_SET_MIDI_OUT_MODE,
-        ScreenFunc_SetMidiOutMode,
-        "SET MIDI OUT MODE"
-    },
-    {
-        SCN_SET_MIDI_OUT_CHANNEL,
-        ScreenFunc_SetMidiOutChannel,
-        "SET MIDI OUT CHANNEL"
-    },
-    {
-        SCN_SET_MIDI_OUT_PRESS_CC,
-        ScreenFunc_SetMidiOutPressureCC,
-        "SET PRESSURE CC #"
-    },
-    {
-        SCN_SET_MIDI_OUT_MODLN_CC,
-        ScreenFunc_SetMidiOutModulationCC,
-        "SET MODULATION CC #"
+        SCN_SET_PITCH_BEND_MODE,
+        ScreenFunc_SetPitchBendMode,
+        " PITCH-BEND MODE"
     },
     {
         SCN_EDIT_PRESET_PATCH,
         ScreenFunc_EditPresetPatch,
-        "EDIT PRESET PATCH"
+        " PRESET PATCH"
     },
     {
         SCN_EDIT_PRESET_MIDI_PGRM,
         ScreenFunc_EditPresetMidiProgram, 
-        "EDIT PRESET MIDI PGRM"
+        " PRESET MIDI PGRM"
     },
     {
-        SCN_EDIT_PRESET_VIBRATO_MODE,
+        SCN_EDIT_PRESET_VIBRATO,
         ScreenFunc_EditPresetVibratoMode,
-        "EDIT VIBRATO MODE"
+        " VIBRATO MODE"
     },
     {
         SCN_EDIT_PRESET_TRANSPOSE,
         ScreenFunc_EditPresetTranspose,
-        "EDIT PITCH TRANSPOSE"
+        " PITCH TRANSPOSE"
     },
     {
         SCN_EDIT_REVERB_ATTEN,
-        ScreenFunc_EditReverbAtten,
-        "EDIT REVERB ATTEN."
+        ScreenFunc_ValidateReverbAtten,
+        " REVERB ATTEN"
     },
     {
         SCN_EDIT_REVERB_MIX,
-        ScreenFunc_EditReverbMix,
-        "EDIT REVERB MIX."
+        ScreenFunc_ValidateReverbMix,
+        " REVERB MIX"
     },
     {
         SCN_SYSTEM_INFO_PAGE1,
         ScreenFunc_SystemInfoPage1,
-        "System Info   Page 1"
+        " System info  Page 1"
     },
     {
         SCN_SYSTEM_INFO_PAGE2,
         ScreenFunc_SystemInfoPage2,
-        "System Info   Page 2"
+        " System info  Page 2"
+    },  
+    {
+        SCN_CONTROL_PANEL_1,
+        ScreenFunc_ControlPanel1,
+        " CONTROL PANEL 1"
+    },  
+    {
+        SCN_CONTROL_PANEL_2,
+        ScreenFunc_ControlPanel2,
+        " CONTROL PANEL 2"
     },  
     {
         SCN_CUSTOM_FUNC_MENU,
         ScreenFunc_CustomFuncMenu,
-        "Custom Functions"
+        " OTHER FUNCTIONS"
     },  
     {
         SCN_DATA_ENTRY,
@@ -187,7 +165,7 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
     {
         SCN_DATA_ENTRY_TEST,
         ScreenFunc_DataEntryTest,
-        " Data Entry Result"
+        " Data Entry Test"
     },
 };
 
@@ -259,20 +237,6 @@ void  GoToNextScreen(uint16 nextScreenID)
 
 
 /*
- * GUI initialization function...
- * Call this before GUI_NavigationExec() to avoid trouble!
- */
-void  GUI_NavigationInit()
-{
-    m_CurrentScreen = SCN_STARTUP;
-    m_PreviousScreen = SCN_STARTUP;
-    m_DataEntryNextScreen = SCN_HOME;
-    m_ScreenSwitchFlag = 1;
-    m_screenSwitchDone = 0;
-}
-
-
-/*
  * GUI navigation engine (service routine, or whatever you want to call it).
  * This is the "executive hub" of the Graphical User Interface.
  *
@@ -281,7 +245,22 @@ void  GUI_NavigationInit()
  */
 void  GUI_NavigationExec(void)
 {
+    static uint32 buttonScanPeriodStart;
+    static bool  init_done;
     short  current, next;  // index values of current and next screens
+    
+    if (!isLCDModulePresent())  return;  // LCD not detected... bail
+    
+    if (!init_done)
+    {
+        m_CurrentScreen = SCN_STARTUP;
+        m_PreviousScreen = SCN_STARTUP;
+        m_DataEntryNextScreen = SCN_HOME;
+        m_ScreenSwitchFlag = 1;
+        m_screenSwitchDone = 0;
+        m_lastUpdateTime = milliseconds();
+        init_done = TRUE;
+    }
 
     if (m_ScreenSwitchFlag)   // Screen switch requested
     {
@@ -309,7 +288,7 @@ void  GUI_NavigationExec(void)
     }
     else  // no screen switch -- check update timer
     {
-        if (milliseconds() - m_lastUpdateTime >= SCREEN_UPDATE_INTERVAL)
+        if ((milliseconds() - m_lastUpdateTime) >= SCREEN_UPDATE_INTERVAL)
         {
             current = ScreenDescIndexFind(m_CurrentScreen);
 
@@ -318,6 +297,14 @@ void  GUI_NavigationExec(void)
             m_lastUpdateTime = milliseconds();
             m_ElapsedTime_ms += SCREEN_UPDATE_INTERVAL;
         }
+    }
+    
+    if (POT_MODULE_CONNECTED) ControlPotService();
+    
+    if ((milliseconds() - buttonScanPeriodStart) >= 6)  // every 6ms...
+    {
+        ButtonInputService();
+        buttonScanPeriodStart = milliseconds();
     }
 }
 
@@ -355,6 +342,59 @@ int  ScreenDescIndexFind(uint16 searchID)
     return index;
 }
 
+/*
+ * This function displays a single-line menu option, i.e. keytop image plus text string.
+ * The keytop image is simply a square with a character drawn inside it in reverse video.
+ * The given text string is printed just to the right of the keytop image.
+ * The character font(s) used are fixed within the function.
+ *
+ * Entry args:   x = X-coord of keytop image (2 pixels left of key symbol)
+ *               y = Y-coord of keytop symbol, same as text to be printed after
+ *               symbol = ASCII code of keytop symbol (5 x 7 mono font)
+ *               text = string to print to the right of the keytop image
+ */
+void  DisplayMenuOption(uint16 x, uint16 y, char symbol, char *text)
+{
+    uint16  xstring = x + 12;  // x-coord on exit
+
+    LCD_Mode(SET_PIXELS);
+    LCD_PosXY(x, y-1);
+    LCD_DrawBar(9, 9);
+
+    LCD_SetFont(MONO_8_NORM);
+    LCD_Mode(CLEAR_PIXELS);
+    LCD_PosXY(x+2, y);
+    if (symbol > 0x20) LCD_PutChar(symbol);
+
+    LCD_SetFont(PROP_8_NORM);
+    LCD_Mode(SET_PIXELS);
+    LCD_PosXY(xstring, y);
+    if (text != NULL) LCD_PutText(text);
+}
+
+/*
+ * This function displays a text string (str) centred in a specified field width (nplaces)
+ * using 8pt mono-spaced font, at the specified upper-left screen position (x, y).
+ * On exit, the display write mode is restored to 'SET_PIXELS'.
+ */
+void  DisplayTextCenteredInField(uint16 x, uint16 y, char *str, uint8 nplaces)
+{
+    int  len = strlen(str);
+    int  i;
+    
+    if (len > 20) len = 20;
+    x += 3 * (nplaces - len);  
+    
+    LCD_SetFont(MONO_8_NORM);
+    LCD_PosXY(x, y);
+    
+    for (i = 0;  i < len;  i++)
+    {
+        LCD_PutChar(*str++);
+    }
+    
+    LCD_Mode(SET_PIXELS);
+}
 
 /*
  * Function renders the Title Bar (background plus text) of a specified screen.
@@ -387,35 +427,61 @@ PRIVATE  void  DisplayTitleBar(uint16 scnIndex)
     LCD_Mode(SET_PIXELS);
 }
 
+/*
+ * Function:   Quantizes an unsigned integer (max. 100,000) so that the output value is a 
+ *             multiple of 1, 2 or 5. The multiple is a power of 10 which depends on the  
+ *             magnitude of the input value. Thus, the output value is a member of the set:
+ *             { 0, 1, 2, 5, 10, 20, 50, 100, ... 100000 }.
+ *
+ * Entry arg:  (uint16) inValue = 16-bit integer to be quantized
+ *
+ * Return val: (uint16) outValue = inValue, quantized in "1-2-5" series
+ */
+unsigned  QuantizeValue_1_2_5(unsigned inValue)
+{
+    unsigned  outValue = 0;
+    unsigned  pow10 = 1;
+    
+    if (inValue < 3)  return inValue;
+    
+    while (pow10 <= 10000)
+    {
+        outValue = 2 * pow10;
+        if (inValue <= (3 * pow10))  break;
+        outValue = 5 * pow10;
+        if (inValue <= (7 * pow10))  break;
+        outValue = 10 * pow10;
+        if (inValue <= (15 * pow10))  break;
+        pow10 = pow10 * 10;
+    }
+    
+    return  outValue;
+}
 
 /*
- * This function displays a single-line menu option, i.e. keytop image plus text string.
- * The keytop image is simply a square with a character drawn inside it in reverse video.
- * The given text string is printed just to the right of the keytop image.
- * The character font(s) used are fixed within the function.
+ * Function:   Quantizes an unsigned integer (max. 100,000) so that the output value is
+ *             rounded to the most significant digit times a power of 10.  Examples:
+ *             0 -> 0, 9 -> 9, 14 -> 10, 15 -> 20, 23 -> 20, 94 -> 90, 99 -> 100, 105 -> 110
  *
- * Entry args:   x = X-coord of keytop image (2 pixels left of key symbol)
- *               y = Y-coord of keytop symbol, same as text to be printed after
- *               symbol = ASCII code of keytop symbol (5 x 7 mono font)
- *               text = string to print to the right of the keytop image
+ * Entry arg:  (uint16) inValue = 16-bit integer to be quantized
+ *
+ * Return val: (uint16) outValue = inValue, quantized per decade
  */
-void  DisplayMenuOption(uint16 x, uint16 y, char symbol, char *text)
+unsigned  QuantizeValuePerDecade(unsigned inValue)
 {
-    uint16  xstring = x + 12;  // x-coord on exit
-
-    LCD_Mode(SET_PIXELS);
-    LCD_PosXY(x, y-1);
-    LCD_DrawBar(9, 9);
-
-    LCD_SetFont(MONO_8_NORM);
-    LCD_Mode(CLEAR_PIXELS);
-    LCD_PosXY(x+2, y);
-    if (symbol > 0x20) LCD_PutChar(symbol);
-
-    LCD_SetFont(PROP_8_NORM);
-    LCD_Mode(SET_PIXELS);
-    LCD_PosXY(xstring, y);
-    if (text != NULL) LCD_PutText(text);
+    unsigned  outValue = 0;
+    unsigned  pow10 = 10;
+    
+    if (inValue < 10)  return inValue;
+    
+    while (pow10 <= 100000)
+    {
+        outValue = ((inValue + pow10 / 2) / pow10) * pow10;  // rounded
+        pow10 = pow10 * 10;
+        if (inValue < pow10)  break;
+    }
+    
+    return  outValue;
 }
 
 
@@ -425,73 +491,72 @@ void  DisplayMenuOption(uint16 x, uint16 y, char symbol, char *text)
  *
  * Function:  ButtonInputService()
  *
- * Overview:  Service Routine for 6-button input.
+ * Overview:  Service Routine for 6 push-buttons on GUI front panel.
+ *            Called periodically at 6 ms intervals (approx).
  *
- * Detail:    Background task called periodically at 5ms intervals from the main loop.
- *            The routine reads the button inputs looking for a change in states.
+ * Detail:    The routine reads 6 button inputs looking for a change in state.
  *            When a button "hit" is detected, the function sets a flag to register the event.
- *            The state of the flag can be read by a call to function KeyHit().
+ *            The state of the flag can be read by a call to function ButtonHit().
  *            An ASCII key-code is stored to identify the button last pressed.
- *            The keycode can be read anytime by a call to function GetKey().
+ *            The keycode can be read anytime by a call to function ButtonCode().
  */
 void  ButtonInputService()
 {
-    static  short   taskState = 0;  // startup/reset state
-	static  uint16  buttonStatesLastRead = 0;
-	static  int     debounceTimer_ms = 0;
-	
-	uint16  buttonStatesNow = READ_BUTTON_INPUTS() ^ 0x003F;  // 6 LS bits, active HIGH
-	
-	if (taskState == 0)  // Waiting for all buttons released
-	{
-		if (buttonStatesNow == ALL_BUTTONS_RELEASED)
-		{
-			debounceTimer_ms = 0;
-			taskState = 3;
-		}
-	}
-	else if (taskState == 1)  // Waiting for any button(s) pressed
-	{
-		if (buttonStatesNow != ALL_BUTTONS_RELEASED) 
-		{
-			buttonStatesLastRead = buttonStatesNow;
-			debounceTimer_ms = 0;
-			taskState = 2;
-		}
-	}
-	else if (taskState == 2)  // De-bounce delay after hit (30ms)
-	{
-		if (buttonStatesNow != buttonStatesLastRead)
-			taskState = 1;    // glitch -- retry
-			
-		if (debounceTimer_ms >= 30)
-		{
-			m_ButtonHitDetected = 1;
-			m_ButtonStates = buttonStatesNow; 
-			if (m_ButtonStates & MASK_BUTTON_A)  m_ButtonLastHit = 'A';
-			else if (m_ButtonStates & MASK_BUTTON_B)  m_ButtonLastHit = 'B';
-			else if (m_ButtonStates & MASK_BUTTON_C)  m_ButtonLastHit = 'C';
-			else if (m_ButtonStates & MASK_BUTTON_D)  m_ButtonLastHit = 'D';
-			else if (m_ButtonStates & MASK_BUTTON_STAR)  m_ButtonLastHit = '*';
-			else if (m_ButtonStates & MASK_BUTTON_HASH)  m_ButtonLastHit = '#';
-			else  m_ButtonLastHit = 0;  // NUL
-            m_ElapsedTime_ms = 0;  // reset screen timeout
-			taskState = 0;
-		}
-	}
-	else if (taskState == 3)  // De-bounce delay after release (100ms)
-	{
-		if (buttonStatesNow != ALL_BUTTONS_RELEASED)  // glitch - retry
-			taskState = 0;
-	
-		if (debounceTimer_ms >= 100)
-		{
-			m_ButtonStates = buttonStatesNow;
-			taskState = 1;
-		}
-	}
-	
-	debounceTimer_ms += 5;
+    static short taskState = 0; // startup/reset state
+    static uint16 buttonStatesLastRead = 0;
+    static int debounceTimer_ms;
+    uint16 buttonStatesNow = READ_BUTTON_INPUTS() ^ 0x003F; // 6 LS bits, active HIGH
+    
+    debounceTimer_ms += 6;  // ms
+
+    if (taskState == 0) // Waiting for all buttons released
+    {
+        if (buttonStatesNow == ALL_BUTTONS_RELEASED)
+        {
+            debounceTimer_ms = 0;
+            taskState = 3;
+        }
+    }
+    else if (taskState == 1) // Waiting for any button(s) pressed
+    {
+        if (buttonStatesNow != ALL_BUTTONS_RELEASED)
+        {
+            buttonStatesLastRead = buttonStatesNow;
+            debounceTimer_ms = 0;
+            taskState = 2;
+        }
+    }
+    else if (taskState == 2) // De-bounce delay after hit (30ms)
+    {
+        if (buttonStatesNow != buttonStatesLastRead)
+            taskState = 1; // glitch -- retry
+
+        if (debounceTimer_ms >= 30)
+        {
+            m_ButtonHitDetected = 1;
+            m_ButtonStates = buttonStatesNow;
+            if (m_ButtonStates & MASK_BUTTON_A) m_ButtonLastHit = 'A';
+            else if (m_ButtonStates & MASK_BUTTON_B) m_ButtonLastHit = 'B';
+            else if (m_ButtonStates & MASK_BUTTON_C) m_ButtonLastHit = 'C';
+            else if (m_ButtonStates & MASK_BUTTON_D) m_ButtonLastHit = 'D';
+            else if (m_ButtonStates & MASK_BUTTON_STAR) m_ButtonLastHit = '*';
+            else if (m_ButtonStates & MASK_BUTTON_HASH) m_ButtonLastHit = '#';
+            else m_ButtonLastHit = 0; // NUL
+            m_ElapsedTime_ms = 0; // reset screen timeout
+            taskState = 0;
+        }
+    }
+    else if (taskState == 3) // De-bounce delay after release (150ms)
+    {
+        if (buttonStatesNow != ALL_BUTTONS_RELEASED) // glitch - retry
+            taskState = 0;
+
+        if (debounceTimer_ms >= 150)
+        {
+            m_ButtonStates = buttonStatesNow;
+            taskState = 1;
+        }
+    }
 }
 
 
@@ -509,41 +574,183 @@ uint8  GetButtonStates(void)
     return  m_ButtonStates;  
 }
 
-
 /*
- * Function:     uint8 KeyHit()
+ * Function:     uint8 ButtonHit()
  *
  * Overview:     Tests for a button hit, i.e. transition from not pressed to pressed.
  *               A private flag, m_ButtonHitDetected, is cleared on exit so that the 
  *               function will return TRUE once only for each button press event.
  *
- * Return val:   TRUE (1) if a key hit was detected since the last call, else FALSE (0).
+ * Return val:   TRUE (1) if a button hit was detected since the last call, else FALSE (0).
  */
-uint8  KeyHit(void)
+uint8 ButtonHit(void)
 {
-	uint8  result = m_ButtonHitDetected;
-	
-	m_ButtonHitDetected = 0;
-	
-    return  result;  
+    uint8 result = m_ButtonHitDetected;
+
+    m_ButtonHitDetected = 0;
+
+    return result;  
 }
 
 
 /*
- * Function:     short GetKey()
+ * Function:     short ButtonCode()
  *
  * Overview:     Returns the ASCII keycode of the last button press detected, i.e.
- *               following a call to function KeyHit() which returned TRUE.
+ *               following a call to function ButtonHit() which returned TRUE.
  *
- * Note:         GetKey() may be called multiple times after a call to KeyHit().
+ * Note:         ButtonCode() may be called multiple times after a call to ButtonHit().
  *               The function will return the same keycode on each call, up to
  *               100 milliseconds after the last button hit registered.
  *
  * Return val:   (uint8) ASCII keycode, one of: 'A', 'B', 'C', 'D', '*', or '#'.
  */
-uint8  GetKey(void)
+uint8  ButtonCode(void)
 {
     return  m_ButtonLastHit;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+// Functions to support up to 6 control potentiometers on the front-panel.
+//-------------------------------------------------------------------------------------------------
+
+#define SIGNAL_ACQUISITION      0
+#define WAITING_FOR_CONVERSION  1
+
+static  int32  m_PotReadingAve[6];  // rolling average of pot readings
+static  bool   m_PotMoved[6];  // Flags: Pot reading changed since last read
+
+/*
+ * Function:  ControlPotService()
+ *
+ * Overview:  Service Routine for 6 front-panel control pots.
+ *            Non-blocking "task" called frequently as possible.
+ *
+ * Detail:    The routine reads the 6 pot inputs and keeps a rolling average of raw ADC
+ *            readings in fixed-point format (24:8 bits). The acquisition time allowed for 
+ *            each pot reading is 3ms, so all 6 pots are serviced in under 20ms.
+ * 
+ *            Each pot reading is compared with its respective reading on the previous pass.
+ *            If a change of more than about 1% is found, then a flag is raised for the
+ *            respective pot.
+ * 
+ * Outputs:   (bool) m_PotMoved[6],  (int32) m_PotReadingAve[6].
+ *            The state of the flag can be read by a call to function PotMoved(potnum).
+ *            The last pot position can be read by a call to function PotReading(n).
+ */
+void  ControlPotService()
+{
+    static bool    prep_done;
+    static uint8   state;
+    static int32   pastReading[6];  // readings on past scan
+    static uint32  acquisitionStartTime; // start of 3ms interval
+    static uint32  intervalStart37ms;    // start of 37ms interval
+    static uint8   potSel;  // pot index, also current ADC input selected
+    int32  potReading;
+    uint8  potr;
+    
+    if (!prep_done)  // One-time initialization at power-on/reset
+    {
+        potSel = 0;
+        ADC_INPUT_SEL(0);
+        ADC_SAMPLING = 1;  // Start signal acquisition
+        acquisitionStartTime = milliseconds();
+        intervalStart37ms = milliseconds();
+        state = SIGNAL_ACQUISITION;
+        prep_done = TRUE;
+    }
+
+    if (state == SIGNAL_ACQUISITION)
+    {
+        if ((milliseconds() - acquisitionStartTime) >= 3)  // 3ms interval
+        {
+            ADC_SAMPLING = 0;  // End sampling, start conversion
+            state = WAITING_FOR_CONVERSION;
+        }
+    }
+    else  // state == WAITING_FOR_CONVERSION
+    {
+        if (ADC_CONV_DONE)  // Every 3ms (approx)...
+        {
+            potReading = (int32) ADC_RESULT_REG;  // get 10 bit raw result
+            potReading = potReading << 8;  // convert to fixed-point (24:8 bits)
+            
+            // Apply rolling average algorithm (1st-order IIR filter, K = 0.25)
+            m_PotReadingAve[potSel] -= m_PotReadingAve[potSel] >> 2;
+            m_PotReadingAve[potSel] += potReading >> 2;
+            
+            if (++potSel >= 6)  potSel = 0;  // next pot to be serviced
+            ADC_INPUT_SEL(potSel);
+            ADC_SAMPLING = 1;  // Start signal acquisition
+            acquisitionStartTime = milliseconds();
+            state = SIGNAL_ACQUISITION;
+        }
+    }
+    
+    // Every 37ms, choose a pot at random, check if it has been moved.
+    // On average, 6 pots will be checked in 220ms (approx).
+    if ((milliseconds() - intervalStart37ms) >= 37)
+    {
+        potr = rand() % 6;  // 0..5
+        if (abs(m_PotReadingAve[potr] - pastReading[potr]) > (10 << 8))
+        {
+            m_PotMoved[potr] = TRUE;
+            pastReading[potr] = m_PotReadingAve[potr];  // update
+        }
+        intervalStart37ms = milliseconds();
+    }
+}
+
+/*
+ * Function:     PotFlagsClear()
+ *
+ * Overview:     Clears all (6) "pot moved" flags in array m_PotMoved[].
+ * 
+ * Note:         To clear one individual pot flag, call PotMoved(num).
+ */
+void  PotFlagsClear()
+{
+    short  i;
+    
+    for (i = 0;  i < 6;  i++)  { m_PotMoved[i] = FALSE; }
+}
+
+/*
+ * Function:     PotMoved()
+ *
+ * Overview:     Returns a flag (TRUE or FALSE) indicating if the specified control pot
+ *               (potnum) position has changed since the previous call to the function.
+ *
+ * Note:         The flag is cleared on exit, so subsequent calls will return FALSE
+ *               until the pot position changes again.
+ *
+ * Arg val:      (uint8) ID number of required pot (0..5)
+ *
+ * Return val:   (bool) status flag, value = TRUE or FALSE
+ */
+bool  PotMoved(uint8 potnum)
+{
+    bool  result = m_PotMoved[potnum];
+
+    if (potnum < 6) m_PotMoved[potnum] = FALSE;
+    
+    return  result;
+}
+
+/*
+ * Function:     PotReading()
+ *
+ * Overview:     Returns the current setting (position) of the specified control pot,
+ *               averaged over several ADC readings, as an 8-bit integer.
+ *
+ * Arg val:      (uint8) ID number of required pot (0..5)
+ *
+ * Return val:   (uint8) Pot reading, 8 bits unsigned, range 0..255.
+ */
+uint8  PotReading(uint8 potnum)
+{
+    return  (uint8) (m_PotReadingAve[potnum] >> 10);
 }
 
 
@@ -592,11 +799,14 @@ PRIVATE  void  ScreenFunc_Startup(bool isNewScreen)
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(3, 56);
         LCD_PutText("Running self-test...");
+        
+        CLIPPING_LED_ON();
     }
     else  // do periodic update...
     {
         if (m_ElapsedTime_ms >= SELF_TEST_WAIT_TIME_MS)
         {
+            CLIPPING_LED_OFF();
             isFailedSelfTest = 0;
             // Check self-test results... if fail, go to test results screen
             for (i = 0;  i < NUMBER_OF_SELFTEST_ITEMS;  i++)
@@ -640,10 +850,10 @@ PRIVATE  void  ScreenFunc_SelfTestReport(bool isNewScreen)
     }
     else  // do periodic update...
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*') BootReset();
-            else if (GetKey() == '#') GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '*') BootReset();
+            else if (ButtonCode() == '#') GoToNextScreen(SCN_HOME);
         }
     }
 }
@@ -662,15 +872,15 @@ PRIVATE  void  ScreenFunc_Home(bool isNewScreen)
         LCD_PosXY(2, 2);
         LCD_PutImage(treble_clef_16x40, 16, 40);
 
-        DisplayMenuOption(0,  46, 'A', "+ Pr -");
-        DisplayMenuOption(44, 46, 'B', "");
+        DisplayMenuOption(0,  46, 'A', "+ Pr -");  // A: Preset++
+        DisplayMenuOption(44, 46, 'B', "");        // B: Preset--
         DisplayMenuOption(60, 46, 'C', "Control");
         DisplayMenuOption(0,  56, '*', "SETUP");
         DisplayMenuOption(60, 56, '#', "PRESET");
 
-        LCD_PosXY(32, 1);
+        LCD_PosXY(26, 1);
         LCD_SetFont(PROP_8_NORM);
-        LCD_PutText("EWI Synth");
+        LCD_PutText("Bauer Synth");
 
         sprintf(textBuf, "v%d.%d.%02d", g_FW_version[0], g_FW_version[1], g_FW_version[2]);
         LCD_SetFont(PROP_8_NORM);
@@ -682,25 +892,23 @@ PRIVATE  void  ScreenFunc_Home(bool isNewScreen)
     }
     else  // do periodic update...
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
             // Main menu options...
-            if (GetKey() == '*')  GoToNextScreen(SCN_SETUP_MIDI_IN);
-            if (GetKey() == '#')  GoToNextScreen(SCN_PRESET_EDIT_MENU);
-            if (GetKey() == 'A')  // Increment Preset
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_MAIN_SETTINGS_MENU);  // SETUP
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_PRESET_EDIT_MENU);  // PRESET
+            if (ButtonCode() == 'A')  // Increment Preset
             {
-                preset = g_Config.PresetLastSelected + 1;
-                if (preset >= 8)  preset = 0;  // wrap
+                preset = (g_Config.PresetLastSelected + 1) & 7;
                 InstrumentPresetSelect(preset);
             }
-            if (GetKey() == 'B')  // Decrement Preset
+            if (ButtonCode() == 'B')  // Decrement Preset
             {
-                preset = g_Config.PresetLastSelected - 1;
-                if (preset >= 8)  preset = 7;  // unsigned byte
+                preset = (g_Config.PresetLastSelected - 1) & 7;
                 InstrumentPresetSelect(preset);
             }
-            if (GetKey() == 'C')  GoToNextScreen(SCN_MISC_CONTROL_MENU);
-            if (GetKey() == 'D')  GoToNextScreen(SCN_CUSTOM_FUNC_MENU);
+            if (ButtonCode() == 'C')  GoToNextScreen(SCN_CONTROL_PANEL_1);
+            if (ButtonCode() == 'D')  GoToNextScreen(SCN_CUSTOM_FUNC_MENU);
         }
         
         if (g_Config.PresetLastSelected != m_presetLastShown)
@@ -736,118 +944,6 @@ PRIVATE  void  ScreenFunc_Home(bool isNewScreen)
 }
 
 
-PRIVATE  void  ScreenFunc_SetupMidiInParams(bool isNewScreen)
-{
-    char    textBuf[40];
-
-    if (isNewScreen)  // new screen...
-    {
-        DisplayMenuOption(0,  12, 'A', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 12);
-        sprintf(textBuf, "MIDI IN mode: %d", g_Config.MidiInMode);
-        LCD_PutText(textBuf);
-        
-        DisplayMenuOption(0,  22, 'B', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 22);
-        sprintf(textBuf, "MIDI IN channel: %d", g_Config.MidiInChannel);
-        LCD_PutText(textBuf);
-        
-        DisplayMenuOption(0,  32, 'C', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 32);
-        sprintf(textBuf, "Pressure CC#: %d", g_Config.MidiInPressureCCnum);
-        LCD_PutText(textBuf);
-
-        DisplayMenuOption(0,  42, 'D', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 42);
-        sprintf(textBuf, "Modulation CC#: %d", g_Config.MidiInModulationCCnum);
-        LCD_PutText(textBuf);
-
-        LCD_PosXY(0, 53);
-        LCD_DrawLineHoriz(128);
-        DisplayMenuOption(0,  56, '*', "Exit");
-        DisplayMenuOption(88, 56, '#', "Next");
-        LCD_PosXY(56, 56);
-    }
-    else  // update screen & check for button hit
-    {
-        if (KeyHit())
-        {
-            if (GetKey() == '*') GoToNextScreen(SCN_HOME);
-            else if (GetKey() == 'A') GoToNextScreen(SCN_SET_MIDI_IN_MODE);
-            else if (GetKey() == 'B') GoToNextScreen(SCN_SET_MIDI_IN_CHANNEL);
-            else if (GetKey() == 'C') GoToNextScreen(SCN_SET_MIDI_IN_PRESS_CC);
-            else if (GetKey() == 'D') GoToNextScreen(SCN_SET_MIDI_IN_MODLN_CC);
-            else if (GetKey() == '#') GoToNextScreen(SCN_SETUP_MIDI_OUT);
-        }
-    }
-
-    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)
-    {
-        GoToNextScreen(SCN_HOME);
-    }
-}
-
-
-PRIVATE  void  ScreenFunc_SetupMidiOutParams(bool isNewScreen)
-{
-    char    textBuf[40];
-
-    if (isNewScreen)  // new screen...
-    {
-        DisplayMenuOption(0,  12, 'A', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 12);
-        sprintf(textBuf, "MIDI OUT mode: %d", g_Config.MidiOutMode);
-        LCD_PutText(textBuf);
-        
-        DisplayMenuOption(0,  22, 'B', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 22);
-        sprintf(textBuf, "MIDI OUT channel: %d", g_Config.MidiOutChannel);
-        LCD_PutText(textBuf);
-        
-        DisplayMenuOption(0,  32, 'C', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 32);
-        sprintf(textBuf, "Pressure CC#: %d", g_Config.MidiOutPressureCCnum);
-        LCD_PutText(textBuf);
-
-        DisplayMenuOption(0,  42, 'D', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 42);
-        sprintf(textBuf, "Modulation CC#: %d", g_Config.MidiOutModulationCCnum);
-        LCD_PutText(textBuf);
-
-        LCD_PosXY(0, 53);
-        LCD_DrawLineHoriz(128);
-        DisplayMenuOption(0,  56, '*', "Exit");
-        DisplayMenuOption(88, 56, '#', "Next");
-        LCD_PosXY(56, 56);
-    }
-    else
-    {
-        if (KeyHit())
-        {
-            if (GetKey() == '*') GoToNextScreen(SCN_HOME);
-            else if (GetKey() == 'A') GoToNextScreen(SCN_SET_MIDI_OUT_MODE);
-            else if (GetKey() == 'B') GoToNextScreen(SCN_SET_MIDI_OUT_CHANNEL);
-            else if (GetKey() == 'C') GoToNextScreen(SCN_SET_MIDI_OUT_PRESS_CC);
-            else if (GetKey() == 'D') GoToNextScreen(SCN_SET_MIDI_OUT_MODLN_CC);
-            else if (GetKey() == '#') GoToNextScreen(SCN_SYSTEM_INFO_PAGE1);
-        }
-    }
-
-    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)
-    {
-        GoToNextScreen(SCN_HOME);
-    }    
-}
-
-
 PRIVATE  void  ScreenFunc_PresetEditMenu(bool isNewScreen)
 {
     char    textBuf[40];
@@ -870,11 +966,11 @@ PRIVATE  void  ScreenFunc_PresetEditMenu(bool isNewScreen)
     }
     else   // update screen, check button hit
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*') GoToNextScreen(SCN_HOME);
-            else if (GetKey() == 'A')  GoToNextScreen(SCN_EDIT_PRESET_PATCH);
-            else if (GetKey() == 'B')  // Edit Preset Midi Pgrm
+            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == 'A')  GoToNextScreen(SCN_EDIT_PRESET_PATCH);
+            if (ButtonCode() == 'B')  // Edit Preset Midi Pgrm
             {
                 m_DataEntryTitle = "Enter MIDI Pgrm #";
                 m_DataEntryNextScreen = SCN_EDIT_PRESET_MIDI_PGRM;
@@ -882,8 +978,8 @@ PRIVATE  void  ScreenFunc_PresetEditMenu(bool isNewScreen)
                 m_DataEntryValue = g_Preset.Descr[m_editPreset].MidiProgram;
                 GoToNextScreen(SCN_DATA_ENTRY);
             }
-            else if (GetKey() == 'C')  GoToNextScreen(SCN_EDIT_PRESET_VIBRATO_MODE);
-            else if (GetKey() == 'D')  // Edit Preset Transpose
+            if (ButtonCode() == 'C')  GoToNextScreen(SCN_EDIT_PRESET_VIBRATO);
+            if (ButtonCode() == 'D')  // Edit Preset Transpose
             {
                 m_DataEntryTitle = "Enter Transpose Qty";
                 m_DataEntryNextScreen = SCN_EDIT_PRESET_TRANSPOSE;
@@ -891,7 +987,7 @@ PRIVATE  void  ScreenFunc_PresetEditMenu(bool isNewScreen)
                 m_DataEntryValue = g_Preset.Descr[m_editPreset].PitchTranspose;
                 GoToNextScreen(SCN_DATA_ENTRY);
             }
-            else if (GetKey() == '#')  // select next preset to edit
+            if (ButtonCode() == '#')  // select next preset to edit
             {
                 if (++m_editPreset >= 8)  m_editPreset = 0;  
                 doRefresh = 1;
@@ -918,7 +1014,7 @@ PRIVATE  void  ScreenFunc_PresetEditMenu(bool isNewScreen)
         LCD_Mode(SET_PIXELS);
         
         // Search table of pre-defined patches for patchNum...
-        patchNum = g_Preset.Descr[m_editPreset].RemiSynthPatch;  // Patch ID #
+        patchNum = g_Preset.Descr[m_editPreset].PatchNumber;  // Patch ID #
 
         for (i = 0;  i < GetNumberOfPatchesDefined();  i++)
         {
@@ -963,14 +1059,11 @@ PRIVATE  void  ScreenFunc_PresetEditMenu(bool isNewScreen)
         doRefresh = 0;   // inhibit refresh until next preset selected
     }
 
-    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)
-    {
-        GoToNextScreen(SCN_HOME);
-    }    
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
-PRIVATE  void  ScreenFunc_MiscControlsMenu(bool isNewScreen)
+PRIVATE  void  ScreenFunc_MainSettingsMenu(bool isNewScreen)
 {
     char    textBuf[40];
     
@@ -987,19 +1080,14 @@ PRIVATE  void  ScreenFunc_MiscControlsMenu(bool isNewScreen)
         LCD_PosXY(12, 22);
         sprintf(textBuf, "Reverb Mix:  %02d %%", g_Config.ReverbMix_pc);
         LCD_PutText(textBuf);
-/*        
-        DisplayMenuOption(0,  32, 'C', "");
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 32);
-        sprintf(textBuf, "Reserved: %d", g_Config.Reserved101);
-        LCD_PutText(textBuf);
-*/
+
+//      DisplayMenuOption(0,  32, 'C', " - TBD - ");  // reserved
+
         DisplayMenuOption(0,  42, 'D', "");
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(12, 42);
-        if (LCD_BACKLIGHT_IS_LOW)  LCD_PutText("LCD brightness: Lo");
-        else  LCD_PutText("LCD brightness: Hi");
-
+        LCD_PutText("Display brightness");
+     
         LCD_PosXY(0, 53);
         LCD_DrawLineHoriz(128);
         DisplayMenuOption(0,  56, '*', "Exit");
@@ -1008,40 +1096,36 @@ PRIVATE  void  ScreenFunc_MiscControlsMenu(bool isNewScreen)
     }
     else  // check for button hit
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*') GoToNextScreen(SCN_HOME);
-            else if (GetKey() == 'A') 
+            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == 'A') 
             {
-                m_DataEntryTitle = "Enter 0..100 (%)";
+                m_DataEntryTitle = "Enter 0..99 (%)";
                 m_DataEntryNextScreen = SCN_EDIT_REVERB_ATTEN;
-                m_DataEntryNumDigits = 3;
+                m_DataEntryNumDigits = 2;
                 m_DataEntryValue = g_Config.ReverbAtten_pc;
                 GoToNextScreen(SCN_DATA_ENTRY);
             }
-            else if (GetKey() == 'B')
+            if (ButtonCode() == 'B')
             {
-                m_DataEntryTitle = "Enter 0..100 (%)";
+                m_DataEntryTitle = "Enter 0..99 (%)";
                 m_DataEntryNextScreen = SCN_EDIT_REVERB_MIX;
-                m_DataEntryNumDigits = 3;
+                m_DataEntryNumDigits = 2;
                 m_DataEntryValue = g_Config.ReverbMix_pc;
                 GoToNextScreen(SCN_DATA_ENTRY);
             }
-//          else if (GetKey() == 'C')  { ... }   // reserved
-            else if (GetKey() == 'D')
+//          if (ButtonCode() == 'C')  GoToNextScreen(SCN_HOME);  // reserved
+            if (ButtonCode() == 'D')  
             {
                 if (LCD_BACKLIGHT_IS_LOW)  LCD_BACKLIGHT_HIGH();
                 else  LCD_BACKLIGHT_LOW();   // Toggle LCD backlight switch
-                GoToNextScreen(SCN_MISC_CONTROL_MENU);  // Update display
+                GoToNextScreen(SCN_MAIN_SETTINGS_MENU);  // Update display
             }
-            else if (GetKey() == '#') GoToNextScreen(SCN_HOME);  // todo: Next page (if any)
+            if (ButtonCode() == '#') GoToNextScreen(SCN_SET_MIDI_IN_MODE);
         }
     }
-
-    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)
-    {
-        GoToNextScreen(SCN_HOME);
-    }
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
@@ -1058,21 +1142,21 @@ PRIVATE  void  ScreenFunc_SetMidiInMode(bool isNewScreen)
         LCD_SetFont(PROP_8_NORM);
         DisplayMenuOption( 0, 56, '*', "Home");
         DisplayMenuOption(40, 56, 'C', "Change");
-        DisplayMenuOption(90, 56, '#', "Back");
+        DisplayMenuOption(90, 56, '#', "Next");
         doRefresh = 1;
     }
     else  // check for button press, update screen
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == 'C')  // change mode
+            if (ButtonCode() == 'C')  // change mode
             {
-                if (mode != 2)  mode = 2;  else  mode = 4;
+                if (mode == 2)  mode = 4;  else  mode = 2;
                 g_Config.MidiInMode = mode;
                 StoreConfigData();
             }
-            else if (GetKey() == '*')  GoToNextScreen(SCN_HOME);
-            else if (GetKey() == '#')  GoToNextScreen(SCN_SETUP_MIDI_IN);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_SET_MIDI_IN_CHANNEL);
             doRefresh = 1;
         }
     }
@@ -1104,6 +1188,7 @@ PRIVATE  void  ScreenFunc_SetMidiInMode(bool isNewScreen)
         
         doRefresh = 0;   // inhibit refresh until next key hit
     }
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
@@ -1127,32 +1212,32 @@ PRIVATE  void  ScreenFunc_SetMidiInChannel(bool isNewScreen)
         DisplayMenuOption(32, 46, 'A', "+4");
         DisplayMenuOption(64, 46, 'B', "-1");
         DisplayMenuOption( 0, 56, '*', "Home");
-        DisplayMenuOption(88, 56, '#', "Back");
+        DisplayMenuOption(88, 56, '#', "Next");
         doRefresh = 1;
     }
     else  // check for button press, update screen
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  
+            if (ButtonCode() == '*')  
             {
                 g_Config.MidiInChannel = channel;
                 StoreConfigData();
                 GoToNextScreen(SCN_HOME);
             }
-            else if (GetKey() == '#')
+            if (ButtonCode() == '#')
             {
                 g_Config.MidiInChannel = channel;
                 StoreConfigData();
-                GoToNextScreen(SCN_SETUP_MIDI_IN);
+                GoToNextScreen(SCN_SET_MIDI_IN_EXPRESS);
             }
-            else if (GetKey() == 'A')
+            if (ButtonCode() == 'A')
             {
                 channel += 4;
                 channel = channel % 16;
                 if (channel == 0) channel = 16;
             }
-            else if (GetKey() == 'B')
+            if (ButtonCode() == 'B')
             {
                 if (channel == 1)  channel = 16;
                 else  channel--;
@@ -1175,13 +1260,14 @@ PRIVATE  void  ScreenFunc_SetMidiInChannel(bool isNewScreen)
         LCD_PutText(textBuf);
         doRefresh = 0;   // inhibit refresh until next key hit
     }
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
-PRIVATE  void  ScreenFunc_SetMidiInPressureCC(bool isNewScreen)
+PRIVATE  void  ScreenFunc_SetMidiInExpression(bool isNewScreen)
 {
     bool   doRefresh = 0;
-    uint8  ccNumber = g_Config.MidiInPressureCCnum;   // can be: 0, 2, 7 or 11
+    uint8  ccNumber = g_Config.MidiInExpressionCCnum;   // can be: 0, 2, 7 or 11
 
     if (isNewScreen)  // new screen
     {
@@ -1191,24 +1277,24 @@ PRIVATE  void  ScreenFunc_SetMidiInPressureCC(bool isNewScreen)
         LCD_SetFont(PROP_8_NORM);
         DisplayMenuOption( 0, 56, '*', "Home");
         DisplayMenuOption(40, 56, 'C', "Change");
-        DisplayMenuOption(90, 56, '#', "Back");
+        DisplayMenuOption(90, 56, '#', "Next");
         doRefresh = 1;
     }
     else  // check for button press, update screen
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == 'C')  // change CC number
+            if (ButtonCode() == 'C')  // change CC number
             {
                 if (ccNumber == 0)  ccNumber = 2;  
                 else if (ccNumber == 2)  ccNumber = 7;  
                 else if (ccNumber == 7)  ccNumber = 11;
                 else  ccNumber = 0;
-                g_Config.MidiInPressureCCnum = ccNumber;
+                g_Config.MidiInExpressionCCnum = ccNumber;
                 StoreConfigData();
             }
-            else if (GetKey() == '*')  GoToNextScreen(SCN_HOME);
-            else if (GetKey() == '#')  GoToNextScreen(SCN_SETUP_MIDI_IN);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_SET_MIDI_OUT_ENABLE);
             doRefresh = 1;
         }
     }
@@ -1222,111 +1308,44 @@ PRIVATE  void  ScreenFunc_SetMidiInPressureCC(bool isNewScreen)
         LCD_Mode(SET_PIXELS);
         LCD_SetFont(MONO_8_NORM);
         LCD_PosXY(4, 22);
-        LCD_PutText("Pressure CC #: ");
+        LCD_PutText("Expression CC #: ");
         
         if (ccNumber == 0)  
         {
             LCD_PutText("0");
-            LCD_PosXY(32, 32);
-            LCD_PutText("No response");
+            LCD_PosXY(20, 32);
+            LCD_PutText("Not recognised");
         }
         else if (ccNumber == 2)  
         {
             LCD_PutText("02");
-            LCD_PosXY(32, 32);
+            LCD_PosXY(20, 32);
             LCD_PutText("Breath pressure");
         }
         else if (ccNumber == 7)  
         {
             LCD_PutText("07");
-            LCD_PosXY(32, 32);
+            LCD_PosXY(20, 32);
             LCD_PutText("Channel volume");
         }
         else if (ccNumber == 11)  
         {
             LCD_PutText("11");
-            LCD_PosXY(32, 32);
+            LCD_PosXY(20, 32);
             LCD_PutText("Expression");
         }
         else  LCD_PutText("?");  // unlikely!
         
         doRefresh = 0;   // inhibit refresh until next key hit
     }
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
-PRIVATE  void  ScreenFunc_SetMidiInModulationCC(bool isNewScreen)
-{
-    char   textBuf[40];
-    bool   doRefresh = 0;
-    uint8  ccNumber = g_Config.MidiInModulationCCnum;   // can be: 0 ~ 31
-
-    if (isNewScreen)  // new screen
-    {
-        LCD_Mode(SET_PIXELS);
-        LCD_PosXY(0, 42);
-        LCD_DrawLineHoriz(128);
-        
-        DisplayMenuOption(32, 46, 'A', " +5");
-        DisplayMenuOption(72, 46, 'B', " -1");
-        DisplayMenuOption( 0, 56, '*', "Home");
-        DisplayMenuOption(88, 56, '#', "Back");
-        doRefresh = 1;
-    }
-    else  // check for button press, update screen
-    {
-        if (KeyHit())
-        {
-            if (GetKey() == '*')  
-            {
-                g_Config.MidiInModulationCCnum = ccNumber;
-                StoreConfigData();
-                GoToNextScreen(SCN_HOME);
-            }
-            else if (GetKey() == '#')
-            {
-                g_Config.MidiInModulationCCnum = ccNumber;
-                StoreConfigData();
-                GoToNextScreen(SCN_SETUP_MIDI_IN);
-            }
-            else if (GetKey() == 'A')
-            {
-                ccNumber += 5;
-                if (ccNumber >= 32) ccNumber = 1;
-            }
-            else if (GetKey() == 'B')
-            {
-                if (ccNumber == 0)  ccNumber = 31;
-                else  ccNumber--;
-            }
-            else if (GetKey() == 'C')  ccNumber = 0;  // set zero value
-            else if (GetKey() == 'D')  ccNumber = 1;  // set default value
-            
-            doRefresh = 1;
-        }
-    }
-
-    if (doRefresh)
-    {
-        LCD_Mode(CLEAR_PIXELS);  // erase existing value
-        LCD_PosXY(0, 22);
-        LCD_BlockFill(128, 10);
-        
-        LCD_Mode(SET_PIXELS);
-        LCD_SetFont(MONO_8_NORM);
-        LCD_PosXY(6, 22);
-        sprintf(textBuf, "Modulation CC #: %02d", (int) ccNumber);
-        LCD_PutText(textBuf);
-        
-        doRefresh = 0;   // inhibit refresh until next key hit
-    }
-}
-
-
-PRIVATE  void  ScreenFunc_SetMidiOutMode(bool isNewScreen)
+PRIVATE  void  ScreenFunc_SetMidiOutEnable(bool isNewScreen)
 {
     bool   doRefresh = 0;
-    uint8  mode = g_Config.MidiOutMode;  // may be 0, 1, 2, 3 or 4
+    uint8  setting = g_Config.MidiOutEnabled;  // 0 or 1
 
     if (isNewScreen)  // new screen
     {
@@ -1336,21 +1355,21 @@ PRIVATE  void  ScreenFunc_SetMidiOutMode(bool isNewScreen)
         LCD_SetFont(PROP_8_NORM);
         DisplayMenuOption( 0, 56, '*', "Home");
         DisplayMenuOption(40, 56, 'C', "Change");
-        DisplayMenuOption(90, 56, '#', "Back");
+        DisplayMenuOption(90, 56, '#', "Next");
         doRefresh = 1;
     }
     else  // check for button press, update screen
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == 'C')  // change mode
+            if (ButtonCode() == 'C')  // change setting
             {
-                if (++mode >= 4)  mode = 0;
-                g_Config.MidiOutMode = mode;
+                if (setting == 0)  setting = 1;  else  setting = 0;  // toggle
+                g_Config.MidiOutEnabled = setting;
                 StoreConfigData();
             }
-            else if (GetKey() == '*')  GoToNextScreen(SCN_HOME);
-            else if (GetKey() == '#')  GoToNextScreen(SCN_SETUP_MIDI_OUT);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_SET_PITCH_BEND_MODE);
             doRefresh = 1;
         }
     }
@@ -1365,100 +1384,22 @@ PRIVATE  void  ScreenFunc_SetMidiOutMode(bool isNewScreen)
         LCD_SetFont(MONO_8_NORM);
         LCD_PosXY(4, 22);
         LCD_PutText("Current setting: ");
-        
-        if (mode == 2)  
-        {
-            LCD_PutText("2");
-            LCD_PosXY(16, 32);
-            LCD_PutText("Omni-On, Mono");
-        }
-        else if (mode == 4)  
-        {
-            LCD_PutText("4");
-            LCD_PosXY(16, 32);
-            LCD_PutText("Omni-Off, Mono");
-        }
-        else  LCD_PutText("?");  // unlikely!
-        
+        LCD_PutDigit(setting);
+        LCD_PosXY(16, 32);
+        if (setting == 0)  LCD_PutText("(Disabled)");
+        else  LCD_PutText("(Enabled)");
         doRefresh = 0;   // inhibit refresh until next key hit
     }
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
-PRIVATE  void  ScreenFunc_SetMidiOutChannel(bool isNewScreen)
+PRIVATE  void  ScreenFunc_SetPitchBendMode(bool isNewScreen)
 {
-    static uint8  channel;  // 1..16
-    char   textBuf[40];
+    static char *pitchBendModeName[] = 
+            { "Disabled", "MIDI PB msg", "Expr'n (CC2)", "(N/A)" };
     bool   doRefresh = 0;
-
-    if (isNewScreen)  // new screen
-    {
-        channel = g_Config.MidiOutChannel;  // 1..16
-        
-        LCD_Mode(SET_PIXELS);
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(4, 22);
-        LCD_PutText("Current setting:");
-        LCD_PosXY(0, 42);
-        LCD_DrawLineHoriz(128);
-        
-        DisplayMenuOption(32, 46, 'A', "+4");
-        DisplayMenuOption(64, 46, 'B', "-1");
-        DisplayMenuOption( 0, 56, '*', "Home");
-        DisplayMenuOption(88, 56, '#', "Back");
-        doRefresh = 1;
-    }
-    else  // check for button press, update screen
-    {
-        if (KeyHit())
-        {
-            if (GetKey() == '*')  
-            {
-                g_Config.MidiOutChannel = channel;
-                StoreConfigData();
-                GoToNextScreen(SCN_HOME);
-            }
-            else if (GetKey() == '#')
-            {
-                g_Config.MidiOutChannel = channel;
-                StoreConfigData();
-                GoToNextScreen(SCN_SETUP_MIDI_OUT);
-            }
-            else if (GetKey() == 'A')
-            {
-                channel += 4;
-                channel = channel % 16;
-                if (channel == 0) channel = 16;
-            }
-            else if (GetKey() == 'B')
-            {
-                if (channel == 1)  channel = 16;
-                else  channel--;
-            }
-
-            doRefresh = 1;
-        }
-    }
-
-    if (doRefresh)
-    {
-        sprintf(textBuf, "%d", (int) channel);
-        LCD_Mode(CLEAR_PIXELS);  // erase existing value
-        LCD_PosXY(90, 22);
-        LCD_BlockFill(30, 10);
-        LCD_Mode(SET_PIXELS);
-        LCD_SetFont(MONO_8_NORM);
-        LCD_PosXY(90, 22);
-        LCD_PutText(textBuf);
-        doRefresh = 0;   // inhibit refresh until next key hit
-    }
-}
-
-
-PRIVATE  void  ScreenFunc_SetMidiOutPressureCC(bool isNewScreen)
-{
-    bool   doRefresh = 0;
-    uint8  ccNumber = g_Config.MidiOutPressureCCnum;   // can be: 0, 2, 7 or 11
+    uint8  ctrlMode = g_Config.PitchBendCtrlMode;   // may be: 0, 1, 2, or 3
 
     if (isNewScreen)  // new screen
     {
@@ -1468,24 +1409,21 @@ PRIVATE  void  ScreenFunc_SetMidiOutPressureCC(bool isNewScreen)
         LCD_SetFont(PROP_8_NORM);
         DisplayMenuOption( 0, 56, '*', "Home");
         DisplayMenuOption(40, 56, 'C', "Change");
-        DisplayMenuOption(90, 56, '#', "Back");
+        DisplayMenuOption(90, 56, '#', "Next");
         doRefresh = 1;
     }
     else  // check for button press, update screen
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == 'C')  // change CC number
+            if (ButtonCode() == 'C')  // change mode
             {
-                if (ccNumber == 0)  ccNumber = 2;  
-                else if (ccNumber == 2)  ccNumber = 7;  
-                else if (ccNumber == 7)  ccNumber = 11;
-                else  ccNumber = 0;
-                g_Config.MidiOutPressureCCnum = ccNumber;
+                if (++ctrlMode >= 4)  ctrlMode = 0;  
+                g_Config.PitchBendCtrlMode = ctrlMode;
                 StoreConfigData();
             }
-            else if (GetKey() == '*')  GoToNextScreen(SCN_HOME);
-            else if (GetKey() == '#')  GoToNextScreen(SCN_SETUP_MIDI_OUT);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_SYSTEM_INFO_PAGE1);
             doRefresh = 1;
         }
     }
@@ -1497,106 +1435,17 @@ PRIVATE  void  ScreenFunc_SetMidiOutPressureCC(bool isNewScreen)
         LCD_BlockFill(128, 20);
         
         LCD_Mode(SET_PIXELS);
-        LCD_SetFont(MONO_8_NORM);
+        LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(4, 22);
-        LCD_PutText("Pressure CC #: ");
-        
-        if (ccNumber == 0)  
-        {
-            LCD_PutText("0");
-            LCD_PosXY(32, 32);
-            LCD_PutText("No response");
-        }
-        else if (ccNumber == 2)  
-        {
-            LCD_PutText("02");
-            LCD_PosXY(32, 32);
-            LCD_PutText("Breath pressure");
-        }
-        else if (ccNumber == 7)  
-        {
-            LCD_PutText("07");
-            LCD_PosXY(32, 32);
-            LCD_PutText("Channel volume");
-        }
-        else if (ccNumber == 11)  
-        {
-            LCD_PutText("11");
-            LCD_PosXY(32, 32);
-            LCD_PutText("Expression");
-        }
-        else  LCD_PutText("?");  // unlikely!
-        
-        doRefresh = 0;   // inhibit refresh until next key hit
-    }
-}
-
-
-PRIVATE  void  ScreenFunc_SetMidiOutModulationCC(bool isNewScreen)
-{
-    char   textBuf[40];
-    bool   doRefresh = 0;
-    uint8  ccNumber = g_Config.MidiOutModulationCCnum;   // can be: 0 ~ 31
-
-    if (isNewScreen)  // new screen
-    {
-        LCD_Mode(SET_PIXELS);
-        LCD_PosXY(0, 42);
-        LCD_DrawLineHoriz(128);
-        
-        DisplayMenuOption(32, 46, 'A', " +5");
-        DisplayMenuOption(72, 46, 'B', " -1");
-        DisplayMenuOption( 0, 56, '*', "Home");
-        DisplayMenuOption(88, 56, '#', "Back");
-        doRefresh = 1;
-    }
-    else  // check for button press, update screen
-    {
-        if (KeyHit())
-        {
-            if (GetKey() == '*')  
-            {
-                g_Config.MidiOutModulationCCnum = ccNumber;
-                StoreConfigData();
-                GoToNextScreen(SCN_HOME);
-            }
-            else if (GetKey() == '#')
-            {
-                g_Config.MidiOutModulationCCnum = ccNumber;
-                StoreConfigData();
-                GoToNextScreen(SCN_SETUP_MIDI_OUT);
-            }
-            else if (GetKey() == 'A')
-            {
-                ccNumber += 5;
-                if (ccNumber >= 32) ccNumber = 1;
-            }
-            else if (GetKey() == 'B')
-            {
-                if (ccNumber == 0)  ccNumber = 31;
-                else  ccNumber--;
-            }
-            else if (GetKey() == 'C')  ccNumber = 0;  // set zero value
-            else if (GetKey() == 'D')  ccNumber = 1;  // set default value
-            
-            doRefresh = 1;
-        }
-    }
-
-    if (doRefresh)
-    {
-        LCD_Mode(CLEAR_PIXELS);  // erase existing value
-        LCD_PosXY(0, 22);
-        LCD_BlockFill(128, 10);
-        
-        LCD_Mode(SET_PIXELS);
+        LCD_PutText("Pitch-Bend Control: ");
         LCD_SetFont(MONO_8_NORM);
-        LCD_PosXY(6, 22);
-        sprintf(textBuf, "Modulation CC #: %02d", (int) ccNumber);
-        LCD_PutText(textBuf);
-        
+        LCD_PutDigit(ctrlMode & 3);
+        LCD_PosXY(20, 32);
+        LCD_PutText(pitchBendModeName[ctrlMode & 3]);
         doRefresh = 0;   // inhibit refresh until next key hit
     }
+    
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
@@ -1605,7 +1454,7 @@ PRIVATE  void  ScreenFunc_SetMidiOutModulationCC(bool isNewScreen)
  * A list of four patch names is displayed from the array of predefined patches.
  * The user can select a patch from the list or scroll down to the next 4 names.
  * If the Preset being edited is the current Preset, then the new patch is activated.
-  */
+ */
 PRIVATE  void  ScreenFunc_EditPresetPatch(bool isNewScreen)
 {
     static  int   itop = 0;   // index into g_PatchProgram[], top line of 4 listed
@@ -1626,20 +1475,20 @@ PRIVATE  void  ScreenFunc_EditPresetPatch(bool isNewScreen)
     }
     else  // do periodic update
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  GoToNextScreen(SCN_PRESET_EDIT_MENU);  // exit
-            else if (GetKey() == '#')    // next page
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_PRESET_EDIT_MENU);  // exit
+            if (ButtonCode() == '#')    // next page
             {
                 itop = itop + 4;
                 if (itop >= GetNumberOfPatchesDefined())  itop = 0;  // wrap
                 doRefresh = 1;
             }
-            else if (GetKey() >= 'A')    // A, B, C or D
+            if (ButtonCode() >= 'A')    // A, B, C or D
             {
-                line = GetKey() - 'A';   // 0, 1, 2 or 3
+                line = ButtonCode() - 'A';   // 0, 1, 2 or 3
                 selectedPatchID = g_PatchProgram[itop+line].PatchNumber;
-                g_Preset.Descr[m_editPreset].RemiSynthPatch = selectedPatchID;
+                g_Preset.Descr[m_editPreset].PatchNumber = selectedPatchID;
                 StorePresetData();
                 if (m_editPreset == activePreset)
                     InstrumentPresetSelect(m_editPreset);  // activate the new patch
@@ -1716,10 +1565,10 @@ PRIVATE  void  ScreenFunc_EditPresetMidiProgram(bool isNewScreen)
     }
     else   // do periodic update
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  GoToNextScreen(SCN_PRESET_EDIT_MENU);  
-            if (GetKey() == '#')  GoToNextScreen(SCN_DATA_ENTRY);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_PRESET_EDIT_MENU);  
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_DATA_ENTRY);
         }
     }
 }
@@ -1749,14 +1598,13 @@ PRIVATE  void  ScreenFunc_EditPresetVibratoMode(bool isNewScreen)
     }
     else  // monitor keypad
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  GoToNextScreen(SCN_HOME);  else
-            if (GetKey() == '#')  GoToNextScreen(SCN_PRESET_EDIT_MENU);  else
-            if (GetKey() == 'C')  // Change mode
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);  else
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_PRESET_EDIT_MENU);  else
+            if (ButtonCode() == 'C')  // Change mode
             {
-                if (vib_mode == VIBRATO_DISABLED) vib_mode = VIBRATO_BY_EFFECT_SW;
-                else if (vib_mode == VIBRATO_BY_EFFECT_SW) vib_mode = VIBRATO_BY_MODN_CC;
+                if (vib_mode == VIBRATO_DISABLED) vib_mode = VIBRATO_BY_MODN_CC;
                 else if (vib_mode == VIBRATO_BY_MODN_CC) vib_mode = VIBRATO_AUTOMATIC;
                 else if (vib_mode == VIBRATO_AUTOMATIC) vib_mode = VIBRATO_DISABLED;
                 else  vib_mode = VIBRATO_DISABLED;
@@ -1779,9 +1627,8 @@ PRIVATE  void  ScreenFunc_EditPresetVibratoMode(bool isNewScreen)
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(16, 32);
 
-        if (vib_mode == VIBRATO_BY_EFFECT_SW)  LCD_PutText("Effect Switch");
-        else if (vib_mode == VIBRATO_BY_MODN_CC)  LCD_PutText("Modulation CC");
-        else if (vib_mode == VIBRATO_AUTOMATIC)  LCD_PutText("Automatic");
+        if (vib_mode == VIBRATO_BY_MODN_CC)  LCD_PutText("Modulation (CC1)");
+        else if (vib_mode == VIBRATO_AUTOMATIC)  LCD_PutText("Automatic (ramp)");
         else  LCD_PutText("Disabled");
 
         doRefresh = 0;   // inhibit refresh until next key hit
@@ -1833,10 +1680,10 @@ PRIVATE  void  ScreenFunc_EditPresetTranspose(bool isNewScreen)
     }
     else   // do periodic update
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*') GoToNextScreen(SCN_PRESET_EDIT_MENU);
-            if (GetKey() == '#') GoToNextScreen(SCN_DATA_ENTRY);
+            if (ButtonCode() == '*') GoToNextScreen(SCN_PRESET_EDIT_MENU);
+            if (ButtonCode() == '#') GoToNextScreen(SCN_DATA_ENTRY);
         }
     }
 }
@@ -1845,7 +1692,7 @@ PRIVATE  void  ScreenFunc_EditPresetTranspose(bool isNewScreen)
  * This function validates the number which was entered in the Data Entry Screen.
  * If validated, the value is saved in the Config. structure in EEPROM.
  */
-PRIVATE  void  ScreenFunc_EditReverbAtten(bool isNewScreen)
+PRIVATE  void  ScreenFunc_ValidateReverbAtten(bool isNewScreen)
 {
     if (isNewScreen)  // first call after screen switch
     {
@@ -1868,24 +1715,24 @@ PRIVATE  void  ScreenFunc_EditReverbAtten(bool isNewScreen)
             {
                 g_Config.ReverbAtten_pc = m_DataEntryValue;
                 StoreConfigData();
-                RemiSynthPrepare();   // Instate new value
-                GoToNextScreen(SCN_MISC_CONTROL_MENU);
+                SynthPrepare();   // Instate new value
+                GoToNextScreen(SCN_MAIN_SETTINGS_MENU);
             }
         }
-        else  GoToNextScreen(SCN_MISC_CONTROL_MENU);  // Cancel key was hit
+        else  GoToNextScreen(SCN_MAIN_SETTINGS_MENU);  // Cancel key was hit
     }
     else   // do periodic update
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  GoToNextScreen(SCN_MISC_CONTROL_MENU);  
-            if (GetKey() == '#')  GoToNextScreen(SCN_DATA_ENTRY);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_MAIN_SETTINGS_MENU);  
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_DATA_ENTRY);
         }
     }
 }
 
 
-PRIVATE  void  ScreenFunc_EditReverbMix(bool isNewScreen)
+PRIVATE  void  ScreenFunc_ValidateReverbMix(bool isNewScreen)
 {
     if (isNewScreen)  // first call after screen switch
     {
@@ -1908,18 +1755,18 @@ PRIVATE  void  ScreenFunc_EditReverbMix(bool isNewScreen)
             {
                 g_Config.ReverbMix_pc = m_DataEntryValue;
                 StoreConfigData();
-                RemiSynthPrepare();   // Instate new value
-                GoToNextScreen(SCN_MISC_CONTROL_MENU);
+                SynthPrepare();   // Instate new value
+                GoToNextScreen(SCN_MAIN_SETTINGS_MENU);
             }
         }
-        else  GoToNextScreen(SCN_MISC_CONTROL_MENU);  // Cancel key was hit
+        else  GoToNextScreen(SCN_MAIN_SETTINGS_MENU);  // Cancel key was hit
     }
     else   // do periodic update
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  GoToNextScreen(SCN_MISC_CONTROL_MENU);  
-            if (GetKey() == '#')  GoToNextScreen(SCN_DATA_ENTRY);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_MAIN_SETTINGS_MENU);  
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_DATA_ENTRY);
         }
     }
 }
@@ -1934,12 +1781,17 @@ PRIVATE  void  ScreenFunc_SystemInfoPage1(bool isNewScreen)
         LCD_Mode(SET_PIXELS);
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(0, 12);
-        LCD_PutText("Bauer EWI Synth mk2");
+        LCD_PutText("Bauer REMI Synth mk2");
         
         sprintf(textBuf, "Firmware: v%d.%d.%02d", g_FW_version[0], g_FW_version[1], 
                 g_FW_version[2]);
         LCD_PosXY(0, 22);
         LCD_PutText(textBuf);
+        
+        LCD_SetFont(PROP_8_NORM);
+        LCD_PosXY(0, 32);
+        if (POT_MODULE_CONNECTED)  LCD_PutText("Pot. module connected");
+        else  LCD_PutText("Pot. module not found");
         
         LCD_SetFont(MONO_8_NORM);  // line 4 of 4
         LCD_PosXY(0, 44);
@@ -1948,23 +1800,20 @@ PRIVATE  void  ScreenFunc_SystemInfoPage1(bool isNewScreen)
         LCD_PosXY(0, 53);
         LCD_DrawLineHoriz(128);
         DisplayMenuOption(0,  56, '*', "Home");
-        DisplayMenuOption(88, 56, '#', "Page");
+        DisplayMenuOption(88, 56, '#', "Next");
         LCD_PosXY(56, 56);
         LCD_PutText("-1-");
     }
     else  // do periodic update...
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  GoToNextScreen(SCN_HOME);
-            if (GetKey() == '#')  GoToNextScreen(SCN_SYSTEM_INFO_PAGE2);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_SYSTEM_INFO_PAGE2);
         }
     }
 
-    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)
-    {
-        GoToNextScreen(SCN_HOME);
-    }
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)  GoToNextScreen(SCN_HOME);
 }
 
 
@@ -1977,7 +1826,7 @@ PRIVATE  void  ScreenFunc_SystemInfoPage2(bool isNewScreen)
         LCD_Mode(SET_PIXELS);
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(0, 12);
-        LCD_PutText("REMI Handset info: "); 
+        LCD_PutText("REMI Handset info "); 
         
         if (isHandsetConnected() && g_HandsetInfo[0] == SYS_EXCLUSIVE_MSG)
         {
@@ -2001,22 +1850,288 @@ PRIVATE  void  ScreenFunc_SystemInfoPage2(bool isNewScreen)
         LCD_PosXY(0, 53);
         LCD_DrawLineHoriz(128);
         DisplayMenuOption(0,  56, '*', "Home");
-        DisplayMenuOption(88, 56, '#', "Page");
+        DisplayMenuOption(88, 56, '#', "Back");
         LCD_PosXY(56, 56);
         LCD_PutText("-2-");
     }
     else  // do periodic update...
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*')  GoToNextScreen(SCN_HOME);
-            if (GetKey() == '#')  GoToNextScreen(SCN_SYSTEM_INFO_PAGE1);
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_MAIN_SETTINGS_MENU);
         }
     }
 
-    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)  GoToNextScreen(SCN_HOME);
+}
+
+
+PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
+{
+    static char *potLabel[] = { "Detune", "Osc2mix", "Filt Fc", "Contour", "Time ms", "Filt Res" };
+    static bool  doRefresh[6];
+    char   textBuf[40];
+    int    pot, setting;
+    uint16 xpos, ypos;  // display coords 
+    
+    if (isNewScreen)  // new screen...
     {
-        GoToNextScreen(SCN_HOME);
+        LCD_Mode(SET_PIXELS);
+        LCD_SetFont(PROP_8_NORM); 
+        
+        for (pot = 0; pot < 6; pot++)  
+        {
+            xpos = (pot % 3) * 43 + 2;
+            ypos = (pot < 3) ? 12 : 34;
+            LCD_PosXY(xpos, ypos);
+            LCD_PutText(potLabel[pot]);
+            xpos = (pot % 3) * 43 + 1;
+            ypos = (pot < 3) ? 20 : 42;
+            LCD_PosXY(xpos, ypos);
+            LCD_BlockFill(40, 11);
+            doRefresh[pot] = TRUE;
+        }
+        DisplayMenuOption(4,  56, '*', "Exit");
+        DisplayMenuOption(92, 56, '#', "Next");
+        PotFlagsClear();
+    }
+    else  // check for button hit or any pot position changed
+    {
+        if (ButtonHit())
+        {
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_CONTROL_PANEL_2);
+            if (ButtonCode() == 'A')  // Activate new setting(s) and refresh display
+            {
+                SynthPrepare();  
+                memset(doRefresh, TRUE, 6);
+                LCD_PosXY(44, 55);  // Erase 'Assert' menu option
+                LCD_Mode(CLEAR_PIXELS);
+                LCD_BlockFill(46, 9);
+            }
+        }
+        
+        if (PotMoved(0))  // OSC2 Detune
+        {
+            setting = (int) PotReading(0) - 128;  // bipolar setting -128..+127
+            setting = (setting * setting * 100) / (127 * 127);  // square-law curve
+            if (PotReading(0) < 128)  setting = 0 - setting;  // negate
+            g_Patch.Osc2Detune = (int16) setting;  // range 0..+/-100 (cents))
+            doRefresh[0] = TRUE;
+        }
+        if (PotMoved(1))  // OSC2 Mix Level (0..100 %)
+        {
+            if (g_Patch.MixerControl == MIXER_CTRL_FIXED)
+            {
+                setting = (int) PotReading(1); 
+                setting = (setting * 100) / 255;    // range 0..100
+                g_Patch.MixerOsc2Level = (uint8) setting;
+                doRefresh[1] = TRUE;
+            }
+        }
+        if (PotMoved(2))  // Filter Frequency (offset), semitones
+        {
+            if (g_Patch.FilterResonance != 0 
+            || (g_Patch.NoiseMode && !(g_Patch.NoiseMode & NOISE_PITCHED)))
+            {
+                setting = (int) PotReading(2);  
+                setting = (setting * 108) / 255;  // range 0..108
+                g_Patch.FilterFrequency = (uint8) setting;
+                doRefresh[2] = TRUE;
+                doRefresh[5] = TRUE;
+            }
+        }
+        if (PotMoved(3))  // Contour profile -- ramp slope (+ or -), bias +50
+        {
+            setting = (int) PotReading(3) - 128;  // bipolar setting -128..+127
+            setting = (setting * 50) / 127;  // range 0..+/-50
+            setting = (setting / 5) * 5;   // nearest multiple of 5
+            g_Patch.ContourStartLevel = 50 - setting;  // setting is 0..+/-50 units
+            g_Patch.ContourHoldLevel = 50 + setting;
+            doRefresh[3] = TRUE;
+        }
+        if (PotMoved(4))  // Contour Ramp Time (ms)
+        {
+            setting = (int) PotReading(4);  // unipolar setting 0..255
+            setting = (setting * setting * 2000) / (255 * 255);  // square-law curve
+            setting = QuantizeValuePerDecade(setting);  // range 0..2000
+            if (setting < 10)  setting = 0;  // floor at 10, but allow 0
+            g_Patch.ContourRamp_ms = setting;
+            doRefresh[4] = TRUE;
+        }
+        if (PotMoved(5))  // Filter Resonance (Q), display normalised value
+        {
+            setting = (int) PotReading(5);  // unipolar setting 0..255
+            if (setting != 0) 
+            {
+                if (PotReading(5) < 128)  // Below half-way mark
+                {
+                    setting = (setting * 8000) / 127 + 1000;  // range 1000..9000
+                    setting = (setting / 100) * 100;  // quantize into 100's
+                }
+                else  // Above half-way mark
+                {
+                    setting = ((setting - 128) * 1000) / 127 + 9000;  // range 9000..10K
+                    setting = (setting / 10) * 10;  // quantize into 10's
+                }
+                if (setting > 9990)  setting = 9990;  // cap at 9990
+            }
+            g_Patch.FilterResonance = (uint16) setting;  // range 0 | 1000..9990
+            
+            DisplayMenuOption(44, 56, 'A', "Assert");  // Assert required
+            doRefresh[2] = TRUE;
+            doRefresh[5] = TRUE;
+        }
+    }
+    
+    // Update variable data displayed, if changed or isNewScreen
+    for (pot = 0; pot < 6; pot++)  
+    {
+        if (doRefresh[pot])
+        {
+            if (pot == 0)  sprintf(textBuf, "%+3d", (int)g_Patch.Osc2Detune);
+            if (pot == 1)  
+            {
+                if (g_Patch.MixerControl == MIXER_CTRL_FIXED)
+                    sprintf(textBuf, "%3d%c", (int)g_Patch.MixerOsc2Level, '%');
+                else  strcpy(textBuf, "-");
+            }
+            if (pot == 2)  
+            {
+                if (g_Patch.FilterResonance != 0 
+                || (g_Patch.NoiseMode && !(g_Patch.NoiseMode & NOISE_PITCHED)))
+                    sprintf(textBuf, "%3d", (int)g_Patch.FilterFrequency);
+                else  strcpy(textBuf, "-");
+            }
+            if (pot == 3)  
+            {
+                // Contour ramp is symmetrical about 50%
+                setting = (int) g_Patch.ContourHoldLevel - (int) g_Patch.ContourStartLevel;
+                sprintf(textBuf, "%+3d%c", setting, '%');  // show slope as %FS
+            }
+            if (pot == 4)  sprintf(textBuf, "%4d", (int) g_Patch.ContourRamp_ms);
+            if (pot == 5)  
+            {
+                if (g_Patch.FilterResonance)
+                    sprintf(textBuf, ".%03d", (int)g_Patch.FilterResonance/10);
+                else  strcpy(textBuf, "Off");
+            }
+
+            xpos = (pot % 3) * 43 + 3;
+            ypos = (pot < 3) ? 22 : 44;
+            LCD_PosXY(xpos, ypos);
+            LCD_Mode(SET_PIXELS);  // Erase existing data
+            LCD_BlockFill(36, 8);
+            LCD_Mode(CLEAR_PIXELS);  // Write new data
+            DisplayTextCenteredInField(xpos, ypos, textBuf, 6);
+            doRefresh[pot] = FALSE;
+        }
+    }
+}
+
+
+PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
+{
+    static char  *potLabel[] = { "Filt mod", "Pot 2", "Pot 3", "Noise G", "Flt Atn", "Filt G" };
+    static float optionAtten[] = { 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
+    static float optionGain[] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0, 5.0, 10.0, 20.0, 25.0 };
+    static bool  doRefresh[6];
+    char   textBuf[40];
+    int    pot, setting;
+    uint16 xpos, ypos;  // display coords 
+    
+    if (isNewScreen)  // new screen...
+    {
+        LCD_Mode(SET_PIXELS);
+        LCD_SetFont(PROP_8_NORM); 
+        
+        for (pot = 0; pot < 6; pot++)  
+        {
+            xpos = (pot % 3) * 43 + 2;
+            ypos = (pot < 3) ? 12 : 34;
+            LCD_PosXY(xpos, ypos);
+            LCD_PutText(potLabel[pot]);
+            xpos = (pot % 3) * 43 + 1;
+            ypos = (pot < 3) ? 20 : 42;
+            LCD_PosXY(xpos, ypos);
+            LCD_BlockFill(40, 11);
+            doRefresh[pot] = TRUE;
+        }
+        DisplayMenuOption(4,  56, '*', "Exit");
+//      DisplayMenuOption(44, 56, 'A', "Assert");  // Nothing to assert (yet)
+        DisplayMenuOption(92, 56, '#', "Back");
+        PotFlagsClear();
+    }
+    else  // check for button hit or any pot position changed
+    {
+        if (ButtonHit())
+        {
+            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#') GoToNextScreen(SCN_CONTROL_PANEL_1);
+//          if (ButtonCode() == 'A') SynthPrepare();  // Activate new setting(s)
+        }
+        
+        if (PotMoved(0))  // Modify filter freq. while note in progress
+        {
+            setting = (int) PotReading(0);  
+            setting = (setting * 108) / 255;  // range 0..108
+            SetFilterFreqIndex(setting);  
+            doRefresh[0] = TRUE;
+        }
+        if (PotMoved(1))  //  TBD
+        {
+            //
+            doRefresh[1] = TRUE;
+        }
+        if (PotMoved(2))  //  TBD
+        {
+            //
+            doRefresh[2] = TRUE;
+        }
+        if (PotMoved(3))  // Noise Filter output Gain
+        {
+            setting = ((int) PotReading(3) * 3) / 64;  // one of 12 options
+            if (setting > 11)  setting = 11;
+            g_NoiseFilterGain = optionGain[setting];
+            doRefresh[3] = TRUE;
+        }
+        if (PotMoved(4))  // Filter input Attenuation (gain)
+        {
+            setting = ((int) PotReading(4) * 3) / 64;  // one of 12 options
+            if (setting > 11)  setting = 11;
+            g_FilterInputAtten = optionAtten[setting];
+            doRefresh[4] = TRUE;
+        }
+        if (PotMoved(5))  // Wave Filter output Gain
+        {
+            setting = ((int) PotReading(5) * 3) / 64;  // one of 12 options
+            g_FilterOutputGain = optionGain[setting];
+            doRefresh[5] = TRUE;
+        }
+    }
+    
+    // Update variable data displayed, if changed or isNewScreen
+    for (pot = 0; pot < 6; pot++)  
+    {
+        if (doRefresh[pot])
+        {
+            if (pot == 0)  sprintf(textBuf, "%3d", (int) GetFilterFreqIndex());
+            if (pot == 1)  sprintf(textBuf, "%3d", PotReading(1));  // temp
+            if (pot == 2)  sprintf(textBuf, "%3d", PotReading(2));  // temp
+            if (pot == 3)  sprintf(textBuf, "%4.1f", g_NoiseFilterGain);
+            if (pot == 4)  sprintf(textBuf, "%4.2f", g_FilterInputAtten);
+            if (pot == 5)  sprintf(textBuf, "%4.1f", g_FilterOutputGain);
+
+            xpos = (pot % 3) * 43 + 3;
+            ypos = (pot < 3) ? 22 : 44;
+            LCD_PosXY(xpos, ypos);
+            LCD_Mode(SET_PIXELS);  // Erase existing data
+            LCD_BlockFill(36, 8);
+            LCD_Mode(CLEAR_PIXELS);  // Write new data
+            DisplayTextCenteredInField(xpos, ypos, textBuf, 6);
+            doRefresh[pot] = FALSE;
+        }
     }
 }
 
@@ -2025,33 +2140,35 @@ PRIVATE  void  ScreenFunc_CustomFuncMenu(bool isNewScreen)
 {
     if (isNewScreen)  // new screen...
     {
-        DisplayMenuOption(8, 12, 'A', "Future option - TBD");
-        DisplayMenuOption(8, 22, 'B', "  ..     ..");
-        DisplayMenuOption(8, 32, 'C', "  ..     ..");
-        DisplayMenuOption(8, 42, 'D', "  ..     ..");
+        LCD_Mode(SET_PIXELS);
+        LCD_SetFont(PROP_8_NORM); 
+        LCD_PosXY(8, 12);
+        LCD_PutText("No custom function yet!");  // temporary
+        
+//      DisplayMenuOption(8, 12, 'A', "  ..     ..");  // todo
+//      DisplayMenuOption(8, 22, 'B', "  ..     ..");  // todo
+//      DisplayMenuOption(8, 32, 'C', "  ..     ..");  // todo
+//      DisplayMenuOption(8, 42, 'D', "  ..     ..");  // todo
 
         LCD_PosXY(0, 53);
         LCD_DrawLineHoriz(128);
         DisplayMenuOption(0,  56, '*', "Exit");
-        DisplayMenuOption(88, 56, '#', "Next");
+//      DisplayMenuOption(88, 56, '#', "Next");
     }
     else  // check for button hit
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*') GoToNextScreen(SCN_HOME);
-            else if (GetKey() == 'A') GoToNextScreen(SCN_HOME);  // <<<<<<<<<<<<< todo >>>>>
-            else if (GetKey() == 'B') GoToNextScreen(SCN_HOME);  // <<<<<<<<<<<<< todo >>>>>
-            else if (GetKey() == 'C') GoToNextScreen(SCN_HOME);  // <<<<<<<<<<<<< todo >>>>>
-            else if (GetKey() == 'D') GoToNextScreen(SCN_HOME);  // <<<<<<<<<<<<< todo >>>>>
-            else if (GetKey() == '#') GoToNextScreen(SCN_HOME);  // <<<<<<<<<<<<< todo >>>>>
+            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == 'A') GoToNextScreen(SCN_HOME);  // reserved 
+            if (ButtonCode() == 'B') GoToNextScreen(SCN_HOME);  // reserved
+            if (ButtonCode() == 'C') GoToNextScreen(SCN_HOME);  // reserved
+            if (ButtonCode() == 'D') GoToNextScreen(SCN_HOME);  // reserved
+            if (ButtonCode() == '#') GoToNextScreen(SCN_HOME);  // reserved
         }
     }
 
-    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT)
-    {
-        GoToNextScreen(SCN_HOME);
-    }
+    if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
 
@@ -2085,7 +2202,7 @@ PRIVATE  void  ScreenFunc_DataEntry(bool isNewScreen)
         DisplayMenuOption(24, 44, 'B', "-");
         DisplayMenuOption(48, 44, 'C', "Clear");
         DisplayMenuOption(90, 44, 'D', "Digit");
-        DisplayMenuOption(0, 56, '*', "Cancel");
+        DisplayMenuOption(0,  56, '*', "Cancel");
         DisplayMenuOption(83, 56, '#', "Accept");
 
         m_DataEntryAccept = 0;
@@ -2098,9 +2215,9 @@ PRIVATE  void  ScreenFunc_DataEntry(bool isNewScreen)
     }
     else  // do periodic update...
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if ((key = GetKey()) == '*')  // Cancel data entry
+            if ((key = ButtonCode()) == '*')  // Cancel data entry
             {
                 m_DataEntryValue = initValue;  // restore
                 m_DataEntryAccept = 0;
@@ -2195,10 +2312,12 @@ PRIVATE  void  ScreenFunc_DataEntryTest(bool isNewScreen)
     }
     else  // do periodic update...
     {
-        if (KeyHit())
+        if (ButtonHit())
         {
-            if (GetKey() == '*') GoToNextScreen(SCN_HOME);  else
-            if (GetKey() == '#') GoToNextScreen(SCN_DATA_ENTRY);
+            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);  else
+            if (ButtonCode() == '#') GoToNextScreen(SCN_DATA_ENTRY);
         }
     }
 }
+
+// end of file

@@ -20,7 +20,7 @@
 //
 #define BUILD_VER_MAJOR   2
 #define BUILD_VER_MINOR   4
-#define BUILD_VER_DEBUG   0
+#define BUILD_VER_DEBUG   25
 //
 // =======================================================================================
 
@@ -58,13 +58,13 @@
 #define REMI_PRESET_MSG   0x07     // 'REMI PRESET' msg type (set Preset #)
 #define REMI_IDENT_MSG    0x30     // 'REMI IDENT' msg type (periodic ID)
 #define MIDI_MON_BUFFER_SIZE        512    // bytes
-#define HANDSET_CONNECTION_TIMEOUT  1000   // ms
+#define HANDSET_CONNECTION_TIMEOUT  2000   // ms
 
 // global data
 extern  uint8   g_FW_version[];          // firmware version # (major, minor, build, 0)
 extern  int     g_SoftTimerError;        // % error
 extern  uint8   g_SelfTestFault[];       // Self-test fault codes (0 => no fault)
-extern  uint32  g_counter;               // temp, for debug
+extern  uint32  g_TaskRunningCount;      // Task execution counter (debug usage only)
 extern  int32   g_TraceBuffer[][5];      // Debug usage only
 extern  float   g_SynthNoiseGain ;       // Noise gen. output adjustment (0..250)
 extern  float   g_SynthNoiseFilterFc;    // Noise filter Fc = 40000/Kt Hz 

@@ -13,36 +13,32 @@
 
 #include "remi_synth2_CLI.h"
 #include "main_remi_synth2.h"
+#include "remi_synth2_def.h"
 #include "wave_table_creator.h"
 
-
+PRIVATE  void   PrintWaveTableInfo(unsigned oscNum);
+PRIVATE  void   DumpActivePatchParams();
+PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal);
 PRIVATE  void   WaveOscSoundTest(int freq, int duration); 
-PRIVATE  void   MidiLoopBackTest();
-PRIVATE  void   KeypadDriverTest();
 PRIVATE  void   CoreCycleTimerTest();
 PRIVATE  void   DisplayControllerTest();
 PRIVATE  void   TestFixedPtBase2Exp();
 
-extern   int32  g_TraceBuffer[][5];      // Debug usage only
+extern  uint8  g_HandsetInfo[];          // REMI handset info from Sys.Ex. msg
+extern  int32  g_TraceBuffer[][5];       // Debug usage only
+extern  uint32 g_TaskCallFrequency;      // Debug usage only
 
-// Settable parameters (using "set" command), for test & debug purposes...
-extern   float  g_PressureGain;          // Expression/Pressure gain adjust (.1 ~ 10)
-extern   float  g_FilterInputAtten;      // Filter input attenuator gain (.01 ~ 2.5)
-extern   float  g_FilterOutputGain;      // Filter output atten/gain (0.1 ~ 25)
-extern   float  g_NoiseFilterGain;       // Noise gen. gain adjustment (0.1 ~ 25)
-extern   float  g_ReverbLoopTime_sec;    // Reverb param. (0.001 ~ 0.1 sec, typ. 0.04)
-extern   float  g_ReverbDecayTime_sec;   // Reverb param. (1.0 ~ 2.0 sec, typ. 1.5)
-
-extern   uint8  g_HandsetInfo[];         // REMI handset info from Sys.Ex. msg
+extern  volatile  bool v_SynthEnable;    // Signal to enable synth engine
+extern  volatile  uint32 v_ISRexecTime;  // ISR execution time (core cycle count)
 
 // Variables used for MIDI IN monitor ...
-extern   BOOL   g_MidiInputMonitorActive;
-extern   uint8  g_MidiInputBuffer[];     // MIDI IN monitor buffer (circular FIFO)
-extern   short  g_MidiInWriteIndex;      // MIDI IN monitor buffer write index
-extern   int    g_MidiInputByteCount;    // MIDI IN monitor received byte count
-extern   int    g_PressureMsgCount;      // Number of Pressure CC msg's Rx'd
-extern   int    g_ModulationMsgCount;    // Number of Modulation CC msg's Rx'd
-extern   int    g_SysExclusivMsgCount;   // Number of REMI Sys.Ex. msg's Rx'd
+extern  BOOL   g_MidiInputMonitorActive;
+extern  uint8  g_MidiInputBuffer[];      // MIDI IN monitor buffer (circular FIFO)
+extern  short  g_MidiInWriteIndex;       // MIDI IN monitor buffer write index
+extern  int    g_MidiInputByteCount;     // MIDI IN monitor received byte count
+extern  int    g_PressureMsgCount;       // Number of Pressure CC msg's Rx'd
+extern  int    g_ModulationMsgCount;     // Number of Modulation CC msg's Rx'd
+extern  int    g_SysExclusivMsgCount;    // Number of REMI Sys.Ex. msg's Rx'd
 
 char    *g_AppTitleCLI;                  // Title string output by "ver" command
 uint8    dummy_byte;
@@ -78,12 +74,9 @@ const  UserSettableParameter_t  UserParam[] =
 {
     // nickname      disp   (float *) &g_VarName      min,  max
     //----------------------------------------------------------------
-    { "pressGain",   'r',  &g_PressureGain,           0.1,  25    },
     { "noiseGain",   'r',  &g_NoiseFilterGain,        0.1,  25    }, 
     { "filtAtten",   'r',  &g_FilterInputAtten,       0.01, 2.5   },
     { "filtGain",    'r',  &g_FilterOutputGain,       0.1,  25    },
-    { "rvbLoop",     'r',  &g_ReverbLoopTime_sec,     0,    0.05  },
-    { "rvbDecay",    'r',  &g_ReverbDecayTime_sec,    0.01, 2.0   },
     //----------------------------------------------------------------
     { "$",           'r',  NULL,                      0,    0     }  // end of table
 };
@@ -100,10 +93,12 @@ const  UserSettableParameter_t  UserParam[] =
  */
 void  Cmnd_config(int argCount, char * argValue[])
 {
+    static char *pitchBendModeName[] = 
+            { "Disabled", "MIDI PB msg", "Expr'n (CC2)", "Analog CV" };
     char   textBuf[100];
     bool   updateConfig = 0;
     bool   isCmdError = 0;
-    int    arg = atoi(argValue[2]);
+    int    arg;
 
     if (argCount == 2 && argValue[1][0] == '?')   // show help
     {
@@ -112,54 +107,47 @@ void  Cmnd_config(int argCount, char * argValue[])
         putstr( "Usage (2):  config <param> <arg>  |  set param value to <arg> \n" );
         putstr( "  ... where <param> = parameter mnemonic (3LA - see listing)\n" );
         putstr( "Example:    config mic 4          |  Set MIDI IN channel to 4 \n" );
-		return;
+	return;
     }
 	
     if (argCount == 1)   // list current config param's
     {
-        sprintf(textBuf, "mib | MIDI Baudrate: %d \n", g_Config.MidiInBaudrate);
+        sprintf(textBuf, "mib | MIDI IN Baudrate: %d \n", g_Config.MidiInBaudrate);
         putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "mim | MIDI IN Mode: %d ", g_Config.MidiInMode);
         putstr("\t");  putstr(textBuf);
-        if (g_Config.MidiInMode == 2) putstr("(Omni-On-Mono) \n");
-        else if (g_Config.MidiInMode == 4) putstr("(Omni-Off-Mono) \n");  
+        if (g_Config.MidiInMode == 2) putstr("Omni-On-Mono \n");
+        else if (g_Config.MidiInMode == 4) putstr("Omni-Off-Mono \n");  
         else  putstr("(invalid) \n");
         sprintf(textBuf, "mic | MIDI IN Channel: %d \n", g_Config.MidiInChannel);
         putstr("\t");  putstr(textBuf);
-        sprintf(textBuf, "mip | MIDI IN Pressure CC #: %d \n", g_Config.MidiInPressureCCnum);
-        putstr("\t");  putstr(textBuf);
-        sprintf(textBuf, "min | MIDI IN Modulation CC #: %d \n", g_Config.MidiInModulationCCnum);
+        sprintf(textBuf, "mix | MIDI IN Expression CC #: %d \n", g_Config.MidiInExpressionCCnum);
         putstr("\t");  putstr(textBuf);
         
-        sprintf(textBuf, "mom | MIDI OUT Mode: %d ", g_Config.MidiOutMode);
+        sprintf(textBuf, "moe | MIDI OUT Enabled:  %d ", g_Config.MidiOutEnabled);
         putstr("\t");  putstr(textBuf);
-        if (g_Config.MidiOutMode == 0) putstr("(Disabled) \n");
-        if (g_Config.MidiOutMode == 1) putstr("(Omni-On-Poly) \n");
-        if (g_Config.MidiOutMode == 2) putstr("(Omni-Off-Mono) \n");  
-        if (g_Config.MidiOutMode == 3) putstr("(Omni-On-Poly) \n");
-        if (g_Config.MidiOutMode == 4) putstr("(Omni-Off-Mono) \n");  
-        sprintf(textBuf, "moc | MIDI OUT Channel: %d \n", g_Config.MidiOutChannel);
+        if (g_Config.MidiOutEnabled == 0) putstr("(Disabled) \n");
+        sprintf(textBuf, "moc | MIDI OUT Channel:  %d \n", g_Config.MidiOutChannel);
         putstr("\t");  putstr(textBuf);
-        sprintf(textBuf, "mop | MIDI OUT Pressure CC #: %d \n", g_Config.MidiOutPressureCCnum);
+        sprintf(textBuf, "mox | MIDI OUT Expression CC #: %d \n", g_Config.MidiOutExpressionCCnum);
         putstr("\t");  putstr(textBuf);
-        sprintf(textBuf, "mon | MIDI OUT Modulation CC #: %d \n", 
-                g_Config.MidiOutModulationCCnum);
+        sprintf(textBuf, "mom | MIDI OUT Modulation Enab: %d \n", g_Config.MidiOutModnEnabled);
         putstr("\t");  putstr(textBuf);
     
-        sprintf(textBuf, "rva | Reverb Attenuator gain: %d %%\n", 
-                g_Config.ReverbAtten_pc);
+        sprintf(textBuf, "pbc | Pitch Bend Control Mode: %d ", g_Config.PitchBendCtrlMode);
         putstr("\t");  putstr(textBuf);
-        sprintf(textBuf, "rvm | Reverb Mix (wet/dry) ratio: %d %%\n", 
-                g_Config.ReverbMix_pc);
-        putstr("\t");  putstr(textBuf);
+        putstr(pitchBendModeName[g_Config.PitchBendCtrlMode]);  
+        putNewLine();
         
-        sprintf(textBuf, "aco | Amplitude Ctrl Override: %d ", g_Config.AmpldControlOverride);
+        sprintf(textBuf, "rva | Reverb Attenuator gain: %d %%\n", g_Config.ReverbAtten_pc);
         putstr("\t");  putstr(textBuf);
-        if (g_Config.AmpldControlOverride == 0) putstr("(Off) \n");
-        else  putstr("(On) \n");
-
+        sprintf(textBuf, "rvm | Reverb Mix (wet/dry ratio): %d %%\n", g_Config.ReverbMix_pc);
+        putstr("\t");  putstr(textBuf);
         return;
     }
+    
+    if (argCount >= 3)  arg = atoi(argValue[2]);
+    else  return;
 
     if (strmatch(argValue[1], "mib"))  // MIDI IN Baudrate
     {
@@ -188,29 +176,20 @@ void  Cmnd_config(int argCount, char * argValue[])
         }
         else  isCmdError = 1;
     }
-    else if (strmatch(argValue[1], "mip"))  // MIDI IN Pressure CC #
+    else if (strmatch(argValue[1], "mix"))  // MIDI IN Expression CC #
     {
-        if (argCount >= 3 && (arg == 2 || arg == 7 || arg == 11))
+        if (argCount >= 3 && (arg >= 0 && arg <= 31))
         {
-            g_Config.MidiInPressureCCnum = arg;
+            g_Config.MidiInExpressionCCnum = arg;
             updateConfig = 1;
         }
         else  isCmdError = 1;
     }
-    else if (strmatch(argValue[1], "min"))  // MIDI IN Modulation CC #
+    else if (strmatch(argValue[1], "moe"))  // MIDI OUT Enabled
     {
-        if (argCount >= 3 && (arg >= 0 && arg < 32))
+        if (argCount >= 3 && (arg == 0 || arg == 1))
         {
-            g_Config.MidiInModulationCCnum = arg;
-            updateConfig = 1;
-        }
-        else  isCmdError = 1;
-    }
-    else if (strmatch(argValue[1], "mom"))  // MIDI OUT Mode
-    {
-        if (argCount >= 3 && arg <= 4)
-        {
-            g_Config.MidiOutMode = arg;
+            g_Config.MidiOutEnabled = arg;
             updateConfig = 1;
         }
         else  isCmdError = 1;
@@ -224,20 +203,29 @@ void  Cmnd_config(int argCount, char * argValue[])
         }
         else  isCmdError = 1;
     }
-    else if (strmatch(argValue[1], "mop"))  // MIDI OUT Pressure CC #
+    else if (strmatch(argValue[1], "mox"))  // MIDI OUT Exprn CC #
     {
-        if (argCount >= 3 && (arg == 0 || arg == 2 || arg == 7 || arg == 11))
+        if (argCount >= 3 && (arg >= 0 && arg <= 31))
         {
-            g_Config.MidiOutPressureCCnum = arg;
+            g_Config.MidiOutExpressionCCnum = arg;
             updateConfig = 1;
         }
         else  isCmdError = 1;
     }
-    else if (strmatch(argValue[1], "mon"))  // MIDI OUT Modulation CC #
+    else if (strmatch(argValue[1], "mom"))  // MIDI OUT Modulation enabled
     {
-        if (argCount >= 3 && arg >= 1 && arg <= 16)
+        if (argCount >= 3 && (arg == 0 || arg == 1))
         {
-            g_Config.MidiOutModulationCCnum = arg;
+            g_Config.MidiOutModnEnabled = arg;
+            updateConfig = 1;
+        }
+        else  isCmdError = 1;
+    }
+    else if (strmatch(argValue[1], "pbc"))  // Pitch-Bend Control Mode
+    {
+        if (argCount >= 3 && (arg == 0 || arg == 1 || arg == 2))  // todo: arg == 3 (analog CV)
+        {
+            g_Config.PitchBendCtrlMode = arg;
             updateConfig = 1;
         }
         else  isCmdError = 1;
@@ -260,21 +248,14 @@ void  Cmnd_config(int argCount, char * argValue[])
         }
         else  isCmdError = 1;
     }
-    else if (strmatch(argValue[1], "aco"))  // Ampld Ctrl Override (0 | 1)
-    {
-        if (argCount >= 3 && (arg == 0 || arg == 1))
-        {
-            g_Config.AmpldControlOverride = arg;
-            updateConfig = 1;
-        }
-        else  isCmdError = 1;
-    }
 
     if (isCmdError)  putstr("! Invalid <arg> value \n");
     
     if (updateConfig)  
     {
-        putstr("* Parameter updated.\n");
+        putstr("* Done... config param ");
+        putstr(argValue[1]);  putstr(" = ");  putDecimal(arg, 1);
+        putNewLine();
         StoreConfigData();  // commit new config setting
     }
 }
@@ -289,9 +270,8 @@ void  Cmnd_preset(int argCount, char * argValue[])
 {
     char    textBuf[80];
     char   *patchName;
-    char    option = tolower(argValue[1][1]);
-    int     arg_n = atoi(argValue[1]);
-    int     arg = atoi(argValue[2]);
+    char    option;
+    int     arg, arg_n;
     int     activePreset = g_Config.PresetLastSelected;  // 0..7
     int     i, preset, pr_idx, patch_ID, patch_idx = 0;
 
@@ -304,17 +284,20 @@ void  Cmnd_preset(int argCount, char * argValue[])
         putstr( " -i  : View Preset configurations (alias -l : List ..)\n");
         putstr( " -p  : Set REMI synth Patch ID number (0..999) \n");
         putstr( " -n  : Set MIDI OUT program/voice Number (0..127) \n");
-	    putstr( " -v  : Set Vibrato mode (O:off, E:fx.sw, M:mod'n, A:auto, D:detune)\n");
+        putstr( " -v  : Set Vibrato mode (O:off, M:mod'n, A:auto-ramp)\n");
         putstr( " -t  : Set pitch Transpose, semitones (-24..+24) \n");
         ////
         return;
     }
+    
+    if (argCount >= 2)  arg_n = atoi(argValue[1]);  // Preset #
+    if (argCount >= 3)  arg = atoi(argValue[2]);    // param value
 
-    if (isdigit(*argValue[1]) && arg_n >= 0 && arg_n <= 8) 
+    if (isdigit(*argValue[1]) && arg_n >= 0 && arg_n <= 8)  // Select Preset
     {
         InstrumentPresetSelect(arg_n);
         activePreset = g_Config.PresetLastSelected;  // 0..7
-        patch_ID = g_Preset.Descr[activePreset].RemiSynthPatch;
+        patch_ID = g_Preset.Descr[activePreset].PatchNumber;
         
         // Search table of predefined patches for patch_ID in the active Preset...
         for (i = 0;  i < GetNumberOfPatchesDefined();  i++)
@@ -332,6 +315,8 @@ void  Cmnd_preset(int argCount, char * argValue[])
     }
     else  // Set Preset parameter
     {
+        option = tolower(argValue[1][1]);
+        
         switch (option)
         {
         case 'p':  // set REMI synth patch number for activePreset
@@ -346,7 +331,7 @@ void  Cmnd_preset(int argCount, char * argValue[])
 
             if (argCount == 3 && (arg == 0 || i < patchCount)) 
             {
-                g_Preset.Descr[activePreset].RemiSynthPatch = arg;
+                g_Preset.Descr[activePreset].PatchNumber = arg;
                 StorePresetData();
                 InstrumentPresetSelect(activePreset);  // activate the new setting
             }
@@ -375,10 +360,9 @@ void  Cmnd_preset(int argCount, char * argValue[])
             if (argCount == 3)
             {
                 if (c1 == '0')  g_Preset.Descr[activePreset].VibratoMode = VIBRATO_DISABLED;
-                if (c1 == 'E')  g_Preset.Descr[activePreset].VibratoMode = VIBRATO_BY_EFFECT_SW;
+                if (c1 == 'O')  g_Preset.Descr[activePreset].VibratoMode = VIBRATO_DISABLED;
                 if (c1 == 'M')  g_Preset.Descr[activePreset].VibratoMode = VIBRATO_BY_MODN_CC;
                 if (c1 == 'A')  g_Preset.Descr[activePreset].VibratoMode = VIBRATO_AUTOMATIC;
-                if (c1 == 'D')  g_Preset.Descr[activePreset].VibratoMode = VIBRATO_AUTO_ASYMM;
                 StorePresetData();
                 InstrumentPresetSelect(activePreset);  // activate the new setting
             }
@@ -410,7 +394,7 @@ void  Cmnd_preset(int argCount, char * argValue[])
         {
             if (preset == 8) pr_idx = 0;  else pr_idx = preset;  // wrap 8 -> 0
                     
-            patch_ID = g_Preset.Descr[pr_idx].RemiSynthPatch;
+            patch_ID = g_Preset.Descr[pr_idx].PatchNumber;
             // Search table of defined patches for patch_ID in the indexed Preset...
             for (i = 0;  i < GetNumberOfPatchesDefined();  i++)
             {
@@ -430,14 +414,10 @@ void  Cmnd_preset(int argCount, char * argValue[])
             sprintf(textBuf, " |    %3d    | ", g_Preset.Descr[pr_idx].MidiProgram);
             putstr(textBuf);
 
-            if (g_Preset.Descr[pr_idx].VibratoMode == VIBRATO_BY_EFFECT_SW)
-                putstr("FxSw CC86 | ");
-            else if (g_Preset.Descr[pr_idx].VibratoMode == VIBRATO_BY_MODN_CC)
+            if (g_Preset.Descr[pr_idx].VibratoMode == VIBRATO_BY_MODN_CC)
                 putstr("Modn CC01 | ");
             else if (g_Preset.Descr[pr_idx].VibratoMode == VIBRATO_AUTOMATIC)
                 putstr("Auto ramp | ");
-            else if (g_Preset.Descr[pr_idx].VibratoMode == VIBRATO_AUTO_ASYMM)
-                putstr("Auto Osc1 | ");   // vibrato on OSC1 only
             else  putstr("Disabled  | ");
 
             sprintf(textBuf, "%+4d \n", g_Preset.Descr[pr_idx].PitchTranspose);
@@ -450,6 +430,516 @@ void  Cmnd_preset(int argCount, char * argValue[])
         patchName = (char *) g_PatchProgram[patch_idx].PatchName;
         sprintf(textBuf, "Active Preset: %d : Patch #%d %s \n", preset, patch_ID, patchName);  
         putstr(textBuf);
+    }
+}
+
+
+/*
+ * Function:     Console CLI command to manage the synth patch, incl...
+ *                 -  view/modify active patch parameters
+ *                 -  save active patch (param set) as 'User Patch' in EEPROM
+ *                 -  load active patch from 'User Patch' in EEPROM
+ *                 -  load active patch from predefined patch table in MCU flash
+ *                 -  dump active patch to console as C data definition
+ */
+void  Cmnd_patch(int argCount, char *argValue[])
+{
+    char    paramAcronym[4];
+    char    option;
+    int     i, paramValue;
+
+    if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted
+    {
+        putstr( "View or modify the active (selected) patch \n" );
+        putstr( "``````````````````````````````````````````````````````````` \n" );
+        putstr( "Usage (1):  patch  <opt>  [arg] \n" );
+        putstr( "  where <opt> = \n" );
+        putstr( " -l  : List/enumerate predefined patches. \n");
+        putstr( " -d  : Dump active patch param's (alias: -i) \n");
+        putstr( " -s  : Save active patch as User Patch [arg = name] \n");
+        putstr( " -u  : Select User patch \n");
+        putstr( " -p  : Select Predefined patch (arg = Patch ID) \n");
+        putstr( " -w  : Wave-table info (active patch) \n");
+        putstr( "``````````````````````````````````````````````````````````` \n" );
+        putstr( "Usage (2):  patch  <param_ID> [=] <value> \n" );
+        putstr( "  where <param_ID> is a 2-letter mnemonic (see dump) \n");
+        putstr( "  Example: To set Vibrato Depth to 50 cents, enter:- \n" );
+        putstr( "           patch VD 50   [Alt:  patch vd = 50] \n" );
+        putstr( "___________________________________________________________ \n" );
+        return;
+    }
+    
+    if (argCount >= 2)  option = tolower(argValue[1][1]);
+
+    if (*argValue[1] == '-')  // Usage is type (1)
+    {
+        switch (option)
+        {
+        case 'l':  // List/enumerate pre-defined patches in flash PM
+        {
+            int   spaces;
+
+            putstr("      ID#  Patch Name              WT1  WT2  \n");
+            putstr("```````````````````````````````````````````` \n");
+
+            for (i = 0;  i < GetNumberOfPatchesDefined();  i++)
+            {
+                putDecimal(i, 3);
+                putstr("  ");
+                putDecimal(g_PatchProgram[i].PatchNumber, 4);
+                putstr("  ");
+                putstr((char *) g_PatchProgram[i].PatchName);
+                spaces = 24 - strlen(g_PatchProgram[i].PatchName);
+                while (spaces > 0)
+                    { putch(' ');  spaces--; }
+                putDecimal(g_PatchProgram[i].Osc1WaveTable, 3);
+                putstr("  ");
+                putDecimal(g_PatchProgram[i].Osc2WaveTable, 3);
+                putstr("\n");
+            }
+
+            putstr("____________________________________________ \n");
+            break;
+        }
+        case 'd':  // Dump active patch param's
+        case 'i':  // alias - patch info
+        {
+            DumpActivePatchParams();
+            break;
+        }
+        case 's':  // Save active patch as User Patch
+        {
+            g_Patch.PatchNumber = 0;
+            memset(&g_Patch.PatchName[0], 0, 22);  // clear existing name
+            if (argCount >= 3)  // new name supplied
+                strncpy(&g_Patch.PatchName[0], argValue[2], 20);
+            else  strcpy(&g_Patch.PatchName[0], "User Patch");
+
+            memcpy(&g_Config.UserPatch, &g_Patch, sizeof(PatchParamTable_t));
+
+            if (StoreConfigData())  putstr("* Saved OK.\n");
+            else  putstr("! Error writing to EEPROM.\n");
+            break;
+        }
+        case 'u':  // Load User Patch
+        {
+            SynthPatchSelect(0);
+            DumpActivePatchParams();
+            break;
+        }
+        case 'p':  // Load & activate a predefined patch (from flash PM)
+        {
+            int   patchNum = atoi(argValue[2]);
+            int   status = 0;
+
+            if (argCount == 3 && patchNum != 0)
+                status = SynthPatchSelect(patchNum);
+            else  status = ERROR;
+
+            if (status == ERROR)  putstr("! Missing or invalid patch ID number.\n");
+            else  DumpActivePatchParams();
+            break;
+        }
+        case 'w':  // View patch active wave-table data
+        {
+            PrintWaveTableInfo(1);  
+            PrintWaveTableInfo(2);  
+            break;
+        }
+        default:
+        {
+            putstr("! Invalid cmd option.");
+            break;
+        }
+        } // end switch
+    }
+    else  // Usage is type (2) -- set a param value
+    {
+        char   arg2_1st_char = argValue[2][0];
+        paramAcronym[0] = toupper(argValue[1][0]);
+        paramAcronym[1] = toupper(argValue[1][1]);
+            
+        if (argCount == 4 && arg2_1st_char == '=') 
+        {
+            paramValue = atoi(argValue[3]);
+            SetPatchParameter(paramAcronym, paramValue);
+        }
+        else if (argCount == 3 && (isdigit(arg2_1st_char) || arg2_1st_char == '-'))  
+        {
+            paramValue = atoi(argValue[2]);
+            SetPatchParameter(paramAcronym, paramValue);
+        }
+        else  putstr("! Missing arg(s). Check cmd syntax.\n");
+    }
+}
+
+
+PRIVATE  void   PrintWaveTableInfo(unsigned oscNum)
+{
+    char   textBuf[120];
+    int    waveTableID;
+    int    activeTableSize;
+    float  activeOscFreqDiv;
+
+    WaveformDesc_t    *waveFormDesc;
+    FlashWaveTable_t  *waveTableDesc;
+
+    if (oscNum == 1)  
+    {
+        waveTableID = g_Patch.Osc1WaveTable;
+        activeTableSize = g_Osc1WaveTableSize;
+        activeOscFreqDiv = g_Osc1FreqDiv;
+    }
+    else if (oscNum == 2)  
+    {
+        waveTableID = g_Patch.Osc2WaveTable;
+        activeTableSize = g_Osc2WaveTableSize;
+        activeOscFreqDiv = g_Osc2FreqDiv;
+    }
+    else  return;  // undefined oscNum
+
+    sprintf(textBuf, "Wave-table assigned to OSC%d \n", oscNum);
+    putstr(textBuf);  
+    putstr("```````````````````````````````\n");
+
+    if (waveTableID != 0)   // Wave-table stored in flash PM
+    {
+        waveTableDesc = (FlashWaveTable_t *) &g_FlashWaveTableDef[waveTableID];
+
+        sprintf(textBuf, "Table ID num:  %d\n", waveTableID);
+        putstr(textBuf);
+        sprintf(textBuf, "Table Size:    %d\n", waveTableDesc->Size);
+        putstr(textBuf);
+        sprintf(textBuf, "Freq Divider:  %5.3f\n\n", waveTableDesc->FreqDiv);
+        putstr(textBuf);
+    }
+    else  // RAM-based user wave-table
+    {
+        waveFormDesc = (WaveformDesc_t *) &g_Config.UserWaveform;
+        
+        sprintf(textBuf, "Table Size:    %d\n", waveFormDesc->Size);
+        putstr(textBuf);
+        sprintf(textBuf, "Freq Divider:  %5.3f\n", waveFormDesc->FreqDiv);
+        putstr(textBuf);
+        putstr("User wave-table selected. May be affected by 'wav' utility.\n");
+        putstr("<!> Data shown above is from the wave-form descriptor in EEPROM.\n");
+    }
+    
+    putstr("Currently active settings:\n");
+    sprintf(textBuf, "Table Size:    %d\n", activeTableSize);
+    putstr(textBuf);
+    sprintf(textBuf, "Freq Divider:  %5.3f\n", activeOscFreqDiv);
+    putstr(textBuf);
+    putstr("```````````````````````````````\n");
+}
+
+
+/*
+ * This function lists names and values of the active patch parameters in a format
+ * suitable for import into the source code as a predefined patch definition.
+ *
+ * Parameters are listed in the order in which they are defined in the structure
+ * PatchParamTable_t. Any change to the patch structure will require a corresponding
+ * change to the listing.
+ */
+PRIVATE  void   DumpActivePatchParams()
+{
+    char    textBuf[120];
+
+    putstr("Patch ID#:  ");  putDecimal(g_Patch.PatchNumber, 1);
+    putstr(" -> ");  putstr(g_Patch.PatchName);
+    putstr("\n\n");
+
+    //-------------  Oscillators, Pitch Bend and Vibrato --------------------------------
+
+    sprintf(textBuf, "\t%d,\t// W1: OSC1 Wave-table ID (0..250)\n",
+            (int) g_Patch.Osc1WaveTable);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// W2: OSC2 Wave-table ID (0..250)\n",
+            (int) g_Patch.Osc2WaveTable);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// OD: OSC2 Detune, cents (+/-1200)\n",
+            (int) g_Patch.Osc2Detune);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// LF: LFO Freq x10 Hz (1..250)\n",
+            (int) g_Patch.LFO_Freq_x10);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// VD: Vibrato Depth, cents (0..200)\n",
+            (int) g_Patch.LFO_FM_Depth);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// VR: Vibrato Ramp time (5..5000+ ms)\n",
+            (int) g_Patch.LFO_RampTime);
+    putstr(textBuf);
+    putstr("\n");
+
+    //-------------  Wave Mixer & Contour Envelope --------------------------------------
+
+    sprintf(textBuf, 
+            "\t%d,\t// MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)\n",
+            (int) g_Patch.MixerControl);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// ML: Mixer OSC2 Level in Fixed mode (0..100 %%)\n",
+            (int) g_Patch.MixerOsc2Level);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// CS: Contour Env Start level (0..100 %%)\n",
+            (int) g_Patch.ContourStartLevel);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// CD: Contour Env Delay time (5..5000+ ms)\n",
+            (int) g_Patch.ContourDelay_ms);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// CR: Contour Env Ramp time (5..5000+ ms)\n",
+            (int) g_Patch.ContourRamp_ms);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// CH: Contour Env Hold level (0..100 %%)\n",
+            (int) g_Patch.ContourHoldLevel);
+    putstr(textBuf);
+    putstr("\n");
+
+    //-------------  Noise Mixer & Bi-quad resonant Filter ------------------------------
+
+    sprintf(textBuf,
+            "\t%d,\t// NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)\n",
+            (int) g_Patch.NoiseMode);
+    putstr(textBuf);
+    sprintf(textBuf,
+            "\t%d,\t// NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Env, 3:Exprn, 4:Modn)\n",
+            (int) g_Patch.NoiseLevelCtrl);
+    putstr(textBuf);
+    sprintf(textBuf,
+            "\t%d,\t// FC: Filter Ctrl (0:Fixed, 1:Contour, 2:Env+, 3:Env-, 4:LFO, 5:Modn)\n",
+            (int) g_Patch.FilterControl);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// FR: Filter Resonance x10000  (0..9999, 0:Bypass)\n",
+            (int) g_Patch.FilterResonance);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// FF: Filter Cutoff Freq (MIDI note - 12, 0..108)\n",
+            (int) g_Patch.FilterFrequency);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)\n",
+            (int) g_Patch.FilterNoteTrack);
+    putstr(textBuf);
+    putstr("\n");
+
+    //-------------  Amplitude Envelope and Output Amplitude Control  -------------------
+
+    sprintf(textBuf, "\t%d,\t// AA: Ampld Env Attack time (5..5000+ ms)\n",
+            (int) g_Patch.AmpldEnvAttack_ms);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// AP: Ampld Env Peak time (0..5000+ ms)\n",
+            (int) g_Patch.AmpldEnvPeak_ms);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// AD: Ampld Env Decay time (5..5000+ ms)\n",
+            (int) g_Patch.AmpldEnvDecay_ms);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// AR: Ampld Env Release time (5..5000+ ms)\n",
+            (int) g_Patch.AmpldEnvRelease_ms);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// AS: Ampld Env Sustain level (0..100 %%)\n",
+            (int) g_Patch.AmpldEnvSustain);
+    putstr(textBuf);
+    sprintf(textBuf,
+            "\t%d \t// AC: Ampld Control (0:Max, 1:Fixed, 2:Exprn, 3:Env, 4:Env*Vel)\n",
+            (int) g_Patch.OutputAmpldCtrl);
+    putstr(textBuf);
+    putstr("\n");
+}
+
+
+/*
+ *  Function sets an active patch parameter to a given value, if the value is valid.
+ *
+ *  Entry arg(s):  paramAbbr = pointer to a 2-char string identifying the parameter
+ *                             to be set.
+ *
+ *                 paramVal = new value for the parameter
+ *
+ *  <!>  All param's except 'OD' (OSC2 Detune) must have positive values (>= 0).
+ */
+PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal)
+{
+    int   paramHash = PARAM_HASH_VALUE(paramAbbr[0], paramAbbr[1]);
+    bool  isBadValue = 0;
+
+    if (paramVal < 0 && paramHash != PARAM_HASH_VALUE('O', 'D'))  
+    {
+        isBadValue = 1;   // negative value not accepted
+    }
+    else switch (paramHash)
+    {
+        //-------------  Oscillators, Pitch Bend and Vibrato --------------------------------
+        case PARAM_HASH_VALUE('W', '1'):
+        {
+            if (paramVal <= GetHighestWaveTableID())  
+                g_Patch.Osc1WaveTable = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('W', '2'):
+        {
+            if (paramVal <= GetHighestWaveTableID())
+                g_Patch.Osc2WaveTable = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('O', 'D'):
+        {
+            if (paramVal >= -4800 && paramVal <= 4800)
+                g_Patch.Osc2Detune = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('L', 'F'):
+        {
+            if (paramVal > 1 && paramVal <= 250)  
+                g_Patch.LFO_Freq_x10 = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('V', 'D'):
+        {
+            if (paramVal <= 200)  g_Patch.LFO_FM_Depth = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('V', 'R'):
+        {
+            if (paramVal >= 5 && paramVal <= 10000)  
+                g_Patch.LFO_RampTime = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        //-------------  Wave Mixer & Contour Envelope --------------------------------------
+        case PARAM_HASH_VALUE('M', 'C'):
+        {
+            if (paramVal <= 15)  g_Patch.MixerControl = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('M', 'L'):
+        {
+            if (paramVal <= 100)  g_Patch.MixerOsc2Level = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('C', 'S'):
+        {
+            if (paramVal <= 100)  g_Patch.ContourStartLevel = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('C', 'D'):
+        {
+            if (paramVal >= 5 && paramVal <= 10000)  
+                g_Patch.ContourDelay_ms = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('C', 'R'):
+        {
+            if (paramVal >= 5 && paramVal <= 10000)  
+                g_Patch.ContourRamp_ms = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('C', 'H'):
+        {
+            if (paramVal <= 100)  g_Patch.ContourHoldLevel = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        //-------------  Noise Generator & Bi-Quad Variable Filter --------------------------------
+        case PARAM_HASH_VALUE('N', 'M'):
+        {
+            if (paramVal <= 7)  g_Patch.NoiseMode = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('N', 'L'):
+        case PARAM_HASH_VALUE('N', 'C'):
+        {
+            if (paramVal <= 15)  g_Patch.NoiseLevelCtrl = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('F', 'C'):
+        {
+            if (paramVal <= 15)  g_Patch.FilterControl = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('F', 'R'):
+        {
+            if (paramVal <= 9999)  g_Patch.FilterResonance = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('F', 'F'):
+        {
+            if (paramVal <= 108)  g_Patch.FilterFrequency = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('F', 'T'):
+        {
+            if (paramVal <= 1)  g_Patch.FilterNoteTrack = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        //-------------  Amplitude Envelope and Output Amplitude Control  -------------------
+        case PARAM_HASH_VALUE('A', 'A'):
+        {
+            if (paramVal >= 5 && paramVal <= 10000)  
+                g_Patch.AmpldEnvAttack_ms = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('A', 'P'):
+        {
+            if (paramVal <= 10000)  g_Patch.AmpldEnvPeak_ms = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('A', 'D'):
+        {
+            if (paramVal >= 5 && paramVal <= 10000)  
+                g_Patch.AmpldEnvDecay_ms = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('A', 'R'):
+        {
+            if (paramVal >= 5 && paramVal <= 10000)  
+                g_Patch.AmpldEnvRelease_ms = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('A', 'S'):
+        {
+            if (paramVal <= 100)  g_Patch.AmpldEnvSustain = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('A', 'C'):
+        {
+            if (paramVal <= 15)  g_Patch.OutputAmpldCtrl = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        default:
+        {
+            putstr("! Parameter acronym undefined: ");
+            putch(paramAbbr[0]);
+            putch(paramAbbr[1]);
+            putstr(" \n");
+            return;
+        }
+    }  // end switch
+
+    if (isBadValue)  putstr("! Value rejected - out of bounds.\n");
+    else  
+    {
+        SynthPrepare();
+        DumpActivePatchParams();
     }
 }
 
@@ -474,23 +964,24 @@ void  Cmnd_preset(int argCount, char * argValue[])
 void  Cmnd_info(int argCount, char * argValue[])
 {
     char  textBuf[80];
-    uint8  HWconfig = GetHardwareConfig();
 
-    sprintf(textBuf, "REMI mk2 Synth. firmware version: %d.%d.%02d \n",
+    sprintf(textBuf, "Bauer REMI Synth mk2 firmware version: %d.%d.%02d \n",
             g_FW_version[0], g_FW_version[1], g_FW_version[2]);
     putstr(textBuf);
     
-    sprintf(textBuf, "HW config. jumper setting:  %d \n", HWconfig);
-    putstr(textBuf);
-
-    if (!isLCDModulePresent())
-        putstr("LCD module not detected. Local UI disabled.\n");
-
 #ifdef USE_LCD_CONTROLLER_ST7920 
     putstr("LCD controller driver: ST7920 \n");
 #else  // assume USE_LCD_CONTROLLER_KS0108
     putstr("LCD controller driver: KS0108 \n");
 #endif
+    
+    if (!isLCDModulePresent())
+        putstr("LCD module not detected. Local UI disabled.\n");
+    
+    if (POT_MODULE_CONNECTED)
+        putstr("Control Panel (detachable pot module) connected.\n");
+    else
+        putstr("Control Panel (detachable pot module) not detected.\n");
     
     if (isHandsetConnected())
     {
@@ -529,9 +1020,9 @@ void  Cmnd_mimon( int argCount, char * argValue[] )
     int     i;
     uint16  nbytes = 0;
     short   buffReadIndex = 0, col = 0;
-    char    option = tolower(argValue[1][1]);
+    char    option;
     
-    if (argCount == 1 || *argValue[1] == '?' )  // help
+    if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted
     {
         putstr( "MIDI Input Monitor -- diagnostic utility \n" );
         putstr( "Usage:  mimon  <opt>  [n] \n" );
@@ -541,6 +1032,8 @@ void  Cmnd_mimon( int argCount, char * argValue[] )
         putstr( "  -n : Output last <n> buffer entries (n <= 512) \n" );
         return;
     }
+    
+    if (argCount >= 2)  option = tolower(argValue[1][1]);
     
     if (option == 'a' || option == 'e')  // Activate/enable the monitor
     {
@@ -617,9 +1110,9 @@ void  Cmnd_eeprom(int argCount, char * argValue[])
     uint8   buffer[20];
     uint8   eebyte;
     int     offset, row, col, count;
-    char    option = tolower(argValue[1][1]);
+    char    option = 0;
 
-    if (argCount == 1 || *argValue[1] == '?' )  // help
+    if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted
     {
         putstr( "Usage:  eeprom  <opt>  <block> \n" );
         putstr( "where <opt> = \n" );
@@ -640,7 +1133,8 @@ void  Cmnd_eeprom(int argCount, char * argValue[])
         buffer[count] = 0xFF;
     }
 
-    if (argCount > 2)  blockNum = atoi(argValue[2]) & 3;
+    if (argCount >= 2)  option = tolower(argValue[1][1]);
+    if (argCount >= 3)  blockNum = atoi(argValue[2]) & 3;
 
     if (option == 'd')  // Dump block contents
     {
@@ -703,9 +1197,7 @@ void  Cmnd_sound(int argCount, char * argValue[])
     static  uint16  duration = 2000;    // default (ms)
     static  uint8   vibratoMode = 0;    // default (off))
     
-    int  arg1 = atoi(argValue[1]);
-    int  arg2 = atoi(argValue[2]);
-    int  arg3 = atoi(argValue[3]);
+    int  arg1 = 0, arg2 = 0, arg3 = 0;
     
     if ( argCount == 2 && *argValue[1] == '?' )  // help wanted
     {
@@ -725,9 +1217,13 @@ void  Cmnd_sound(int argCount, char * argValue[])
         return;
     }
     
+    if (argCount >= 2)  arg1 = atoi(argValue[1]);
+    if (argCount >= 3)  arg2 = atoi(argValue[2]);
+    if (argCount >= 4)  arg3 = atoi(argValue[3]);
+    
     if (argCount == 2 && arg1 == 0)
     {
-        RemiSynthNoteOff(noteNumber);
+        SynthNoteOff(noteNumber);
         return;
     }
     
@@ -737,15 +1233,16 @@ void  Cmnd_sound(int argCount, char * argValue[])
     
     if (!init_done)  // Power-on/reset initialization -- load default patch
     {
-        RemiSynthPatchSelect(90);  // "Test Patch" (Osc1: sine wave;  Osc2: sawtooth)
+        SynthPatchSelect(90);  // "Test Patch" (Osc1: sine wave;  Osc2: sawtooth)
+        putstr("Test Patch (90) loaded.\n");
         init_done = 1;
     }
     
     noteEndTime = milliseconds() + duration;  // msec
     
-    SetVibratoModeTemp(vibratoMode);     // Override Preset
-    RemiSynthNoteOn(noteNumber, 64);     // velocity value ignored
-    RemiSynthExpression(4000);           // full scale is 16000
+    SetVibratoMode(vibratoMode);   // Override Preset vibrato mode
+    SynthNoteOn(noteNumber, 64);   // velocity value ignored
+    SynthExpression(8000);         // full scale is 16000
     
     if (argCount >= 3 && arg2 == 0)  return;  // sound indefinitely
     
@@ -760,44 +1257,49 @@ void  Cmnd_sound(int argCount, char * argValue[])
         }
     }
     
-    RemiSynthNoteOff(noteNumber);
+    SynthNoteOff(noteNumber);
 }
 
 
 /*```````````````````````````````````````````````````````````````````````````````````````
  *   Function called by "diag" command.
  * 
- *   NB:  All diag command options (except '-x') activate Diagnostic Mode
+ *   NB:  If the firmware build includes support for timed "Diagnostic Mode",
+ *        then all diag command options (except '-x') activate Diagnostic Mode
  *        which causes the REMI synth process (B/G task) to be suspended.
  *        Command "diag -x" cancels Diagnostic Mode and re-activates the synth
  *        process. A time-out (default 30 mins) is imposed on Diagnostic Mode.
  */
 void  DiagnosticCommandExec(int argCount, char * argValue[])
 {
-//  static bool  diagEnabled;
-    static bool  outputLevelSet;
-    char   option = tolower(argValue[1][1]);
-    char   opt_c2 = tolower(argValue[1][2]);
+    static bool    diagEnabled;
+    static uint32  intervalStart;
+    char   option;
+    int    arg;
 
-    if ( argCount == 1 || *argValue[1] == '?' )   // help wanted  Osc1FreqDividerGet()
+    if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted  g_TaskCallFrequency
     {
         putstr( "REMI mk2 synth module :: low-level diagnostics \n" );
         putstr( "`````````````````````````````````````````````` \n" );
         putstr( "Usage:  diag  <option>  [arg's] ... \n" );
         putstr( "Options:  \n" );
-        putstr( " -a  :  Audio output level (0..100), range (0..3) \n");
-        putstr( " -c  :  Core cycle timer test \n");
-        putstr( " -d  :  Display controller/driver test \n");
-        putstr( " -k  :  Keypad/button test \n");
-//      putstr( " -m  :  MIDI I/O loop-back test \n");
-        putstr( " -p  :  Pitch bend test (+/-0..1023) \n");
-//      putstr( " -t  :  Set timeout for diag mode (mins) \n");
-        putstr( " -u  :  Show UART error counts, then clear. \n");
-//      putstr( " -x  :  Exit diagnostic mode. \n");
-        putstr( " <!> Most options (except -x) activate diagnostic mode.\n");
-        ////
+        putstr( " -a  :  Audio ISR execution time \n");
+        putstr( " -b  :  Background task frequency \n");
+        putstr( " -c  :  Control pot readings \n");
+        putstr( " -d  :  Test Display Driver \n");
+        putstr( " -e  :  Expression peak value \n");
+        putstr( " -p  :  Test Pitch Bend (arg: +/-8000) \n");
+        putstr( " -r  :  Reverb mix setting \n");
+        putstr( " -s  :  Disable/enable Synth (arg: 0|1) \n");
+        putstr( " -u  :  UART errors.\n");
+        putstr( " -y  :  CPU core cYcle timer \n");
+#ifdef SUPPORT_DIAG_MODE        
+        putstr( " -t  :  Set timeout for diag mode (mins) \n");
+        putstr( " -x  :  Exit diagnostic mode. \n");
+#endif
         return;
     }
+    
 #ifdef SUPPORT_DIAG_MODE    
     if (option != 'x')  
     {
@@ -806,49 +1308,111 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
     }
 #endif
     
+    if (argCount >= 2)  option = tolower(argValue[1][1]);
+    
     switch (option)
     {
-    case 'a':  // Set audio output level (%), temporarily
+    case 'a':  // Show Audio ISR execution time (us)
     {
-        int   level_pc = atoi(argValue[2]);  // percent
-        fixed_t level_pu = IntToFixedPt(level_pc) / 100;  // per unit
-
-        SetAudioOutputLevel(level_pu);
-        outputLevelSet = 1;
+        int  execTime_us = (int) v_ISRexecTime / 40 + 1;  // 40 counts per microsecond
+        int  duty_pc = (execTime_us * 100) / 25;  // duty = % of ISR period
+        
+        putstr("Audio ISR execution time: ");
+        putDecimal(execTime_us, 1);
+        putstr(" us;  Portion of CPU time: ");
+        putDecimal(duty_pc, 1);
+        putstr(" % \n");
+        putstr("excluding context-switching overhead (negligible).\n");
         break;
     }
-    case 'c':  // Core cycle timer test
+    case 'b':  // Background task frequency check
     {
-        CoreCycleTimerTest();
+        uint32 loopStartTime = milliseconds();
+        uint32 taskFreq;
+        
+        while ((milliseconds() - loopStartTime) < 2000)
+        {
+            BackgroundTaskExec();
+            GUI_NavigationExec();
+        }
+        taskFreq = g_TaskCallFrequency;  // capture before serial output
+        putstr("Main B/G process (1ms task) calls per second: ");
+        putDecimal(taskFreq, 1);
+        putNewLine();
         break;
     }
-    case 'd':  // Display controller/driver  test
+    case 'd':  // Run LCD controller/driver test
     {
         DisplayControllerTest();
         break;
     }
-    case 'k':  // Keypad/button test
+    case 'e':  // Show Expression peak value (normalized)
     {
-        KeypadDriverTest();
+        char   textBuf[80];
+        float  exprnPeak = FixedToFloat(g_ExpressionPeak);
+        
+        sprintf(textBuf, "Last Expression peak: %6.3f (normalized) \n", exprnPeak);
+        putstr(textBuf);
+        g_ExpressionPeak = 0;  // reset
         break;
     }
-    case 'm':  // MIDI comm's loop-back test (*incomplete*)
+    case 'c':  // Show Control Panel pot readings (8 bits, filtered) 
     {
-        MidiLoopBackTest();  
-//      CancelDiagnosticMode();
-//      diagEnabled = 0;
-        outputLevelSet = 0;
+        char  key = 0;  short n;
+        
+        putstr("  Hit [Esc] to exit ... \n");
+        
+        intervalStart = milliseconds();
+        while (key != ASCII_ESC)
+        {
+            GUI_NavigationExec();  // Service pots, buttons & LCD panel
+            
+            if ((milliseconds() - intervalStart) >= 200)
+            {
+                putch(ASCII_CR);
+                for (n = 0; n < 6; n++)  { putDecimal(PotReading(n), 6); }
+                putstr("    ");
+                intervalStart = milliseconds();
+            }
+            if (kbhit())  key = getch();
+        }
+        putNewLine();
         break;
     }
     case 'p':  // Pitch bend test
     {
-        float   arg = atof(argValue[2]);
-
-        RemiSynthPitchBend((int) arg);
+        if (argCount >= 3) 
+        {
+            arg = atoi(argValue[2]) & 0x3FFF;
+            SynthPitchBend(arg);
+        }
+        else  putstr("! Need arg (0..+/-8000) \n ");  
         break;
     }
-/*    
-    case 'u':  // UART errors
+    case 'r':  // Show *active* Reverb Mix setting (% wet)
+    {
+        int  setting = (GetReverbMixSetting() * 100 + 5) / 128;  // rounded
+        
+        putstr("Active Reverb Mix (% wet): ");
+        putDecimal(setting, 1);
+        putNewLine();        
+        break;
+    }
+    case 's':  // Disable or enable synth B/G process & audio ISR
+    {
+        if (argCount == 3 && *argValue[2] == '0') 
+        {
+            v_SynthEnable = FALSE;
+            putstr("* Synth process and audio ISR disabled.\n "); 
+        }
+        else  
+        {
+            v_SynthEnable = TRUE;
+            putstr("* Synth process and audio ISR enabled.\n "); 
+        }
+        break;
+    }
+    case 'u':  // UART errors   GetReverbMixSetting()
     {
         putstr("UART #1 error count: ");  
         putDecimal(UART1_getErrorCount(), 5);
@@ -856,12 +1420,15 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
         putstr("UART #2 error count: ");  
         putDecimal(UART2_getErrorCount(), 5);
         putNewLine();
-        CancelDiagnosticMode();
-        diagEnabled = 0;
         break;
     }
-*/
-#ifdef SUPPORT_DIAG_MODE      
+    case 'y':  // Core cycle timer test
+    {
+        CoreCycleTimerTest();
+        break;
+    }
+
+#ifdef SUPPORT_DIAG_MODE  // If supported, DIAG MODE suspends the Synth Process task  
     case 't':  // Set timeout for diagnostic mode;  arg = timeout (mins)
     {
         int   arg = atoi(argValue[2]);  // minutes
@@ -1018,71 +1585,6 @@ PRIVATE  void  DisplayControllerTest()
 }
 
 
-/*`````````````
- * Function:  Command option "diag -k"
- *
- * Real-time diagnostic for button input service.
- */
-PRIVATE  void  KeypadDriverTest()
-{
-    char  c = 0;
-
-    putstr("Press a key on the keypad to test it. \n");
-    putstr("Press [Esc] on terminal to exit test. \n\n");
-
-    while (c != ASCII_ESC)
-    {
-        BackgroundTaskExec();  // Button input service
-        
-        if (KeyHit())  putch(GetKey());  // GUI button hit
-
-        if (kbhit())  c = getch();  // Console key hit
-    }
-
-    putNewLine();
-}
-
-
-/*````````````````  
- * Function:  Command option "diag -m"    *** todo ***
- *
- * MIDI comm's loop-back test.  Connect TX output to RX input.
- * 
- * Function transmits continuous System Exclusive messages (REMI IDENT, 4 bytes)
- * at intervals of 2.0ms. Received messages are checked for data integrity.
- * Normal synth operation is disabled while the loop-back test is running.
- */
-PRIVATE  void  MidiLoopBackTest()
-{
-    static  uint32  start_time;
-    char    c;
-    char    commsError = 0;
-
-    putstr("Press [Esc] to exit test... \n\n");
-
-    while (c != ASCII_ESC /* && g_DiagnosticModeActive */)
-    {
-        start_time = milliseconds();
-        while (milliseconds() - start_time < 50)  // Delay 50ms
-        {
-            BackgroundTaskExec();
-			;
-			;
-        }
-        
- 		;
-		;
-
-        if (kbhit()) c = getch();
-    }
-    putNewLine();
-    
-//  if (!g_DiagnosticModeActive) putstr("* Diag mode timer expired.\n");
-//  putstr("* Diag mode cancelled.\n");
-//  CancelDiagnosticMode();
-}
-
-
 /*`````````````````````````````````````````````````````````````````````````````````````````````````
  *   CLI command function:  Cmnd_trace
  *
@@ -1127,11 +1629,9 @@ void  Cmnd_trace(int argCount, char *argValue[])
 void  Cmnd_util(int argCount, char *argValue[])
 {
     char   textbuf[120];
-    char   option = tolower(argValue[1][1]);
+    char   option;
     
-    if (!SuperUserAccess()) return;
-
-    if (argCount == 1 || *argValue[1] == '?')   // help wanted
+    if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted
     {
         putstr( "Run a specified Utility...   \n" );
         putstr( "Usage:  util  <opt>  [args] \n" );
@@ -1144,19 +1644,29 @@ void  Cmnd_util(int argCount, char *argValue[])
             ;
         return;
     }
+    
+    if (argCount >= 2)  option = tolower(argValue[1][1]);
+    else  return;  // No option
 
     switch (option)
     {
     case 'a':
     {
-        float    arg1 = atof(argValue[2]);
-        int      arg2 = atoi(argValue[3]);
-        fixed_t  mp_cand = FloatToFixed(arg1);
-        fixed_t  prod = (mp_cand * arg2) >> 10;
+        float    arg1;
+        fixed_t  multiplicand, product;
+        int      multiplier;
         
-        sprintf(textbuf, "(fixed_t) %f x (int) %d / 1024 = %f \n", 
-                FixedToFloat(mp_cand),  arg2,  FixedToFloat(prod));
-        putstr(textbuf);
+        if (argCount >= 4)
+        {
+            arg1 = atof(argValue[2]);  // float
+            multiplicand = FloatToFixed(arg1);  // fixed-point
+            multiplier = atoi(argValue[3]);     // integer
+            product = (multiplicand * multiplier) >> 10;  // fixed-point
+            
+            sprintf(textbuf, "  Scalar multiply: (%f x %d) / 1024 = %f \n", 
+                    FixedToFloat(multiplicand),  multiplier,  FixedToFloat(product));
+            putstr(textbuf);
+        }
         break;
     }
     case 'b':
@@ -1189,143 +1699,6 @@ PRIVATE  void  TestFixedPtBase2Exp()
 }
 
 
-#ifdef USE_WIRELESS_MODULE  // future option
-/*```````````````````````````````````````````````````````````````````````````````````````
- * CLI command function:  Cmnd_mrf
- *
- * Diagnostic utility functions to support wireless module MRF24J40MA.
- */
-void  Cmnd_mrf(int argCount, char * argVal[])
-{
-    static  rx_info_t  *rx_inf;   // pointer to rx_info
-    static  uint16  destNodeAddr = 0x6901;  // default dest. node
-    static  char    tx_msg[64];
-    static  uint16  pktSeqNum = 0;
-    char    textBuf[80];
-    char    opt_c1, opt_c2 = 0;
-    int     arg1, arg2;
-    int     i, rx_len = 0;   // size of rx packet payload
-    uint8  *rx_dat;
-
-    if (argCount == 1 || *argVal[1] == '?' )  // help
-    {
-        putstr( "Diagnostic utility for MRF24J40 wireless module.\n" );
-        putstr( "Usage:  mrf  <option>  [arg1] [arg2] ... \n" );
-        putstr( "options \n" );
-        putstr( "  -z  : Initialize the device (reset & configure) \n" );
-/*        
-        putstr( "  -rr : Read MRF24J40 register (arg1 = short.addr, hex) \n" );
-        putstr( "  -wr : Write MRF24J40 reg. (arg2:data = decimal or hex^) \n" );
-        putstr( "        ^ Use $ prefix for hex data (eg. $0F) \n" );
-*/
-        putstr( "  -p  : Get/Set wireless PAN ID [arg1 = PAN.id, hex] \n" );
-        putstr( "  -sn : Get/Set source node address [arg1 = addr, hex] \n" );
-        putstr( "  -tx : Transmit test packet [arg1 = destin.node, hex] \n" );
-        putstr( "  -rx : View last received packet (hex bytes) \n" );
-        return;
-    }
-
-    if (argVal[1][0] == '-')
-    {
-        opt_c1 = tolower(argVal[1][1]);
-        opt_c2 = tolower(argVal[1][2]);
-    }
-    
-    if (opt_c1 == 'z')    // Initialize the device (reset & configure)
-    {
-        // todo: arg1 = RF channel (11..26)
-        if (WirelessModuleInit() == ERROR)
-        {
-            putstr("! MRF24J40 module not detected.\n");
-        }
-        pktSeqNum = 0;
-    }
-    else if (opt_c1 == 'p')    // Get/Set PAN ID  [arg1 = PAN.id, hex]
-    {
-        if (argCount >= 3)
-        {
-            arg1 = hexatoi(argVal[2]);
-            if (arg1 > 0) 
-            {
-                g_Wireless_PAN_ID = arg1;
-                MRF_SetPANID(g_Wireless_PAN_ID);
-            }
-        }
-        g_Wireless_PAN_ID = MRF_GetPANID();
-        putstr("PAN ID (from RF module): $");
-        putHexWord(g_Wireless_PAN_ID);
-        putNewLine();
-    }
-    else if (opt_c1 == 's')    // Get/Set local node address [arg1]
-    {
-        if (argCount >= 3)
-        {
-            arg1 = hexatoi(argVal[2]);
-            if (arg1 > 0) 
-            {
-                g_WirelessNodeAddr = arg1;
-                MRF_SetNodeAddr(g_WirelessNodeAddr);
-            }
-        }
-        g_WirelessNodeAddr = MRF_GetNodeAddr();
-        putstr("Node Addr (from RF module): $");
-        putHexWord(g_WirelessNodeAddr);
-        putNewLine();
-    }
-    else if (opt_c1 == 'r' && opt_c2 == 'x')  // Dump data from last Rx packet
-    {
-        rx_inf = MRF_RxInfoGet();
-        rx_len = MRF_RxDataLength();
-        rx_dat = (uint8 *) &rx_inf->rx_data[0];
-
-        if (rx_len <= 64)
-        {
-            putstr("\n  Rx Data: ");
-            for (i = 0;  i < rx_len;  i++)
-            {
-                putHexByte(*rx_dat++);  putch(' ');
-            }
-            putstr("\n  Pkt len: ");
-            putDecimal(rx_len, 1); 
-            putstr(" bytes \n");
-
-            putstr("  LQ: ");  
-            putDecimal(rx_inf->lqi / 25, 1);   // Link Quality Index
-            putstr("/10 | ");
-            putstr("RSS: ");  
-            putDecimal(rx_inf->rssi / 25, 1);  // Rx Signal Strength Index
-            putstr("/10 \n");
-        }
-    }
-    else if (opt_c1 == 't' && opt_c2 == 'x')  // Transmit test packet [arg1 = dest.node]
-    {
-        if (argCount >= 3)
-        {
-            arg1 = hexatoi(argVal[2]);
-            if (arg1 > 0)  destNodeAddr = arg1;
-        }
-        pktSeqNum++;
-        wordToHexStr(pktSeqNum, textBuf);
-        textBuf[4] = 0;  // term.char
-        strcpy(tx_msg, "Test Packet #");
-        strcat(tx_msg, textBuf);
-        MRF_TransmitData(destNodeAddr, tx_msg, strlen(tx_msg));
-    }
-    // 
-    // ...to be continued...
-    //
-    else  putstr("! What? \n");  // Cmd option undefined
-}
-
-#else
-void  Cmnd_mrf(int argCount, char * argVal[])
-{
-	putstr("! Wireless comm's not supported in this firmware version.\n");
-}
-
-#endif  // USE_WIRELESS_MODULE
-
-
 /*```````````````````````````````````````````````````````````````````````````````````````
  *   Function called by "watch" command function...
  *   Variables to be "watched" are output on a single line (no newline).
@@ -1334,7 +1707,7 @@ void  WatchCommandExec(void)
 {
     char   txtbuf[100];
     
-    float  exprsn = FixedToFloat(GetExpressionLevel());  // Breath pressure (CC02)
+    float  exprsn = FixedToFloat(GetExpressionLevel());  // CC02 (normalized)
     float  moduln = FixedToFloat(GetModulationLevel());  // CC01 (normalized)
     
     sprintf(txtbuf, "  MIDI CC02: %5.3f | CC01: %5.3f ", exprsn, moduln);  
@@ -1361,23 +1734,10 @@ void  DefaultPersistentData(void)
  */
 void  CommitPersistentParams()
 {
-    g_Config.PressureGain = g_PressureGain;
     g_Config.FilterInputAtten = g_FilterInputAtten;
     g_Config.FilterOutputGain = g_FilterOutputGain;
     g_Config.NoiseFilterGain = g_NoiseFilterGain;
         
     StoreConfigData();
+    SynthPrepare();
 }
-
-
-/*```````````````````````````````````````````````````````````````````````````````````````
- *   Function called by "set" command whenever a global synth parameter is updated.
- * 
- *   Performs whatever actions are necessary following a synth parameter change;
- *   typically, corresponding working variables must be updated.
- */
-void  ActivateSetParamValues(void)
-{
-    RemiSynthPrepare();
-}
-

@@ -12,7 +12,7 @@
  * Compiler:    Microchip MPLAB XC32 (free version) under MPLAB'X IDE.
  * `````````    The project contains no Microchip "PLIB" dependencies.
  *
- * Author:      M.J.Bauer, Copyright 2016-2021, All rights reserved
+ * Author:      M.J.Bauer, Copyright 2016-2022, All rights reserved
  * ```````
  * Reference:   www.mjbauer.biz/Build_the_REMI_by_MJB.htm
  * ``````````  
@@ -20,8 +20,6 @@
  */
 #include "main_remi_synth2.h"
 
-PRIVATE  void   Init_Application(void); 
-PRIVATE  void   StartupRoutine();
 PRIVATE  void   ProcessMidiMessage(uint8 *midiMessage, short msgLength); 
 PRIVATE  void   ProcessControlChange(uint8 *midiMessage);
 PRIVATE  void   ProcessMidiSystemExclusive(uint8 *midiMessage, short msgLength);
@@ -31,7 +29,7 @@ PRIVATE  void   MidiInputMonitor(uint8 *midiMessage, short msgLength);
 //
 uint8   g_FW_version[4];           // firmware version # (major, minor, build, 0)
 uint8   g_SelfTestFault[16];       // Self-test fault codes (0 => no fault)
-uint32  g_counter;                 // temp, for debug
+uint32  g_TaskRunningCount;        // Task execution counter (debug usage only)
 uint8   g_HandsetInfo[16];         // REMI handset info rec'd from Sys.Ex. msg
 
 uint8   g_MidiInputBuffer[MIDI_MON_BUFFER_SIZE];  // MIDI monitor buffer (circ. FIFO)
@@ -46,21 +44,17 @@ int     g_SysExclusivMsgCount;     // Number of System Exclusive msg's Rx'd
 // --------------  Private data  ----------------------
 //
 static  bool    m_LCD_ModuleDetected;    // Flag: LCD module detected
-static  bool    m_HandsetConnectedMIDI;  // Flag: REMI Handset detected on MIDI-IN port
-static  bool    m_HandsetConnectedMRF;   // Flag: REMI Handset detected on wireless link
+static  bool    m_REMI2handsetConnected;  // Flag: REMI Handset detected on MIDI-IN port
 static  short   m_HandsetTimeout_ms;     // Timer: Handset connection lost (at 1000 ms)
-static  char    m_textbuf[120];
 
 //=================================================================================================
 
-PRIVATE  void  Init_Application(void)
+void  Init_Application(void)
 {
     int   i;
 
     for (i = 1;  i < NUMBER_OF_SELFTEST_ITEMS;  i++)
-    {
         g_SelfTestFault[i] = 0;  // clear fault codes (except item 0)
-    }
 
     g_FW_version[0] = BUILD_VER_MAJOR;
     g_FW_version[1] = BUILD_VER_MINOR;
@@ -68,9 +62,7 @@ PRIVATE  void  Init_Application(void)
 
     // Check that the MCU device ID matches the firmware build...
     if ((GET_DEVICE_ID() & DEVICE_ID_MASK) != DEVICE_ID_PIC32MX340F512H)
-    {
         g_SelfTestFault[TEST_DEVICE_ID] = 1;
-    }
 
     if (LCD_Init())  // LCD module detected
     {
@@ -83,45 +75,32 @@ PRIVATE  void  Init_Application(void)
     g_MidiInWriteIndex = 0;
     g_MidiInputByteCount = 0;
     g_HandsetInfo[0] = 0;        // Info not yet received
-}
-
-
-int  main(void)
-{
-    InitializeMCUclock();
-    Init_MCU_IO_ports();
-    Init_I2C1();            // for EEPROM
-
-    UART2_init(57600);      // for console CLI using UART2
-    putstr("\n");
-    putstr("* MCU reset/startup \n");
-    putstr("* Running self-test routine \n");
-
-    Init_Application();
     
     if (g_SelfTestFault[TEST_DEVICE_ID])
         putstr("! PIC32 device type is incompatible with firmware build.\n");
 
     if (!m_LCD_ModuleDetected)
-        putstr("! LCD module not detected - GUI disabled.\n");
+        putstr("! LCD module not detected - GUI and Control Panel disabled.\n");
+    
+    if (!POT_MODULE_CONNECTED)
+        putstr("! Control Panel (detachable pot module) not detected.\n");
 
     if (CheckConfigData() == FALSE)    // Read Config data from EEPROM
     {
         g_SelfTestFault[TEST_EEPROM] = 1;
-        putstr("! Error reading EEPROM Config data - Restoring defaults.\n");
+        putstr("! Error reading EEPROM Config data - Loading defaults.\n");
         DefaultConfigData();
     }
 
     if (CheckPresetData() == FALSE)    // Read Preset data from EEPROM
     {
         g_SelfTestFault[TEST_EEPROM] = 1;
-        putstr("! Error reading EEPROM Preset data - Restoring defaults.\n");
+        putstr("! Error reading EEPROM Preset data - Loading defaults.\n");
         DefaultPresetData();
     }     
     
     UART1_init(g_Config.MidiInBaudrate);    
-    RemiSynthAudioInit();
-    if (m_LCD_ModuleDetected) GUI_NavigationInit();   // Initialize GUI if fitted
+    PWM_audioDAC_init();
     
     InstrumentPresetSelect(g_Config.PresetLastSelected);  // Activate last Preset
     putstr("Active Preset: ");
@@ -130,41 +109,31 @@ int  main(void)
     putDecimal(preset, 1);
     putNewLine();
     
-    g_AppTitleCLI = "Bauer {REMI} mk2 Sound Synth Module...\n";  // Start-up msg
+    g_AppTitleCLI = "Bauer {REMI} Sound Synth mk2 ...\n";  // Start-up msg
     Cmnd_ver(1, NULL);   
-    PrepareForNewCommand();   // Initialize CLI -- output prompt
+}
+
+
+int  main(void)
+{
+    InitializeMCUclock();
+    Init_MCU_IO_ports();   // initializes I2C(1) and ADC also
+
+    UART2_init(57600);     // for console CLI terminal
+    putstr("\n");
+    putstr("* MCU reset/startup \n");
+    putstr("* Running self-test routine \n");
+
+    Init_Application();
     
     while ( TRUE )   // main process loop
     {
         BackgroundTaskExec();  // run MIDI and Synth processes
-
-        if (m_LCD_ModuleDetected) GUI_NavigationExec();
-        
+        ////
+        GUI_NavigationExec();
+        ////
         ConsoleCLI_Service();
     }
-}
-
-
-/*
- * Function:  isLCDModulePresent()
- *
- * Overview:  Return TRUE if LCD Module is present, as detected at startup.
- */
-bool  isLCDModulePresent()
-{
-    return (m_LCD_ModuleDetected);
-}
-
-
-/*
- * Function:  isHandsetConnected()
- *
- * Overview:  Return TRUE if a REMI (mk2) handset is detected on the MIDI-IN port,
- *            or if a wireless handset is detected, else return False (0).
- */
-bool  isHandsetConnected()
-{
-    return (m_HandsetConnectedMIDI || m_HandsetConnectedMRF);
 }
 
 
@@ -183,24 +152,22 @@ void  BackgroundTaskExec()
 {
     MidiInputService(); 
        
-    if (g_Config.MidiOutMode)  MidiOutputQueueHandler();
+    if (g_Config.MidiOutEnabled)  MidiOutputQueueHandler();
         
     if (isTaskPending_1ms())  // Do 1ms periodic task(s)
     {
-        RemiSynthProcess();
+        SynthProcess();
+        g_TaskRunningCount++;
     }
 
-    if (isTaskPending_5ms())  // Do 5ms periodic tasks
+    if (isTaskPending_50ms())  // Do 50ms periodic tasks
     {
-        ButtonInputService();
-
-        if (m_HandsetTimeout_ms >= HANDSET_CONNECTION_TIMEOUT)   // 1 sec timeout
+        if (m_HandsetTimeout_ms >= HANDSET_CONNECTION_TIMEOUT)   // 2 sec timeout
         {
-            m_HandsetConnectedMIDI = 0;    // connection lost
-            m_HandsetConnectedMRF = 0;
+            m_REMI2handsetConnected = 0;   // connection lost
             g_HandsetInfo[0] = 0;          // Info now invalid
         }
-        else  m_HandsetTimeout_ms += 5;
+        else  m_HandsetTimeout_ms += 50;
     }
 }
 
@@ -225,14 +192,14 @@ void  InstrumentPresetSelect(uint8 preset)
     StoreConfigData();   // Save this Preset for next power-on/reset
 
     // Load and activate the REMI synth patch assigned to this Preset:
-    RemiSynthPatchSelect(g_Preset.Descr[preset].RemiSynthPatch);
-    
-    // Set MIDI receiver mode for external MIDI sound module or synth...
-    MIDI_SendReceiverMode(channel, g_Config.MidiOutMode);
+    SynthPatchSelect(g_Preset.Descr[preset].PatchNumber);
     
     // If this Preset's MIDI program # is non-zero, send it to the MIDI OUT port:
-    program = g_Preset.Descr[preset].MidiProgram;
-    if (program != 0) MIDI_SendProgramChange(channel, program);
+    if (g_Config.MidiOutEnabled)
+    {
+        program = g_Preset.Descr[preset].MidiProgram;
+        if (program != 0) MIDI_SendProgramChange(channel, program);
+    }
 }
 
 
@@ -328,8 +295,8 @@ PRIVATE  void  ProcessMidiMessage(uint8 *midiMessage, short msgLength)
         {
             uint8  noteNumber = midiMessage[1];
 
-            RemiSynthNoteOff(noteNumber);
-            MIDI_SendNoteOff(channel, noteNumber);
+            SynthNoteOff(noteNumber);
+            if (g_Config.MidiOutEnabled) MIDI_SendNoteOff(channel, noteNumber);
             break;
         }
         case NOTE_ON_CMD:
@@ -337,14 +304,15 @@ PRIVATE  void  ProcessMidiMessage(uint8 *midiMessage, short msgLength)
             uint8  noteNumber = midiMessage[1];
             uint8  velocity = midiMessage[2];
             
-            if (velocity == 0)  RemiSynthNoteOff(noteNumber);
-            else if (noteNumber >= 12 && noteNumber <= 108)
-                RemiSynthNoteOn(noteNumber, velocity);
+            if (velocity == 0)  SynthNoteOff(noteNumber);
+            else if (noteNumber >= 12 && noteNumber <= 120)
+                SynthNoteOn(noteNumber, velocity);
 
-            MIDI_SendNoteOn(channel, noteNumber, velocity);  // MIDI msg pass-through
+            if (g_Config.MidiOutEnabled)
+                MIDI_SendNoteOn(channel, noteNumber, velocity);  // MIDI msg pass-through
             break;
         }
-        case CONTROL_CHANGE_CMD:
+        case CONTROL_CHANGE_CMD:  // same for MODE CHANGE CMD
         {
             ProcessControlChange(midiMessage);
             break;
@@ -353,12 +321,17 @@ PRIVATE  void  ProcessMidiMessage(uint8 *midiMessage, short msgLength)
         {
             uint8  program = midiMessage[1];  // MIDI-IN pgrm number
 
-            if (!m_HandsetConnectedMIDI)   // MIDI controller is not a REMI handset...
+            if (!m_REMI2handsetConnected && g_Config.MidiOutEnabled) 
                 MIDI_SendProgramChange(channel, program);   // MIDI msg pass-through
             break;
         }
-        case PITCH_BEND_CMD:   // *** todo ***
+        case PITCH_BEND_CMD:
         {
+            uint8  leverPosn_Hi = midiMessage[1];  // PB lever position, 7 MS bits
+            uint8  leverPosn_Lo = midiMessage[2];  // PB lever position, 7 MS bits
+            int    signed14b = ((int16) leverPosn_Hi << 7) | leverPosn_Lo;
+            
+            SynthPitchBend(signed14b);
             break;
         }
         case SYS_EXCLUSIVE_MSG: 
@@ -383,41 +356,46 @@ PRIVATE  void  ProcessControlChange(uint8 *midiMessage)
     uint8  midiCCnum;
     uint8  channel = g_Config.MidiOutChannel;
     
-    if (midiMessage[1] == g_Config.MidiInPressureCCnum)
+    if (midiMessage[1] == g_Config.MidiInExpressionCCnum)
     {
         pressureHi = midiMessage[2];
         data14 = (((int) pressureHi) << 7) + pressureLo;
-        RemiSynthExpression(data14);
-        midiCCnum = g_Config.MidiOutPressureCCnum;
-        MIDI_SendControlChange(channel, midiCCnum, pressureHi);
+        SynthExpression(data14);
+        midiCCnum = g_Config.MidiOutExpressionCCnum;
+        if (g_Config.MidiOutEnabled) 
+            MIDI_SendControlChange(channel, midiCCnum, pressureHi);
     }
-    else if (midiMessage[1] == (g_Config.MidiInPressureCCnum + 32))
+    else if (midiMessage[1] == (g_Config.MidiInExpressionCCnum + 32))
     {
         pressureLo = midiMessage[2];
         data14 = (((int) pressureHi) << 7) + pressureLo;
-        RemiSynthExpression(data14);
-        midiCCnum = g_Config.MidiOutPressureCCnum + 32;
-        MIDI_SendControlChange(channel, midiCCnum, pressureLo);
+        SynthExpression(data14);
+        midiCCnum = g_Config.MidiOutExpressionCCnum + 32;
+        if (g_Config.MidiOutEnabled)
+            MIDI_SendControlChange(channel, midiCCnum, pressureLo);
     }
-    else if (midiMessage[1] == g_Config.MidiInModulationCCnum)
+    else if (midiMessage[1] == 0x01)  // CC-01 = modulation Hi byte
     {
         modulationHi = midiMessage[2];
         data14 = (((int) modulationHi) << 7) + modulationLo;
-        RemiSynthModulation(data14);
-        midiCCnum = g_Config.MidiOutModulationCCnum;
-        MIDI_SendControlChange(channel, midiCCnum, modulationHi);
+        SynthModulation(data14);
+        midiCCnum = 0x01;
+        if (g_Config.MidiOutEnabled)
+            MIDI_SendControlChange(channel, midiCCnum, modulationHi);
     }
-    else if (midiMessage[1] == (g_Config.MidiInModulationCCnum + 32))
+    else if (midiMessage[1] == 0x21)  // CC-33 = modulation Lo byte
     {
         modulationLo = midiMessage[2];
         data14 = (((int) modulationHi) << 7) + modulationLo;
-        RemiSynthModulation(data14);
-        midiCCnum = g_Config.MidiOutModulationCCnum + 32;
-        MIDI_SendControlChange(channel, midiCCnum, modulationLo);
+        SynthModulation(data14);
+        midiCCnum = 0x21;
+        if (g_Config.MidiOutEnabled)
+            MIDI_SendControlChange(channel, midiCCnum, modulationLo);
     }
-    //
-    // todo: Process 'All sound off', 'All notes off', 'Channel Mode', etc, messages
-    //
+    else if (midiMessage[1] == 120 || midiMessage[1] == 121)  // 'Mode Change' command
+    {
+        SynthPrepare();  // All Sound Off - Kill note playing and reset synth engine
+    }
 }
 
 
@@ -452,7 +430,7 @@ PRIVATE  void  ProcessMidiSystemExclusive(uint8 *midiMessage, short msgLength)
                 
     if (midiMessage[1] == SYS_EXCL_REMI_ID)  // "Manufacturer ID" match
     {
-        m_HandsetConnectedMIDI = 1;  // REMI wired handset detected...
+        m_REMI2handsetConnected = 1;  // REMI wired handset detected...
         m_HandsetTimeout_ms = 0;     // Reset the "connection lost" timer
         
         if (midiMessage[2] == REMI_PRESET_MSG)
@@ -505,8 +483,9 @@ PRIVATE  void   MidiInputMonitor(uint8 *midiMessage, short msgLength)
         }
         case CONTROL_CHANGE_CMD:
         {
-            if (midiMessage[1] == g_Config.MidiInPressureCCnum) g_PressureMsgCount++;
-            if (midiMessage[1] == g_Config.MidiInModulationCCnum) g_ModulationMsgCount++;
+            if (midiMessage[1] == g_Config.MidiInExpressionCCnum) 
+                g_PressureMsgCount++;
+            if (midiMessage[1] == 0x01) g_ModulationMsgCount++;  // CC-01 modulation
             break;
         }
         case PROGRAM_CHANGE_CMD:
@@ -533,6 +512,29 @@ PRIVATE  void   MidiInputMonitor(uint8 *midiMessage, short msgLength)
         }
         default:  break;
     }  // end switch
+}
+
+
+/*
+ * Function:  isLCDModulePresent()
+ *
+ * Overview:  Return TRUE if LCD Module is present, as detected at startup.
+ */
+bool  isLCDModulePresent()
+{
+    return (m_LCD_ModuleDetected);
+}
+
+
+/*
+ * Function:  isHandsetConnected()
+ *
+ * Overview:  Return TRUE if a REMI (mk2) handset is detected on the MIDI-IN port,
+ *            else return False (0).
+ */
+bool  isHandsetConnected()
+{
+    return (m_REMI2handsetConnected);
 }
 
 

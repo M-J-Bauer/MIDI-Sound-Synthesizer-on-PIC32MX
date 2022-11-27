@@ -7,7 +7,6 @@
  */
 #include "remi_synth2_def.h"
 
-
 // Pre-defined Patch "Programs" -- Array of patch parameter tables in flash memory
 // ```````````````````````````````````````````````````````````````````````````````
 // Once copied into the active patch table in data memory (m_Patch), parameters may be
@@ -22,7 +21,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         13,     // W1: OSC1 Wave-table ID (0..250) = alto/treble recorder
         13,     // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -38,8 +36,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:FilterBypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         5,      // AA: Ampld Env Attack time (10..5000+ ms)
         50,     // AP: Ampld Env Peak time (0..5000+ ms)
@@ -55,7 +53,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         4,      // W1: OSC1 Wave-table ID (0..250)
         13,     // W2: OSC2 Wave-table ID (0..250)
         -7,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -71,8 +68,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -88,7 +85,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         6,      // W1: OSC1 Wave-table ID (0..250)
         6,      // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -104,8 +100,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -121,7 +117,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         12,     // W1: OSC1 Wave-table ID (0..250)
         12,     // W2: OSC2 Wave-table ID (0..250)
         -3,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -137,8 +132,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -154,7 +149,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         7,      // W1: OSC1 Wave-table ID (0..250)
         3,      // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -166,12 +160,12 @@ const  PatchParamTable_t  g_PatchProgram[] =
         80,     // CR: Contour Env Ramp time (5..5000+ ms)
         0,      // CH: Contour Env Hold level (0..100 %)
         
-        90,     // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         1,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -187,7 +181,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         2,      // W1: OSC1 Wave-table ID (0..250)
         8,      // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -199,12 +192,12 @@ const  PatchParamTable_t  g_PatchProgram[] =
         200,    // CR: Contour Env Ramp time (5..5000+ ms)
         80,     // CH: Contour Env Hold level (0..100 %)
         
-        90,     // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        7,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         1,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -218,34 +211,33 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         21,     // Patch ID Number
         "Reed Woodwind 1",  // aka "Mellow Reed" -- Breath-controlled wave morph
-        12,     // W1: OSC1 Wave-table ID (0..250) 
-        23,     // W2: OSC2 Wave-table ID (0..250)
-        -2,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
+        8,      // W1: OSC1 Wave-table ID (0..250)
+        3,      // W2: OSC2 Wave-table ID (0..250)
+       -3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (10..5000+ ms)
+        500,    // VR: Vibrato Ramp time (5..5000+ ms)
 
         3,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        200,    // CR: Contour Env Ramp time (5..5000+ ms)
-        80,     // CH: Contour Env Hold level (0..100 %)
-        
+        80,     // CS: Contour Env Start level (0..100 %)
+        5,      // CD: Contour Env Delay time (5..5000+ ms)
+        500,    // CR: Contour Env Ramp time (5..5000+ ms)
+        50,     // CH: Contour Env Hold level (0..100 %)
+
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
-                
-        10,     // AA: Ampld Env Attack time (10..5000+ ms)
+        0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Env, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Ctrl (0:Fixed, 1:Contour, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
+        9800,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
+        15,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        1,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+
+        10,     // AA: Ampld Env Attack time (5..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
-        10,     // AD: Ampld Env Decay time (10..5000+ ms)
-        10,     // AR: Ampld Env Release time (10..5000+ ms)
+        10,     // AD: Ampld Env Decay time (5..5000+ ms)
+        10,     // AR: Ampld Env Release time (5..5000+ ms)
         100,    // AS: Ampld Env Sustain level (0..100 %)
-        2,      // AC: Ampld Control (0:Max, 1:Fixed.5, 2:Expr, 3:Amp.Env, 4:Env*Vel)
+        2       // AC: Ampld Control (0:Max, 1:Fixed, 2:Exprn, 3:Env, 4:Env*Ve
     },
     
     {
@@ -254,7 +246,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         9,      // W1: OSC1 Wave-table ID (0..250)
         9,      // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -270,8 +261,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -287,7 +278,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         32,     // W1: OSC1 Wave-table ID (0..250)    // <<<<<<<<<<<<<<<<<<
         32,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -303,8 +293,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -320,7 +310,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // W1: OSC1 Wave-table ID (0..250)
         32,     // W2: OSC2 Wave-table ID (0..250)
         -7,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -336,8 +325,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -353,7 +342,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         11,     // W1: OSC1 Wave-table ID (0..250)
         11,     // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -369,8 +357,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -387,7 +375,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         5,      // W1: OSC1 Wave-table ID (0..250)
         5,      // W2: OSC2 Wave-table ID (0..250)
         -6,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -403,8 +390,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -420,7 +407,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         24,     // W1: OSC1 Wave-table ID (0..250)   
         24,     // W2: OSC2 Wave-table ID (0..250) 
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -436,8 +422,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -453,7 +439,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         25,     // W1: OSC1 Wave-table ID (0..250)   
         25,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -469,8 +454,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         50,     // AP: Ampld Env Peak time (0..5000+ ms)
@@ -486,7 +471,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         14,     // W1: OSC1 Wave-table ID (0..250)   
         14,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -502,8 +486,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         50,     // AP: Ampld Env Peak time (0..5000+ ms)
@@ -519,7 +503,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         25,     // W1: OSC1 Wave-table ID (0..250)   
         25,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -535,8 +518,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         50,     // AP: Ampld Env Peak time (0..5000+ ms)
@@ -552,7 +535,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         20,     // W1: OSC1 Wave-table ID (0..250)   
         20,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -568,8 +550,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         50,     // AP: Ampld Env Peak time (0..5000+ ms)
@@ -585,7 +567,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         27,     // W1: OSC1 Wave-table ID (0..250)   
         27,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -601,8 +582,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -618,7 +599,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         22,     // W1: OSC1 Wave-table ID (0..250)   
         22,     // W2: OSC2 Wave-table ID (0..250)   
         7,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -634,8 +614,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         50,     // AP: Ampld Env Peak time (0..5000+ ms)
@@ -651,7 +631,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         30,     // W1: OSC1 Wave-table ID (0..250)   
         30,     // W2: OSC2 Wave-table ID (0..250)   
         -3,     // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -667,8 +646,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -684,7 +663,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         35,     // W1: OSC1 Wave-table ID (0..250)   
         35,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -700,8 +678,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (10..10000 Hz)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         50,     // AP: Ampld Env Peak time (0..5000+ ms)
@@ -718,7 +696,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         3,      // W1: OSC1 Wave-table ID (0..250) 
         3,      // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         330,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -734,8 +711,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        250,    // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         10,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -752,7 +729,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         1,      // W1: OSC1 Wave-table ID (0..250)  <------ sinewave
         3,      // W2: OSC2 Wave-table ID (0..250)  <------ sawtooth
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         250,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -768,15 +744,15 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Off/bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         50,     // AA: Ampld Env Attack time (10..5000+ ms)
-        0,      // AP: Ampld Env Peak time (0..5000+ ms)
-        10,     // AD: Ampld Env Decay time (10..5000+ ms)
-        500,    // AR: Ampld Env Release time (10..5000+ ms)
-        95,     // AS: Ampld Env Sustain level (0..100 %)
-        3,      // AC: Ampld Control (0:Max, 1:Fixed.5, 2:Expr, 3:Amp.Env, 4:Env*Vel)
+        500,    // AP: Ampld Env Peak time (0..5000+ ms)
+        1000,   // AD: Ampld Env Decay time (10..5000+ ms)
+        10,     // AR: Ampld Env Release time (10..5000+ ms)
+        50,     // AS: Ampld Env Sustain level (0..100 %)
+        0,      // AC: Ampld Control (0:Max, 1:Fixed.5, 2:Expr, 3:Amp.Env, 4:Env*Vel)
     },
     
     {
@@ -785,7 +761,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
         4,      // W1: OSC1 Wave-table ID (0..250)
         3,      // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        100,    // PB: Pitch Bend range, cents (0..1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
         300,    // VR: Vibrato Ramp time, (10..5000+ ms)
@@ -801,8 +776,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Amp.Env, 3:Expr, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Cont, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. in Fixed mode (40..10000 Hz, 0:NoteTracking)
-        0,      // FT: Filter Note Tracking offset (0..60 semitones)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
         50,     // AA: Ampld Env Attack time (10..5000+ ms)
         0,      // AP: Ampld Env Peak time (0..5000+ ms)
@@ -5444,149 +5419,5 @@ int  GetHighestWaveTableID()
     return  sizeof(g_FlashWaveTableDef) / sizeof(g_FlashWaveTableDef[0]) - 1;
 }
 
-
-//=================================================================================================
-//
-// Lookup table to transform linear variable to base-2 exponential.
-// Index value range 0..1024 (integer) represents linear axis range -1.0 ~ +1.0.
-// Lookup value range is 0.5 to 2.0 (fixed point).  Centre (zero) value is 1.00.
-//
-// <!>  g_base2exp[] values are in 18:14 bit fixed-point format.
-//      Shift left 6 bit places to convert to 12:20 fixed-point.
-//      ````````````````````````````````````````````````````````
-// For higher precision, where required, use the function: Base2Exp()
-//
-const  uint16  g_base2exp[] =
-{
-    0x2000, 0x200B, 0x2016, 0x2021, 0x202C, 0x2037, 0x2042, 0x204E,
-    0x2059, 0x2064, 0x206F, 0x207A, 0x2086, 0x2091, 0x209C, 0x20A8,
-    0x20B3, 0x20BE, 0x20CA, 0x20D5, 0x20E0, 0x20EC, 0x20F7, 0x2103,
-    0x210E, 0x211A, 0x2125, 0x2130, 0x213C, 0x2148, 0x2153, 0x215F,
-    0x216A, 0x2176, 0x2181, 0x218D, 0x2199, 0x21A4, 0x21B0, 0x21BC,
-    0x21C7, 0x21D3, 0x21DF, 0x21EB, 0x21F6, 0x2202, 0x220E, 0x221A,
-    0x2226, 0x2231, 0x223D, 0x2249, 0x2255, 0x2261, 0x226D, 0x2279,
-    0x2285, 0x2291, 0x229D, 0x22A9, 0x22B5, 0x22C1, 0x22CD, 0x22D9,
-    0x22E5, 0x22F1, 0x22FD, 0x2309, 0x2315, 0x2322, 0x232E, 0x233A,
-    0x2346, 0x2352, 0x235F, 0x236B, 0x2377, 0x2384, 0x2390, 0x239C,
-    0x23A9, 0x23B5, 0x23C1, 0x23CE, 0x23DA, 0x23E7, 0x23F3, 0x23FF,
-    0x240C, 0x2418, 0x2425, 0x2432, 0x243E, 0x244B, 0x2457, 0x2464,
-    0x2470, 0x247D, 0x248A, 0x2496, 0x24A3, 0x24B0, 0x24BD, 0x24C9,
-    0x24D6, 0x24E3, 0x24F0, 0x24FC, 0x2509, 0x2516, 0x2523, 0x2530,
-    0x253D, 0x254A, 0x2557, 0x2564, 0x2570, 0x257D, 0x258A, 0x2598,
-    0x25A5, 0x25B2, 0x25BF, 0x25CC, 0x25D9, 0x25E6, 0x25F3, 0x2600,
-    0x260D, 0x261B, 0x2628, 0x2635, 0x2642, 0x2650, 0x265D, 0x266A,
-    0x2678, 0x2685, 0x2692, 0x26A0, 0x26AD, 0x26BA, 0x26C8, 0x26D5,
-    0x26E3, 0x26F0, 0x26FE, 0x270B, 0x2719, 0x2726, 0x2734, 0x2742,
-    0x274F, 0x275D, 0x276A, 0x2778, 0x2786, 0x2794, 0x27A1, 0x27AF,
-    0x27BD, 0x27CB, 0x27D8, 0x27E6, 0x27F4, 0x2802, 0x2810, 0x281E,
-    0x282C, 0x283A, 0x2847, 0x2855, 0x2863, 0x2871, 0x287F, 0x288E,
-    0x289C, 0x28AA, 0x28B8, 0x28C6, 0x28D4, 0x28E2, 0x28F0, 0x28FF,
-    0x290D, 0x291B, 0x2929, 0x2938, 0x2946, 0x2954, 0x2962, 0x2971,
-    0x297F, 0x298E, 0x299C, 0x29AA, 0x29B9, 0x29C7, 0x29D6, 0x29E4,
-    0x29F3, 0x2A01, 0x2A10, 0x2A1F, 0x2A2D, 0x2A3C, 0x2A4A, 0x2A59,
-    0x2A68, 0x2A77, 0x2A85, 0x2A94, 0x2AA3, 0x2AB2, 0x2AC0, 0x2ACF,
-    0x2ADE, 0x2AED, 0x2AFC, 0x2B0B, 0x2B1A, 0x2B29, 0x2B38, 0x2B47,
-    0x2B56, 0x2B65, 0x2B74, 0x2B83, 0x2B92, 0x2BA1, 0x2BB0, 0x2BBF,
-    0x2BCE, 0x2BDE, 0x2BED, 0x2BFC, 0x2C0B, 0x2C1B, 0x2C2A, 0x2C39,
-    0x2C48, 0x2C58, 0x2C67, 0x2C77, 0x2C86, 0x2C95, 0x2CA5, 0x2CB4,
-    0x2CC4, 0x2CD3, 0x2CE3, 0x2CF3, 0x2D02, 0x2D12, 0x2D21, 0x2D31,
-    0x2D41, 0x2D50, 0x2D60, 0x2D70, 0x2D80, 0x2D8F, 0x2D9F, 0x2DAF,
-    0x2DBF, 0x2DCF, 0x2DDF, 0x2DEF, 0x2DFE, 0x2E0E, 0x2E1E, 0x2E2E,
-    0x2E3E, 0x2E4E, 0x2E5F, 0x2E6F, 0x2E7F, 0x2E8F, 0x2E9F, 0x2EAF,
-    0x2EBF, 0x2ED0, 0x2EE0, 0x2EF0, 0x2F00, 0x2F11, 0x2F21, 0x2F31,
-    0x2F42, 0x2F52, 0x2F62, 0x2F73, 0x2F83, 0x2F94, 0x2FA4, 0x2FB5,
-    0x2FC5, 0x2FD6, 0x2FE7, 0x2FF7, 0x3008, 0x3018, 0x3029, 0x303A,
-    0x304B, 0x305B, 0x306C, 0x307D, 0x308E, 0x309F, 0x30AF, 0x30C0,
-    0x30D1, 0x30E2, 0x30F3, 0x3104, 0x3115, 0x3126, 0x3137, 0x3148,
-    0x3159, 0x316A, 0x317C, 0x318D, 0x319E, 0x31AF, 0x31C0, 0x31D2,
-    0x31E3, 0x31F4, 0x3205, 0x3217, 0x3228, 0x323A, 0x324B, 0x325C,
-    0x326E, 0x327F, 0x3291, 0x32A2, 0x32B4, 0x32C6, 0x32D7, 0x32E9,
-    0x32FB, 0x330C, 0x331E, 0x3330, 0x3341, 0x3353, 0x3365, 0x3377,
-    0x3389, 0x339B, 0x33AC, 0x33BE, 0x33D0, 0x33E2, 0x33F4, 0x3406,
-    0x3418, 0x342A, 0x343C, 0x344F, 0x3461, 0x3473, 0x3485, 0x3497,
-    0x34AA, 0x34BC, 0x34CE, 0x34E0, 0x34F3, 0x3505, 0x3517, 0x352A,
-    0x353C, 0x354F, 0x3561, 0x3574, 0x3586, 0x3599, 0x35AB, 0x35BE,
-    0x35D1, 0x35E3, 0x35F6, 0x3609, 0x361C, 0x362E, 0x3641, 0x3654,
-    0x3667, 0x367A, 0x368D, 0x369F, 0x36B2, 0x36C5, 0x36D8, 0x36EB,
-    0x36FE, 0x3712, 0x3725, 0x3738, 0x374B, 0x375E, 0x3771, 0x3784,
-    0x3798, 0x37AB, 0x37BE, 0x37D2, 0x37E5, 0x37F8, 0x380C, 0x381F,
-    0x3833, 0x3846, 0x385A, 0x386D, 0x3881, 0x3894, 0x38A8, 0x38BC,
-    0x38CF, 0x38E3, 0x38F7, 0x390B, 0x391E, 0x3932, 0x3946, 0x395A,
-    0x396E, 0x3982, 0x3996, 0x39AA, 0x39BE, 0x39D2, 0x39E6, 0x39FA,
-    0x3A0E, 0x3A22, 0x3A36, 0x3A4A, 0x3A5F, 0x3A73, 0x3A87, 0x3A9B,
-    0x3AB0, 0x3AC4, 0x3AD8, 0x3AED, 0x3B01, 0x3B16, 0x3B2A, 0x3B3F,
-    0x3B53, 0x3B68, 0x3B7C, 0x3B91, 0x3BA6, 0x3BBA, 0x3BCF, 0x3BE4,
-    0x3BF9, 0x3C0D, 0x3C22, 0x3C37, 0x3C4C, 0x3C61, 0x3C76, 0x3C8B,
-    0x3CA0, 0x3CB5, 0x3CCA, 0x3CDF, 0x3CF4, 0x3D09, 0x3D1E, 0x3D34,
-    0x3D49, 0x3D5E, 0x3D73, 0x3D89, 0x3D9E, 0x3DB3, 0x3DC9, 0x3DDE,
-    0x3DF4, 0x3E09, 0x3E1F, 0x3E34, 0x3E4A, 0x3E5F, 0x3E75, 0x3E8B,
-    0x3EA0, 0x3EB6, 0x3ECC, 0x3EE2, 0x3EF7, 0x3F0D, 0x3F23, 0x3F39,
-    0x3F4F, 0x3F65, 0x3F7B, 0x3F91, 0x3FA7, 0x3FBD, 0x3FD3, 0x3FE9,
-    0x4000, 0x4016, 0x402C, 0x4042, 0x4058, 0x406F, 0x4085, 0x409C,
-    0x40B2, 0x40C8, 0x40DF, 0x40F5, 0x410C, 0x4122, 0x4139, 0x4150,
-    0x4166, 0x417D, 0x4194, 0x41AA, 0x41C1, 0x41D8, 0x41EF, 0x4206,
-    0x421D, 0x4234, 0x424A, 0x4261, 0x4278, 0x4290, 0x42A7, 0x42BE,
-    0x42D5, 0x42EC, 0x4303, 0x431B, 0x4332, 0x4349, 0x4360, 0x4378,
-    0x438F, 0x43A7, 0x43BE, 0x43D6, 0x43ED, 0x4405, 0x441C, 0x4434,
-    0x444C, 0x4463, 0x447B, 0x4493, 0x44AA, 0x44C2, 0x44DA, 0x44F2,
-    0x450A, 0x4522, 0x453A, 0x4552, 0x456A, 0x4582, 0x459A, 0x45B2,
-    0x45CA, 0x45E3, 0x45FB, 0x4613, 0x462B, 0x4644, 0x465C, 0x4675,
-    0x468D, 0x46A5, 0x46BE, 0x46D6, 0x46EF, 0x4708, 0x4720, 0x4739,
-    0x4752, 0x476A, 0x4783, 0x479C, 0x47B5, 0x47CE, 0x47E7, 0x47FF,
-    0x4818, 0x4831, 0x484A, 0x4864, 0x487D, 0x4896, 0x48AF, 0x48C8,
-    0x48E1, 0x48FB, 0x4914, 0x492D, 0x4947, 0x4960, 0x497A, 0x4993,
-    0x49AD, 0x49C6, 0x49E0, 0x49F9, 0x4A13, 0x4A2D, 0x4A46, 0x4A60,
-    0x4A7A, 0x4A94, 0x4AAE, 0x4AC8, 0x4AE1, 0x4AFB, 0x4B15, 0x4B30,
-    0x4B4A, 0x4B64, 0x4B7E, 0x4B98, 0x4BB2, 0x4BCC, 0x4BE7, 0x4C01,
-    0x4C1B, 0x4C36, 0x4C50, 0x4C6B, 0x4C85, 0x4CA0, 0x4CBA, 0x4CD5,
-    0x4CF0, 0x4D0A, 0x4D25, 0x4D40, 0x4D5B, 0x4D75, 0x4D90, 0x4DAB,
-    0x4DC6, 0x4DE1, 0x4DFC, 0x4E17, 0x4E32, 0x4E4D, 0x4E69, 0x4E84,
-    0x4E9F, 0x4EBA, 0x4ED5, 0x4EF1, 0x4F0C, 0x4F28, 0x4F43, 0x4F5F,
-    0x4F7A, 0x4F96, 0x4FB1, 0x4FCD, 0x4FE9, 0x5004, 0x5020, 0x503C,
-    0x5058, 0x5074, 0x508F, 0x50AB, 0x50C7, 0x50E3, 0x50FF, 0x511C,
-    0x5138, 0x5154, 0x5170, 0x518C, 0x51A9, 0x51C5, 0x51E1, 0x51FE,
-    0x521A, 0x5237, 0x5253, 0x5270, 0x528C, 0x52A9, 0x52C5, 0x52E2,
-    0x52FF, 0x531C, 0x5339, 0x5355, 0x5372, 0x538F, 0x53AC, 0x53C9,
-    0x53E6, 0x5403, 0x5421, 0x543E, 0x545B, 0x5478, 0x5495, 0x54B3,
-    0x54D0, 0x54EE, 0x550B, 0x5529, 0x5546, 0x5564, 0x5581, 0x559F,
-    0x55BD, 0x55DA, 0x55F8, 0x5616, 0x5634, 0x5652, 0x5670, 0x568E,
-    0x56AC, 0x56CA, 0x56E8, 0x5706, 0x5724, 0x5742, 0x5761, 0x577F,
-    0x579D, 0x57BC, 0x57DA, 0x57F9, 0x5817, 0x5836, 0x5854, 0x5873,
-    0x5891, 0x58B0, 0x58CF, 0x58EE, 0x590D, 0x592B, 0x594A, 0x5969,
-    0x5988, 0x59A7, 0x59C7, 0x59E6, 0x5A05, 0x5A24, 0x5A43, 0x5A63,
-    0x5A82, 0x5AA1, 0x5AC1, 0x5AE0, 0x5B00, 0x5B1F, 0x5B3F, 0x5B5F,
-    0x5B7E, 0x5B9E, 0x5BBE, 0x5BDE, 0x5BFD, 0x5C1D, 0x5C3D, 0x5C5D,
-    0x5C7D, 0x5C9D, 0x5CBE, 0x5CDE, 0x5CFE, 0x5D1E, 0x5D3E, 0x5D5F,
-    0x5D7F, 0x5DA0, 0x5DC0, 0x5DE1, 0x5E01, 0x5E22, 0x5E42, 0x5E63,
-    0x5E84, 0x5EA5, 0x5EC5, 0x5EE6, 0x5F07, 0x5F28, 0x5F49, 0x5F6A,
-    0x5F8B, 0x5FAC, 0x5FCE, 0x5FEF, 0x6010, 0x6031, 0x6053, 0x6074,
-    0x6096, 0x60B7, 0x60D9, 0x60FA, 0x611C, 0x613E, 0x615F, 0x6181,
-    0x61A3, 0x61C5, 0x61E7, 0x6209, 0x622B, 0x624D, 0x626F, 0x6291,
-    0x62B3, 0x62D5, 0x62F8, 0x631A, 0x633C, 0x635F, 0x6381, 0x63A4,
-    0x63C6, 0x63E9, 0x640B, 0x642E, 0x6451, 0x6474, 0x6497, 0x64B9,
-    0x64DC, 0x64FF, 0x6522, 0x6545, 0x6569, 0x658C, 0x65AF, 0x65D2,
-    0x65F6, 0x6619, 0x663C, 0x6660, 0x6683, 0x66A7, 0x66CA, 0x66EE,
-    0x6712, 0x6736, 0x6759, 0x677D, 0x67A1, 0x67C5, 0x67E9, 0x680D,
-    0x6831, 0x6855, 0x6879, 0x689E, 0x68C2, 0x68E6, 0x690B, 0x692F,
-    0x6954, 0x6978, 0x699D, 0x69C1, 0x69E6, 0x6A0B, 0x6A2F, 0x6A54,
-    0x6A79, 0x6A9E, 0x6AC3, 0x6AE8, 0x6B0D, 0x6B32, 0x6B57, 0x6B7D,
-    0x6BA2, 0x6BC7, 0x6BED, 0x6C12, 0x6C38, 0x6C5D, 0x6C83, 0x6CA8,
-    0x6CCE, 0x6CF4, 0x6D1A, 0x6D3F, 0x6D65, 0x6D8B, 0x6DB1, 0x6DD7,
-    0x6DFD, 0x6E24, 0x6E4A, 0x6E70, 0x6E96, 0x6EBD, 0x6EE3, 0x6F09,
-    0x6F30, 0x6F57, 0x6F7D, 0x6FA4, 0x6FCB, 0x6FF1, 0x7018, 0x703F,
-    0x7066, 0x708D, 0x70B4, 0x70DB, 0x7102, 0x7129, 0x7151, 0x7178,
-    0x719F, 0x71C7, 0x71EE, 0x7216, 0x723D, 0x7265, 0x728D, 0x72B4,
-    0x72DC, 0x7304, 0x732C, 0x7354, 0x737C, 0x73A4, 0x73CC, 0x73F4,
-    0x741C, 0x7444, 0x746D, 0x7495, 0x74BE, 0x74E6, 0x750F, 0x7537,
-    0x7560, 0x7589, 0x75B1, 0x75DA, 0x7603, 0x762C, 0x7655, 0x767E,
-    0x76A7, 0x76D0, 0x76F9, 0x7723, 0x774C, 0x7775, 0x779F, 0x77C8,
-    0x77F2, 0x781B, 0x7845, 0x786F, 0x7899, 0x78C2, 0x78EC, 0x7916,
-    0x7940, 0x796A, 0x7994, 0x79BF, 0x79E9, 0x7A13, 0x7A3D, 0x7A68,
-    0x7A92, 0x7ABD, 0x7AE7, 0x7B12, 0x7B3D, 0x7B67, 0x7B92, 0x7BBD,
-    0x7BE8, 0x7C13, 0x7C3E, 0x7C69, 0x7C94, 0x7CBF, 0x7CEB, 0x7D16,
-    0x7D41, 0x7D6D, 0x7D98, 0x7DC4, 0x7DEF, 0x7E1B, 0x7E47, 0x7E73,
-    0x7E9F, 0x7ECA, 0x7EF6, 0x7F22, 0x7F4F, 0x7F7B, 0x7FA7, 0x7FD3,
-    0x8000
-};
 
 // *** end of file ***

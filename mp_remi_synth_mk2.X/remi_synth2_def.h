@@ -12,8 +12,11 @@
 
 #define SAMPLE_RATE_HZ        (40000)    // For wave-table Oscillators
 #define PARTIAL_ORDER_MAX          16    // Highest partial order for waveform generator
-#define NOISE_FILTER_K_LOG2         6    // Time-constant for noise filter = log_2( K )
-#define NOISE_FILTER_GAIN_x8       20    // Noise generator post-filter gain (x8)
+#define MIDI_EXPRN_ADJUST_PC      130    // Factor to adjust MIDI CC expression level (%)
+
+#define REVERB_DELAY_MAX_SIZE    2000    // samples 
+#define REVERB_LOOP_TIME_SEC     0.04    // seconds (max. 0.05 sec.)
+#define REVERB_DECAY_TIME_SEC     1.5    // seconds
 
 #define USER_WAVE_TABLE_ID          0   
 #define WAVE_TABLE_MAXIMUM_SIZE  2600    // samples
@@ -26,16 +29,15 @@
 
 // Possible values for PRESET parameter: g_Preset.Descr[preset].VibratoMode
 #define VIBRATO_DISABLED            0    // Vibrato always off
-#define VIBRATO_BY_EFFECT_SW        1    // Vibrato controlled by effect switch
+#define VIBRATO_BY_EFFECT_SW        1    // Vibrato controlled by effect switch (N/A)
 #define VIBRATO_BY_MODN_CC          2    // Vibrato controlled by Modulation (CC1)
 #define VIBRATO_AUTOMATIC           3    // Vibrato automatic, delay + ramp, OSC1, OSC2
-#define VIBRATO_AUTO_ASYMM          4    // Vibrato automatic, delay + ramp, OSC1 only
 
-// Possible values for PRESET parameter: g_Preset.Descr[preset].PitchBendMode  *** TODO ***
+// Possible values for config parameter: g_Config.PitchBendCtrlMode
 #define PITCH_BEND_DISABLED         0    // Pitch Bend disabled
-#define PITCH_BEND_BY_PB_MESSAGE    1    // Pitch Bend controlled by MIDI PB message
-#define PITCH_BEND_BY_MODN_CC01     2    // Pitch Bend controlled by Modulation (CC01)
-#define PITCH_BEND_BY_EXPRN_CC02    3    // Pitch Bend controlled by Expression (CC02)
+#define PITCH_BEND_BY_MIDI          1    // Pitch Bend uses MIDI pitch-bend data
+#define PITCH_BEND_BY_EXPRN         2    // Pitch Bend uses MIDI expression CC data
+#define PITCH_BEND_BY_ANALOG_CV     3    // Pitch Bend uses synth analog CV input (todo)
 
 // Possible values for patch parameter: m_Patch.MixerControl
 #define MIXER_CTRL_FIXED            0    // Osc. mix is constant (MixerOsc2Level %)
@@ -108,10 +110,9 @@ typedef  struct  synth_patch_param_table
     uint8   Osc1WaveTable;          // 0..250
     uint8   Osc2WaveTable;          // 0..250
     int16   Osc2Detune;             // +/-1200 cents
-    uint16  PitchBendRange;         // 0..1200 cents
     uint8   LFO_Freq_x10;           // 1..250 -> 0.1 ~ 25 Hz
-    uint8   VibratoDepth;           // 0..200 cents, or 0..99 % [see Note 1]
-    uint16  VibratoRamp_ms;         // 1..10k ms (delay & ramp-up time)
+    uint8   LFO_FM_Depth;           // 0..200 cents, or 0..99 % [see Note 1]
+    uint16  LFO_RampTime;           // 1..10k ms (delay & ramp-up time)
     // Wave Mixer & Contour Envelope
     uint8   MixerControl;           // 0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn
     uint8   MixerOsc2Level;         // 0..100 % 
@@ -124,8 +125,8 @@ typedef  struct  synth_patch_param_table
     uint8   NoiseLevelCtrl;         // 0:Off, 1:Fixed, 2:Amp.Env, 3:Exprn, 4:Modn
     uint8   FilterControl;          // 0:Fixed, 1:Contour, 2:Env+, 3:Env-, 4:LFO, 5:Modn
     uint16  FilterResonance;        // 0..9999  (0: bypass filter)
-    uint16  FilterFrequency;        // 40..10000 Hz (if Note Tracking is off)
-    uint8   FilterNoteTrack;        // 0..60 semitones  (>= 128: Tracking off)
+    uint8   FilterFrequency;        // 0..108 (MIDI note # - 12)
+    uint8   FilterNoteTrack;        // 0:Off, 1:On (FF is offset from Fo)
     // Amplitude Envelope and Output Level Control
     uint16  AmpldEnvAttack_ms;      // 1..10k ms
     uint16  AmpldEnvPeak_ms;        // 0..10k ms
@@ -166,33 +167,45 @@ extern  const  PatchParamTable_t  g_PatchProgram[];       // Array of pre-define
 extern  const  WaveformDesc_t     g_RegenWaveformDef[];   // Array of regenerating waveforms
 extern  const  FlashWaveTable_t   g_FlashWaveTableDef[];  // Array of flash-based wave-tables
 
+extern  float  g_FilterInputAtten;      // Filter input atten/gain (.01 ~ 2.5)
+extern  float  g_FilterOutputGain;      // Filter output atten/gain (0.1 ~ 25)
+extern  float  g_NoiseFilterGain;       // Noise gen. gain adjustment (0.1 ~ 25)
+
+extern  fixed_t  g_ExpressionPeak;      // Peak (max.) value of expression
+
 extern  const  int16   g_sinewave[];
 extern  const  int16   g_sawtooth_wave[];
 extern  const  uint16  g_base2exp[];
 
 extern  int16  WaveTableBuffer[];        // Wave-table buffer in data RAM
+extern  PatchParamTable_t  g_Patch;      // active (working) patch parameters
+
+extern  uint16   g_Osc1WaveTableSize;    // Number of samples in OSC1 wave-table
+extern  uint16   g_Osc2WaveTableSize;    // Number of samples in OSC2 wave-table
+extern  float    g_Osc1FreqDiv;          // OSC1 frequency divider
+extern  float    g_Osc2FreqDiv;          // OSC2 frequency divider
 
 extern  volatile uint16   v_Mix2Level; 
 extern  volatile fixed_t  v_OutputLevel;
 
 
-// Public functions defined in "remi_synth2_engine.c" available to external modules:
+// Functions defined in "remi_synth2_engine.c" available to external modules:
 //
-void   RemiSynthAudioInit();
-void   RemiSynthPrepare();
-short  RemiSynthPatchSelect(int patchID);
-void   RemiSynthNoteOn(uint8 note, uint8 vel);
-void   RemiSynthNoteChange(uint8 note);
-void   RemiSynthNoteOff(uint8 note);
-void   RemiSynthPitchBend(int data14);
-void   RemiSynthExpression(unsigned data14);
-void   RemiSynthModulation(unsigned data14);
-void   RemiSynthEffectSwitch(uint8 ctrlnum, uint8 enab);
-void   RemiSynthProcess();
+void   SynthAudioInit();
+void   SynthPrepare();
+short  SynthPatchSelect(int patchID);
+void   SynthNoteOn(uint8 note, uint8 vel);
+void   SynthNoteChange(uint8 note);
+void   SynthNoteOff(uint8 note);
+void   SynthPitchBend(int data14);
+void   SynthExpression(unsigned data14);
+void   SynthModulation(unsigned data14);
+void   SynthEffectSwitch(uint8 ctrlnum, uint8 enab);
+void   SynthProcess();
 
 PatchParamTable_t  *GetActivePatchTable();
 
-// Public functions defined in "remi_synth2_engine.c"
+// The follwoing functions are intended mainly for diagnostic purposes
 bool   isNoteOn();
 int    GetActivePatchID();
 void   SelectUserWaveTableOsc1();
@@ -203,13 +216,17 @@ float  Osc1FreqDividerGet();
 void   OscFreqMultiplierSet(float  mult);
 bool   isSynthActive();
 void   SetAudioOutputLevel(fixed_t level_pu);
-void   SetVibratoModeTemp(unsigned mode);
+void   SetVibratoMode(unsigned mode);
+void   SetFilterFreqIndex(uint8 freqIndex);
+uint8  GetFilterFreqIndex();
+int    GetReverbMixSetting(void);
+
 fixed_t  GetExpressionLevel(void);
 fixed_t  GetModulationLevel(void);
 fixed_t  Base2Exp(fixed_t xval);
-void   Cmnd_patch(int argCount, char *argValue[]);
 
-// Public functions defined in "remi_synth2_data.c"
+// Functions defined in "remi_synth2_data.c"
+//
 int    GetNumberOfPatchesDefined();
 int    GetHighestWaveTableID();
 

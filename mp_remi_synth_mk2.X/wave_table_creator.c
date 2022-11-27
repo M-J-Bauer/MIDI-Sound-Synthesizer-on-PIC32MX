@@ -362,7 +362,7 @@ void  Cmnd_wav(int argCount, char * argVal[])
     }
     case 'x':           // Exit 'wav' utility, restore previous patch
     {
-        RemiSynthPatchSelect(previousPatch);
+        SynthPatchSelect(previousPatch);
         isPrepDone = FALSE;
         isHammond = FALSE;
         break;

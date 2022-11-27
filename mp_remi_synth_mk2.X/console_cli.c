@@ -46,19 +46,16 @@ extern int   RTCC_Synchronize( void );
 
 //-------------------------------  Private data  --------------------------------------------------
 //                     
-static  char     gacCLIprompt[] = "\r> ";          // CLI Prompt
-static  char     acCmndLine[CMND_LINE_MAX_LEN+2];   // Command Line buffer
-static  char    *pcCmndLinePtr;                    // Pointer into Cmnd Line buffer
-static  int      iCmndLineLen;                     // Cmnd line length (char count)
-static  int      argCount;                         // Number of Cmnd Line args (incl. Cmnd name)
-static  char    *argValue[CLI_MAX_ARGS];           // Array of pointers to Command Line args
-static  char     szNULLstring[] = { '\0' };        // Empty string
+static  char     CLIprompt[] = "\r> ";                // CLI Prompt
+static  char     CmndLineBuff[CMND_LINE_MAX_LEN+2];   // Command Line buffer
+static  char    *cmndLinePtr;   // Pointer into Cmnd Line buffer
+static  int      cmndLineLen;   // Cmnd line length (char count)
 
-static  char     acCmndHistoryBuffer[CMND_HIST_BUF_SIZE][CMND_LINE_MAX_LEN+2];
-static  int16    wCmndHistoryMarker;    // Index to next free place in Command History Buf
-static  int16    wCmndRecallMarker;     // Index of command to be recalled
-static  char     yHistoryInitialised = 0;
-static  char     ySuperUser = FALSE;
+static  char     CmndHistoryBuff[CMND_HIST_BUF_SIZE][CMND_LINE_MAX_LEN+2];
+static  int16    cmndHistoryMarker;   // Index to next free place in Command History Buf
+static  int16    cmndRecallMarker;    // Index of command to be recalled
+static  char     SuperUser = FALSE;
+
 
 /*----------------------------------------------------------------------------------------
 *                      C O M M O N   C O M M A N D   T A B L E
@@ -128,9 +125,17 @@ const  CmndTableEntry_t  CommonCommands[] =
 */
 void  ConsoleCLI_Service( void )
 {
-#if USE_CONSOLE_CLI
-
+    static bool prep_done;
     char  c;
+    
+    if (!prep_done)  // one-time initialization at start-up
+    {
+        cmndLineLen = 0;  // prepare for new command
+        CmndLineBuff[0] = 0;
+        cmndLinePtr = CmndLineBuff;
+        putstr(CLIprompt);
+        prep_done = TRUE;
+    }
 
     if ( RxDataAvail() )     // char(s) available in serial input buffer
     {
@@ -139,14 +144,17 @@ void  ConsoleCLI_Service( void )
         {
         case ASCII_CAN:                 // Ctrl+X... cancel line...
             EraseLine();
-            PrepareForNewCommand();
+            cmndLineLen = 0;  // prepare for new command
+            CmndLineBuff[0] = 0;
+            cmndLinePtr = CmndLineBuff;
+            putstr(CLIprompt);
             break;
 
         case ASCII_BS:                  // BACKSPACE...
-            if ( iCmndLineLen > 0 )
+            if ( cmndLineLen > 0 )
             {
-                pcCmndLinePtr-- ;           // Remove last-entered char from buffer
-                iCmndLineLen-- ;
+                cmndLinePtr-- ;           // Remove last-entered char from buffer
+                cmndLineLen-- ;
                 putch( ASCII_BS );          // Backspace the VDU cursor
                 putch( ' ' );               // Erase offending char at VDU cursor
                 putch( ASCII_BS );          // Re-position the VDU cursor
@@ -156,18 +164,24 @@ void  ConsoleCLI_Service( void )
         case ASCII_CR:                  // ENTER...
             putch( '\r' );                  // Echo NewLine
             putch( '\n' );
-            if ( iCmndLineLen > 0 )         // Got a command string...
+            if ( cmndLineLen > 0 )         // Got a command string...
             {
-                *pcCmndLinePtr = 0;         // Terminate the command string
+                *cmndLinePtr = 0;           // Terminate the command string
                 EnterCommandInHistory();    // Enter it into the history buffer
                 CommandLineInterpreter();   // Interpret and execute the cmnd.
             }
-            PrepareForNewCommand();         // CR
+            cmndLineLen = 0;                // prepare for new command
+            CmndLineBuff[0] = 0;
+            cmndLinePtr = CmndLineBuff;
+            putstr(CLIprompt);
             break;
 
         case ASCII_DC2:                 // Ctrl+R... recall command
             EraseLine();                    // Trash the current command line
-            PrepareForNewCommand();         // Output the prompt
+            cmndLineLen = 0;                // prepare for new command
+            CmndLineBuff[0] = 0;
+            cmndLinePtr = CmndLineBuff;
+            putstr(CLIprompt);
             RecallCommand();                // Retrieve previous command from history
             break;
 
@@ -175,16 +189,15 @@ void  ConsoleCLI_Service( void )
             c = ' ';
         //  no break... fall thru to default case
         default:
-            if ( isprint( c ) && iCmndLineLen < CMND_LINE_MAX_LEN )
+            if ( isprint( c ) && cmndLineLen < CMND_LINE_MAX_LEN )
             {
                 putch( c );                 // Echo char
-                *pcCmndLinePtr++ = c;       // Append char to Cmnd Line buffer
-                iCmndLineLen++ ;
+                *cmndLinePtr++ = c;       // Append char to Cmnd Line buffer
+                cmndLineLen++ ;
             }
             break;
         } // end_switch
     }
-#endif // USE_CONSOLE_CLI
 }
 
 
@@ -213,96 +226,81 @@ void  ConsoleCLI_Service( void )
 */
 void  CommandLineInterpreter( void )
 {
+    static char  *argValue[CLI_MAX_ARGS];
+    int     argCount = 0;
     char    c;
-    short   idx, cmndIndex;
-    char    yCommonCmndNameFound = 0;
-    char    yAppCmndNameFound = 0;
+    short   i, icmd;
+    char    commonCmndNameFound = 0;
+    char    appCmndNameFound = 0;
 
-    pcCmndLinePtr = acCmndLine;             // point to start of Cmnd Line buffer
-    argCount = 0;
+    cmndLinePtr = CmndLineBuff;            // point to start of Cmnd Line buffer
+    for (i = 1;  i < CLI_MAX_ARGS;  i++)   // Clear all command arg's
+        { argValue[i] = NULL; }
 
     // This loop finds and terminates (with a NUL) any user-supplied arguments...
-    for ( idx = 0;  idx < CLI_MAX_ARGS;  idx++ )
+    for ( i = 0;  i < CLI_MAX_ARGS;  i++ )
     {
-        if ( !isprint( *pcCmndLinePtr ) )               // stop at end of line
+        if ( !isprint( *cmndLinePtr ) )               // stop at end of line
             break;
-        while ( *pcCmndLinePtr == ' ' )                 // skip leading spaces
-            pcCmndLinePtr++ ;
-        if ( !isprint( *pcCmndLinePtr ) )               // end of line found
+        while ( *cmndLinePtr == ' ' )                 // skip leading spaces
+            cmndLinePtr++ ;
+        if ( !isprint( *cmndLinePtr ) )               // end of line found
             break;
-        argValue[idx] = pcCmndLinePtr;                  // Make ptr to arg
+        argValue[i] = cmndLinePtr;                  // Make ptr to arg
         argCount++ ;
 
-        while ( ( c = *pcCmndLinePtr ) != ' ' )         // find first space after arg
+        while ( ( c = *cmndLinePtr ) != ' ' )         // find first space after arg
         {
             if ( !isprint( c ) )                        // end of line found
                 break;
-            pcCmndLinePtr++ ;
+            cmndLinePtr++ ;
         }
-        if ( !isprint( *pcCmndLinePtr ) )               // stop at end of line
+        if ( !isprint( *cmndLinePtr ) )               // stop at end of line
             break;
-        *pcCmndLinePtr++ = 0;                           // NUL-terminate the arg
+        *cmndLinePtr++ = 0;                           // NUL-terminate the arg
     }
 
     // This loop searches the common command table for the supplied command name...
-    for ( idx = 0;  idx < MAX_COMMANDS;  idx++ )
+    for ( i = 0;  i < MAX_COMMANDS;  i++ )
     {
-        if ( *CommonCommands[idx].phzName == '$' )      // reached end of table
+        if ( *CommonCommands[i].phzName == '$' )      // reached end of table
             break;
-        if ( strmatch( argValue[0], CommonCommands[idx].phzName ) )
+        if ( strmatch(argValue[0], CommonCommands[i].phzName ))
         {
-            yCommonCmndNameFound = 1;
-            cmndIndex = idx;
+            commonCmndNameFound = 1;
+            icmd = i;
             break;
         }
     }
     
     // This loop searches the (external) application-specific command table...
-    for ( idx = 0;  idx < MAX_COMMANDS;  idx++ )
+    for ( i = 0;  i < MAX_COMMANDS;  i++ )
     {
-        if ( *AppCommands[idx].phzName == '$' )         // reached end of table
+        if ( *AppCommands[i].phzName == '$' )         // reached end of table
             break;
-        if ( strmatch( argValue[0], AppCommands[idx].phzName ) )
+        if ( strmatch(argValue[0], AppCommands[i].phzName) )
         {
-            yAppCmndNameFound = 1;
-            cmndIndex = idx;
+            appCmndNameFound = 1;
+            icmd = i;
             break;
         }
     }
     
-    if ( argCount > 1 )   // If there is one or more user-supplied arg(s)...
+    if ( argCount > 1 )   // If there are user-supplied arg(s)...
     {
         if ( strmatch( argValue[1], "-help" ) )    // convert "-help" to '?' ...
             *argValue[1] = '?';                    // ... to simplify cmd fn
     }
 
-    if (yAppCmndNameFound)
+    if (appCmndNameFound)
     {
-        (*AppCommands[cmndIndex].Function)(argCount, argValue);  // execute cmd fn
+        (*AppCommands[icmd].Function)(argCount, argValue);  // execute cmd fn
     }
-    else if (yCommonCmndNameFound)
+    else if (commonCmndNameFound)
     {
-        (*CommonCommands[cmndIndex].Function)(argCount, argValue);  // execute fn
+        (*CommonCommands[icmd].Function)(argCount, argValue);  // execute fn
     }
     else  putstr( "? Undefined command.\n" );
-}
-
-
-/*
-*   Flush Command Line buffer, clear CLI arg's and output CLI prompt.
-*   This function must be called before the first call to ConsoleCLI_Service()
-*   to initialize the CLI environment.
-*/
-void  PrepareForNewCommand( void )
-{
-    uint8  idx;
-
-    acCmndLine[0] = 0;
-    pcCmndLinePtr = acCmndLine;  // point to start of Cmnd Line buffer
-    iCmndLineLen = 0;
-    for ( idx = 0;  idx < CLI_MAX_ARGS;  idx++ )   // Clear CLI args
-        argValue[idx] = szNULLstring;
-    putstr( gacCLIprompt );
 }
 
 
@@ -312,25 +310,26 @@ void  PrepareForNewCommand( void )
 */
 void  EnterCommandInHistory( void )
 {
+    static bool  initialised = FALSE;
     short  line;
 
-    if ( !yHistoryInitialised )
+    if ( !initialised )
     {
         for ( line = 0 ; line < CMND_HIST_BUF_SIZE ; line++ )
         {
-            acCmndHistoryBuffer[line][0] = 0;    // make empty cmnd string
+            CmndHistoryBuff[line][0] = 0;    // make empty cmnd string
         }
-        wCmndHistoryMarker = 0;
-        wCmndRecallMarker = 0;
-        yHistoryInitialised = 1;
+        cmndHistoryMarker = 0;
+        cmndRecallMarker = 0;
+        initialised = 1;
     }
 
-    if ( strlen( acCmndLine ) != 0 )   // Not an empty cmnd string
+    if ( strlen( CmndLineBuff ) != 0 )   // Not an empty cmnd string
     {
-        strncpy( acCmndHistoryBuffer[wCmndHistoryMarker], acCmndLine, CMND_LINE_MAX_LEN );
-        wCmndRecallMarker = wCmndHistoryMarker;
-        wCmndHistoryMarker++ ;
-        if ( wCmndHistoryMarker >= CMND_HIST_BUF_SIZE ) wCmndHistoryMarker = 0;
+        strncpy( CmndHistoryBuff[cmndHistoryMarker], CmndLineBuff, CMND_LINE_MAX_LEN );
+        cmndRecallMarker = cmndHistoryMarker;
+        cmndHistoryMarker++ ;
+        if ( cmndHistoryMarker >= CMND_HIST_BUF_SIZE ) cmndHistoryMarker = 0;
     }
 }
 
@@ -338,20 +337,20 @@ void  EnterCommandInHistory( void )
 /*
 *   Recall a previously entered command from the history buffer...
 *   The function selects the next previous command from the buffer (if any)
-*   as indicated by wCmndRecallMarker, and outputs the command string to the user's
+*   as indicated by cmndRecallMarker, and outputs the command string to the user's
 *   terminal for editing. At the same time, the selected command is copied to the
 *   current command line buffer.
 *   The selected command is not executed until the user hits ENTER (CR).
 */
 void  RecallCommand( void )
 {
-    strncpy( acCmndLine, acCmndHistoryBuffer[wCmndRecallMarker], CMND_LINE_MAX_LEN );
-    if ( wCmndRecallMarker == 0 ) wCmndRecallMarker = CMND_HIST_BUF_SIZE;
-    --wCmndRecallMarker;
-    iCmndLineLen = strlen( acCmndLine );
-    pcCmndLinePtr = acCmndLine + iCmndLineLen;
-    *pcCmndLinePtr = 0;
-    putstr( acCmndLine );
+    strncpy( CmndLineBuff, CmndHistoryBuff[cmndRecallMarker], CMND_LINE_MAX_LEN );
+    if ( cmndRecallMarker == 0 ) cmndRecallMarker = CMND_HIST_BUF_SIZE;
+    --cmndRecallMarker;
+    cmndLineLen = strlen( CmndLineBuff );
+    cmndLinePtr = CmndLineBuff + cmndLineLen;
+    *cmndLinePtr = 0;
+    putstr( CmndLineBuff );
 }
 
 
@@ -639,7 +638,7 @@ void  Cmnd_watch( int argCount, char * argValue[] )
     static  uint16 elapsed_time = 0;  // millisec since watch started
     char c = 0;
 
-    if (!SuperUserAccess()) return;
+//  if (!SuperUserAccess()) return;
 
     putstr( "Hit [Esc] to quit. \n\n" );
 
@@ -689,7 +688,7 @@ void  Cmnd_flags( int argCount, char * argValue[] )
 */
 void  Cmnd_diag(int argCount, char * argValue[])
 {
-    if (!SuperUserAccess()) return;
+//  if (!SuperUserAccess()) return;
 
     DiagnosticCommandExec(argCount, argValue);
 }
@@ -713,7 +712,7 @@ void  Cmnd_set( int argCount, char * argValue[] )
 {
     float  fValue = 0.0;
 
-    if ( *argValue[1] == '?' )   // help wanted
+    if (argCount == 2 && *argValue[1] == '?' )   // help wanted
     {
         putstr( "Usage:  set  [name [=] value] \n" );
         putstr( "... where <name> is a parameter nickname (not case-sensitive).\n" );
@@ -726,7 +725,7 @@ void  Cmnd_set( int argCount, char * argValue[] )
     else if (argCount > 3 && argValue[2][0] == '=') fValue = atof(argValue[3]);
 
     if (argCount >= 3) SetParameterValue(argValue[1], fValue);
-    else ListParamNamesValues();
+    else  ListParamNamesValues();
 }
 
 // List nick-names and current values of global user-settable parameters...
@@ -805,11 +804,9 @@ void  SetParameterValue(char *nickName, float fValue)
 
     putstr(outBuf);
     
-    ActivateSetParamValues();  // Assume a param value was modified
+    SynthPrepare();  // Assume a param value was modified
 
-    // Include this call to automatically commit parameter changes to NV memory;
-    // Exclude this call if "commit" command is required to commit changes...
-    // CommitPersistentParams();  // Function defined in application module
+//  CommitPersistentParams();
 }
 
 
@@ -819,16 +816,17 @@ void  SetParameterValue(char *nickName, float fValue)
 *   The "commit" command invokes a background task to write current values of
 *   user-settable parameters to non-volatile memory. Thus, the current parameter
 *   values will become the default values used at subsequent system restarts.
+*   NB: This function applies only to parameters settable by the 'set' command.
 */
 void    Cmnd_commit( int argCount, char * argValue[] )
 {
     char  c = 0;
     BOOL  commit = FALSE;
 
-    if ( *argValue[1] == '?' )   // help wanted
+    if (argCount == 2 && *argValue[1] == '?' )   // help wanted
     {
         putstr( "Usage:  commit [-y] \n" );
-        putstr( "Commit parameter values to non-volatile memory, i.e.\n" );
+        putstr( "Commit 'set' parameter values to non-volatile memory, i.e.\n" );
         putstr( "make current values the power-on/restart defaults.\n" );
         return;
     }
@@ -865,8 +863,8 @@ void  Cmnd_su( int argCount, char * argValue[] )
         return;
     }
 
-    if (strcmp(argValue[1], SU_PASSWORD) == 0) ySuperUser = TRUE;
-    else  ySuperUser = FALSE;
+    if (strcmp(argValue[1], SU_PASSWORD) == 0) SuperUser = TRUE;
+    else  SuperUser = FALSE;
 }
 
 
@@ -879,14 +877,14 @@ char  SuperUserAccess(void)
 {
     char  inputBuf[20];
 
-    if (!ySuperUser)
+    if (!SuperUser)
     {
         putstr("! Password: ");
         getstr(inputBuf, 18);
-        if (strcmp(inputBuf, SU_PASSWORD) == 0) ySuperUser = TRUE;
+        if (strcmp(inputBuf, SU_PASSWORD) == 0) SuperUser = TRUE;
     }
 
-    return ySuperUser;
+    return SuperUser;
 }
 
 
@@ -1135,7 +1133,7 @@ void  putHexLong( uint32 uL )
 void  putDecimal( int32 lVal, uint8 bFieldSize )
 {
     uint8    acDigit[12];     /* ASCII result string, acDigit[0] is LSD */
-    int      idx;
+    int      i;
     int      iSignLoc = 0;
     uint8    c;
     uint8    yNegative = 0;
@@ -1145,31 +1143,31 @@ void  putDecimal( int32 lVal, uint8 bFieldSize )
     if ( bFieldSize < 1 )  bFieldSize = 1;
     if ( lVal < 0 )  { yNegative = 1;  lVal = 0 - lVal; }   /* make value absolute */
 
-    for ( idx = 0;  idx < 12;  idx++ )      /* begin conversion with LSD */
+    for ( i = 0;  i < 12;  i++ )      /* begin conversion with LSD */
     {
         c = '0' + (uint8)(lVal % 10);
-        acDigit[idx] = c;
+        acDigit[i] = c;
         lVal = lVal / 10;
     }
 
-    for ( idx = 11;  idx >= 0;  idx-- )    /* begin processing with MSD */
+    for ( i = 11;  i >= 0;  i-- )    /* begin processing with MSD */
     {
-        c = acDigit[idx];
-        if ( idx != 0 && c == '0' && yLeadingZero )    /* leave digit 0 (LSD) alone */
-            acDigit[idx] = ' ';
+        c = acDigit[i];
+        if ( i != 0 && c == '0' && yLeadingZero )    /* leave digit 0 (LSD) alone */
+            acDigit[i] = ' ';
 
-        if ( idx == 0 || c != '0' )              /* found 1st significant digit (MSD) */
+        if ( i == 0 || c != '0' )              /* found 1st significant digit (MSD) */
         {
             yLeadingZero = 0;
-            if ( iSignLoc == 0 ) iSignLoc = idx + 1;
+            if ( iSignLoc == 0 ) iSignLoc = i + 1;
         }
     }
     if ( yNegative ) acDigit[iSignLoc] = '-';     /* if +ve, there will be a SPACE */
 
-    for ( idx = 11;  idx >= 0;  idx-- )    /* begin output with MSD (or sign) */
+    for ( i = 11;  i >= 0;  i-- )    /* begin output with MSD (or sign) */
     {
-        c = acDigit[idx];
-        if ( idx < bFieldSize || c != ' ' ) putch( c );
+        c = acDigit[i];
+        if ( i < bFieldSize || c != ' ' ) putch( c );
     }
 }
 

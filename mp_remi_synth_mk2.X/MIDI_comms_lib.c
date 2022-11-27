@@ -176,8 +176,9 @@ void  MIDI_SendReceiverMode(uint8 chan, uint8 mode)
 
 /*
  * Function:     Transmit MIDI Channel 'All Sound Off' (mode change) message.
+ *               Status Byte for Mode Change is the same as Control Change (0xBn).
  *
- * Entry args:   chan = MIDI channel number (1..16)
+ * Entry args:   chan = MIDI channel number (1..16) = n + 1
  */
 void  MIDI_SendAllSoundOff(uint8 chan)
 {

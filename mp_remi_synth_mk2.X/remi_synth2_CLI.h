@@ -29,5 +29,4 @@ void    Cmnd_sound( int argCount, char * argValue[] );
 void    Cmnd_util(int argCount, char *argValue[]);
 void    Cmnd_trace( int argCount, char * argValue[] );
 
-
 #endif  // _REMI_SYNTH2_CLI_H_

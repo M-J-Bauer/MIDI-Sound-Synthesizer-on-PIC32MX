@@ -36,7 +36,10 @@
 //
 //==================================================================================
 
-int  g_SoftTimerError;   // declare as external in main module if needed
+extern  uint32  g_TaskRunningCount;  // incremented on every call to 1ms B/G task
+
+uint32  g_TaskCallFrequency;  // # calls to 1ms background task per second
+uint32  g_SoftTimerError;
 
 volatile unsigned int  v_RTI_tick_counter;
 volatile unsigned char v_RTI_flag_1ms_task;
@@ -141,9 +144,9 @@ void  Delay_Nx25ns(unsigned int count)
 /***************************************************************************************************
  * Function:  InitializeMCUclock()
  *
- * Overview:  Initializes processor clock and RTI timer (1ms "tick") interrupt
+ * Overview:  Initializes processor clock and RTI timer (1ms "tick") interrupt;
+ *            enables vectored interrupts.
  *
- * Return value:  OK (0) normally, or ERROR (-1) if a fault is detected.
  */
 void  InitializeMCUclock(void)
 {
@@ -208,9 +211,7 @@ void  __ISR(_TIMER_1_VECTOR, IPL5AUTO)  Timer_1_RTI_Handler(void)
     static short count_to_5 = 0;
     static short count_to_50 = 0;
     static short count_to_500 = 0;
-#ifdef INCLUDE_KERNEL_RTC_SUPPORT
     static short count_to_1000 = 0;
-#endif
 
     IFS0bits.T1IF = 0;
 
@@ -219,13 +220,17 @@ void  __ISR(_TIMER_1_VECTOR, IPL5AUTO)  Timer_1_RTI_Handler(void)
 
     if (++count_to_5  >= 5) { v_RTI_flag_5ms_task = 1;  count_to_5 = 0; }
     if (++count_to_50 >= 50) { v_RTI_flag_50ms_task = 1;  count_to_50 = 0; }
-    if (++count_to_500 >= 500) { v_RTI_flag_500ms_task = 1; count_to_500 = 0; }
-
-#ifdef INCLUDE_KERNEL_RTC_SUPPORT
-
-    if (++count_to_1000 >= 1000)  // seconds rollover...
+    if (++count_to_500 >= 500) { v_RTI_flag_500ms_task = 1;  count_to_500 = 0; }
+    if (++count_to_1000 >= 1000)
     {
         count_to_1000 = 0;
+        g_TaskCallFrequency = g_TaskRunningCount;
+        g_TaskRunningCount = 0;
+    }
+
+#ifdef INCLUDE_KERNEL_RTC_SUPPORT
+    if (count_to_1000 == 0)  // seconds rollover
+    {
         if ( ++sRTC.secs >= 60 )
         {
             sRTC.secs = 0;
@@ -240,7 +245,6 @@ void  __ISR(_TIMER_1_VECTOR, IPL5AUTO)  Timer_1_RTI_Handler(void)
             }
         }
     }
-
 #endif
 }
 

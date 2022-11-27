@@ -26,24 +26,22 @@ void  DefaultConfigData(void)
 
     // Assign defaults to application-specific param's...
     g_Config.MidiInBaudrate = 31250;
-    g_Config.MidiInMode = OMNI_ON_MONO;     // 2:omni-on-mono, 4:omni-off-mono
+    g_Config.MidiInMode = 2;                // 2:omni-on-mono, 4:omni-off-mono
     g_Config.MidiInChannel = 1;
-    g_Config.MidiInPressureCCnum = 2;       // 2:breath, 7:chan-vol, 11:expr'n
-    g_Config.MidiInModulationCCnum = 1;     // 0:none, 1:mod-lever, (0..31)
+    g_Config.MidiInExpressionCCnum = 2;     // 0:none, 2:breath, 7:chan-vol, 11:expr'n
     
-    g_Config.MidiOutMode = 0;               // 0:disabled, 2:omni-on, 4:omni-off
+    g_Config.MidiOutEnabled = 0;            // 0:disabled, 1:enabled
     g_Config.MidiOutChannel = 1;
-    g_Config.MidiOutPressureCCnum = 2;      // 0:none, 2:breath, 7:chan-vol, 11:expr'n
-    g_Config.MidiOutModulationCCnum = 1;    // 0:none, 1:mod-lever, (0..31)
+    g_Config.MidiOutExpressionCCnum = 2;    // 0:none, 2:breath, 7:chan-vol, 11:expr'n
+    g_Config.MidiOutModnEnabled = 1;        // 0:none, 1:mod-lever (CC01:33)
     
     g_Config.ReverbAtten_pc = 80;
-    g_Config.ReverbMix_pc = 10;
-    g_Config.AmpldControlOverride = 0;      // Override Off: use patch AC param
-    
+    g_Config.ReverbMix_pc = 20;
+    g_Config.PitchBendCtrlMode = 0;         // 0:disabled, 1 = MIDI PB, 2 = MIDI CC2
+    g_Config.PitchBendRange = 200;          // 0..1200 cents
     g_Config.PresetLastSelected = 1;
     
-    // Calibration param's (not settable via "config" cmd; use "set" cmd.)
-    g_Config.PressureGain = 1.5;        
+    // Calibration constants (default settings)
     g_Config.FilterInputAtten = 0.25; 
     g_Config.FilterOutputGain = 4.0;   
     g_Config.NoiseFilterGain = 4.0; 
@@ -86,17 +84,11 @@ void  DefaultPresetData(void)
 
     for (i = 0;  i < 8;  i++)
     {
-        g_Preset.Descr[i].RemiSynthPatch = defaultSynthPatch[i];
+        g_Preset.Descr[i].PatchNumber = defaultSynthPatch[i];
         g_Preset.Descr[i].MidiProgram = defaultMidiProgram[i];
-        g_Preset.Descr[i].VibratoMode = VIBRATO_AUTOMATIC;
+        g_Preset.Descr[i].VibratoMode = VIBRATO_DISABLED;
         g_Preset.Descr[i].PitchTranspose = 0;
     }
-    
-    g_Preset.Descr[1].VibratoMode = VIBRATO_DISABLED;  // Recorder 1
-    g_Preset.Descr[1].PitchTranspose = 12; 
-    
-    g_Preset.Descr[2].VibratoMode = VIBRATO_DISABLED;  // Recorder 2
-
     StorePresetData();
 }
 

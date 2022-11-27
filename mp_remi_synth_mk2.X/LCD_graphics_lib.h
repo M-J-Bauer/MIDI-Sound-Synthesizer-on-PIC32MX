@@ -86,6 +86,7 @@ void    LCD_PutHexByte(uint8 bDat);       // Show hexadecimal byte value (2 char
 
 void    LCD_PutDecimalWord(uint16 val, uint8 fieldSize);  // Show uint16 in decimal
 void    LCD_BlockFill(uint16 w, uint16 h);   // Fill area, w x h pixels, at cursor (x, y)
+void    LCD_BlockClear(uint16 w, uint16 h);  // Clear area, w x h pixels, at cursor (x, y)
 uint8   LCD_PutImage(bitmap_t *image, uint16 w, uint16 h);  // Show bitmap image at (x, y)
 uint16 *LCD_ScreenCapture();              // Return a pointer to the screen buffer
 

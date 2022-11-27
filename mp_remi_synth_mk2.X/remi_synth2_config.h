@@ -12,7 +12,7 @@
 
 typedef struct Instrument_Preset_Descriptor
 {
-    uint16  RemiSynthPatch;           // REMI synth patch ID # for this Preset
+    uint8   PatchNumber;              // REMI synth patch ID # for this Preset (1..99))
     uint8   MidiProgram;              // MIDI program (voice) # for this Preset
     uint8   VibratoMode;              // Vibrato Control Mode [see note 2]
     int8    PitchTranspose;           // Pitch transpose/offset semitones (+/-24)
@@ -27,25 +27,23 @@ typedef struct Eeprom_block0_structure
     uint32  checkDword;               // Constant value used to check data integrity
     ////
     uint16  MidiInBaudrate;           // MIDI IN baudrate (dflt 31250, max. 57600)
-    uint8   MidiInMode;               // MIDI IN mode, range 1..4, dflt: 2 (Omni-Mono)
+    uint8   MidiInMode;               // MIDI IN mode, 2 or 4 only; dflt: 2 (Omni-Mono)
     uint8   MidiInChannel;            // MIDI IN channel, range: 1..16, default: 1
-    uint8   MidiInPressureCCnum;      // MIDI IN breath/pressure CC number, dflt: 2
-    uint8   MidiInModulationCCnum;    // MIDI IN effect modulation CC number, dflt: 1
+    uint8   MidiInExpressionCCnum;    // MIDI IN breath/pressure CC number, dflt: 2
     
-    uint8   MidiOutMode;              // MIDI OUT mode, range 1..4, dflt: 2 (Omni-Mono)
+    uint8   MidiOutEnabled;           // MIDI OUT messages (all) enabled (dflt: 0)
     uint8   MidiOutChannel;           // MIDI OUT channel, range: 1..16, default: 1
-    uint8   MidiOutPressureCCnum;     // MIDI OUT breath/pressure CC number, dflt: 2
-    uint8   MidiOutModulationCCnum;   // MIDI OUT effect modulation CC number, dflt: 1
+    uint8   MidiOutExpressionCCnum;   // MIDI OUT breath/pressure CC number, dflt: 2
+    uint8   MidiOutModnEnabled;       // MIDI OUT modulation messages enabled (dflt 1)
     
     uint8   ReverbAtten_pc;           // Reverberation attenuator gain (1..100 %)
     uint8   ReverbMix_pc;             // Reverberation wet/dry mix (1..100 %)
-    
+    uint8   PitchBendCtrlMode;        // Pitch-Bend control source (MIDI, analog CV, etc))
+    uint16  PitchBendRange;           // Pitch-Bend range, cents (0..1200)
     uint8   PresetLastSelected;       // Preset last selected (0..7)
-    uint8   AmpldControlOverride;     // Override Patch Audio Ampld Control **
     
-    // Calibration param's (not settable via "config" cmd; use "set" cmd.)
-    float   PressureGain;             //
-    float   FilterInputAtten;         //
+    // Calibration param's (not settable via "config" cmd; use "set" cmd or control pots.)
+    float   FilterInputAtten;         // 
     float   FilterOutputGain;         //
     float   NoiseFilterGain;          //
     //
@@ -55,9 +53,6 @@ typedef struct Eeprom_block0_structure
     uint32  EndOfDataBlockCode;       // Last entry, used to test if format has changed
 
 } EepromBlock0_t;
-
-// ** Flag to override patch Audio Ampld Control (AC) parameter...
-//    0: use patch AC param (default);  1: use Ampld Envelope (override)
 
 
 typedef struct Eeprom_block1_structure

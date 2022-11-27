@@ -26,85 +26,75 @@ PRIVATE  void   NoiseLevelControl();
 PRIVATE  void   FilterFrequencyControl();
 PRIVATE  void   LowFrequencyOscillator();
 PRIVATE  void   VibratoRampGenerator();
-PRIVATE  void   PrintWaveTableInfo(unsigned oscNum);
-PRIVATE  void   DumpActivePatchParams();
-PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal);
 
 int16    WaveTableBuffer[WAVE_TABLE_MAXIMUM_SIZE];  // signed 16-bit samples
 fixed_t  ReverbDelayLine[REVERB_DELAY_MAX_SIZE];    // fixed-point samples
 
-int32  g_TraceBuffer[100][5];
+PatchParamTable_t  g_Patch;        // active (working) patch parameters
 
-// These global variables may be modified by the CLI 'set' command...
-float  g_PressureGain;          // Expression/Pressure gain adjust (.1 ~ 10)
+fixed_t  g_ExpressionPeak;         // Peak (max.) value of expression (fixed-pt)
+int32    g_TraceBuffer[100][5];
+
+uint16   g_Osc1WaveTableSize;      // Number of samples in OSC1 wave-table
+uint16   g_Osc2WaveTableSize;      // Number of samples in OSC2 wave-table
+float    g_Osc1FreqDiv;            // OSC1 frequency divider
+float    g_Osc2FreqDiv;            // OSC2 frequency divider
+
+// These global variables may be modified by the CLI 'set' command or by Control Panel pots;
+// initialized at power-on/reset to values strored in EEPROM (with config param's)...
 float  g_FilterInputAtten;      // Filter input atten/gain (.01 ~ 2.5)
 float  g_FilterOutputGain;      // Filter output atten/gain (0.1 ~ 25)
 float  g_NoiseFilterGain;       // Noise gen. gain adjustment (0.1 ~ 25)
-float  g_ReverbLoopTime_sec;    // Reverb param. (0.01 ~ 0.05 sec, typ. 0.04)
-float  g_ReverbDecayTime_sec;   // Reverb param. (1.0 ~ 2.0 sec, typ. 1.5)
 
-static PatchParamTable_t  m_Patch;        // active (working) patch parameters
-
-static uint16   m_Osc1WaveTableSize;      // Number of samples in OSC1 wave-table
-static uint16   m_Osc2WaveTableSize;      // Number of samples in OSC2 wave-table
 static int16   *m_WaveTable1;             // Pointer to OSC1 wave-table
 static int16   *m_WaveTable2;             // Pointer to OSC2 wave-table
-static float    m_Osc1FreqDiv;            // OSC1 frequency divider
-static float    m_Osc2FreqDiv;            // OSC2 frequency divider
-static fixed_t  m_Osc1StepInit;           // Initial value of v_Osc1Step at Note-On
-static fixed_t  m_Osc2StepInit;           // Initial value of v_Osc2Step at Note-On
-static fixed_t  m_OscFreqMultiplier;      // Pitch-bend factor (range: 0.5 ~ 2.0)
+static fixed_t  m_Osc1StepMedian;         // Median value of v_Osc1Step (as at Note-On)
+static fixed_t  m_Osc2StepMedian;         // Median value of v_Osc2Step (as at Note-On)
+static int32    m_LFO_Step;               // LFO "phase step" (fixed-point 24:8 bit format)
 static fixed_t  m_LFO_output;             // LFO output signal, normalized, bipolar (+/-1.0)
-
-static uint16   m_PressureGain_pc;        // Expression/Pressure gain (percent)
-static fixed_t  m_PressureLevel;          // Expression/Pressure level, norm.
+static fixed_t  m_ExpressionLevel;        // Expression (breath pressure) level (0..+1.0))
 static fixed_t  m_ModulationLevel;        // Modulation level, normalized
 static fixed_t  m_PitchBendFactor;        // Pitch-Bend factor, normalized
 static uint8    m_PitchBendControl;       // Pitch-Bend control mode (Off, PBmsg, CC01, CC02)
 static uint8    m_VibratoControl;         // 0:None, 1:FX.Sw, 2:CC(Mod.Lvr), 3:Auto
 static fixed_t  m_RampOutput;             // Vibrato Ramp output level, normalized (0..1)
-static bool     m_EffectSwitchState;      // Effect Switch state: 0:Off, 1:On
-static short    m_AmpldEnvSegment;        // Amplitude envelope shaper phase (state)
 static fixed_t  m_AmpldEnvOutput;         // Amplitude envelope output (0 ~ 0.9995)
-static short    m_ContourEnvSegment;      // Mixer transient/contour phase (state)
-static fixed_t  m_ContourEnvOutput;       // Mixer contour output, normalized (0..1)
 
+static fixed_t  m_ContourEnvOutput;       // Mixer contour output, normalized (0..1)
 static fixed_t  m_AttackVelocity;         // Attack Velocity, normalized (0 ~ 0.999)
 static bool     m_TriggerAttack;          // Signal to put ampld envelope into attack
 static bool     m_TriggerRelease;         // Signal to put ampld envelope into release
 static bool     m_ContourEnvTrigger;      // Signal to start mixer transient/contour
 static bool     m_ContourEnvFinish;       // Signal to end mixer transient/contour
-
 static bool     m_LegatoNoteChange;       // Signal Legato note change to Vibrato func.
 static uint8    m_Note_ON;                // TRUE if Note ON, ie. "gated", else FALSE
 static uint8    m_NotePlaying;            // MIDI note number of note playing
-
 static uint8    m_FilterAtten_pc;         // Filter input atten/gain (%)
 static uint8    m_FilterGain_x10;         // Filter output gain x10 (1..250)
 static uint8    m_NoiseGain_x10;          // Noise filter gain x10 (1..250)
 static fixed_t  m_FiltCoeff_c[110];       // Bi-quad filter coeff. c  (a1 = -c)
 static fixed_t  m_FiltCoeff_a2;           // Bi-quad filter coeff. a2
 static fixed_t  m_FiltCoeff_b0;           // Bi-quad filter coeff. b0  (b2 = -b0)
-static int      m_FilterFcIndex;          // Index into LUT: m_FiltCoeff_c[]
-
+static int      m_FilterIndex;            // Index into LUT: m_FiltCoeff_c[]
 static int      m_RvbDelayLen;            // Reverb. delay line length (samples)
 static fixed_t  m_RvbDecay;               // Reverb. decay factor
-static fixed_t  m_RvbAtten;               // Reverb. attenuation factor
-static fixed_t  m_RvbMix;                 // Reverb. wet/dry mix ratio
+static uint16   m_RvbAtten;               // Reverb. attenuation factor (0..127)
+static uint16   m_RvbMix;                 // Reverb. wet/dry mix ratio (0..127)
 
-volatile uint8    v_SynthEnable;      // Signal to enable synth sampling routine
+volatile bool     v_SynthEnable;      // Signal to enable synth engine
 volatile int32    v_Osc1Angle;        // sample pos'n in wave-table, OSC1 [16:16]
 volatile int32    v_Osc2Angle;        // sample pos'n in wave-table, OSC2 [16:16]
 volatile int32    v_Osc1Step;         // sample pos'n increment, OSC1 [16:16 fixed-pt]
 volatile int32    v_Osc2Step;         // sample pos'n increment, OSC2 [16:16 fixed-pt]
-volatile uint16   v_Mix1Level;        // Mixer input_1 level x1024 (0..1024)
-volatile uint16   v_Mix2Level;        // Mixer input_2 level x1024 (0..1024)
+volatile uint16   v_Mix2Level;        // Osc2 Mixer input level x1000 (0..1000)
 volatile fixed_t  v_NoiseLevel;       // Noise level control (normalized)
 volatile fixed_t  v_OutputLevel;      // Audio output level control (normalized)
 volatile fixed_t  v_coeff_b0;         // Bi-quad filter coeff b0 (active)
 volatile fixed_t  v_coeff_b2;         // Bi-quad filter coeff b2 (active)
 volatile fixed_t  v_coeff_a1;         // Bi-quad filter coeff a1 (active)
 volatile fixed_t  v_coeff_a2;         // Bi-quad filter coeff a2 (active)
+volatile bool     v_Clipping;         // Mixer output clipping (flag)
+volatile uint32   v_ISRexecTime;      // ISR execution time (core cycle count)
 
 
 // Look-up table giving frequencies of notes on the chromatic scale.
@@ -146,56 +136,19 @@ const  float  m_NoteFrequency[] =
 
 
 /*`````````````````````````````````````````````````````````````````````````````````````````````````
- * Function:  Initialize Timer #2 and OC4 pin for PWM audio DAC operation.
- *
- * Timer_2 is set up to generate the PWM audio output signal using a sampling
- * rate of 40ks/s.  Prescaler = 1:1;  Fclk = FCY = 80MHz;  Tclk = 12.5ns.
- * Timer_2 period := 50.00us (4000 x 12.5ns);  PR2 = 1999;  PWM freq = 40kHz.
- * Maximum duty register value is 1999.
- * Output Compare modules OC4 [and OC5] are setup for PWM (fault-detect disabled).
- */
-void  RemiSynthAudioInit(void)
-{
-    TRISDbits.TRISD3 = 0;    // RD3/OC4 is an output pin
-    TRISDbits.TRISD4 = 0;    // RD4/OC5 ..   ..   ..
-
-    OC4CON = 0x0000;         // Disable OC4 while timer is set up
-
-    T2CON = 0;               // Timer_2 setup for 40KHz PWM freq.
-    T2CONbits.TCKPS = 0;     // Prescaler set to 1:1
-    PR2 = 1999;              // Period = 2000 x 12.5ns (-> freq = 40kHz)
-    IFS0bits.T2IF = 0;       // Clear IRQ flag
-    IPC2bits.T2IP = 6;       // Set IRQ priority (highest!)
-    T2CONbits.TON = 1;       // Start Timer
-
-    OC4R = 1000;             // PWM Set initial duty (50%)
-    OC4RS = 1000;
-    OC4CON = 0x8006;         // Enable OC4 for PWM
-
-    v_SynthEnable = 0;
-    m_WaveTable1 = (int16 *) WaveTableBuffer;
-    m_WaveTable2 = (int16 *) WaveTableBuffer;
-
-    SetAudioOutputLevel(IntToFixedPt(1) / 2);  // For diagnostic mode only
-    TIMER2_IRQ_ENABLE();
-}
-
-
-/*`````````````````````````````````````````````````````````````````````````````````````````````````
  * Function:     Prepare REMI synth tone generator to play a note.
  *
  * Overview:     This function must be called following any change in the synth patch
- *               configuration or other synth parameter, before playing a note.
+ *               or synth configuration parameter, before playing a note.
  *
  * Note:         On entry, and exit, the signal v_SynthEnable is set False.
  */
-void  RemiSynthPrepare()
+void  SynthPrepare()
 {
     static  bool prepDone = FALSE;
     float   res, res_sq, freq_rat;
     float   rvbDecayFactor;
     float   pi_2 = 2.0f * 3.14159265f;
-    float   filterFreq;   // Hz
     int     idx;
     int     preset = g_Config.PresetLastSelected;
 
@@ -204,28 +157,27 @@ void  RemiSynthPrepare()
     
     if (!prepDone)  // One-time initialisation at power-on/reset
     {
-        g_PressureGain = g_Config.PressureGain;          // persistent param
         g_FilterInputAtten = g_Config.FilterInputAtten;  // persistent param
         g_FilterOutputGain = g_Config.FilterOutputGain;  // persistent param
         g_NoiseFilterGain = g_Config.NoiseFilterGain;    // persistent param
-        g_ReverbLoopTime_sec = 0.04;
-        g_ReverbDecayTime_sec = 1.5;
+        // Calculate reverb delay-line constants...
+        m_RvbDelayLen = (int) (REVERB_LOOP_TIME_SEC * SAMPLE_RATE_HZ);  // samples
+        rvbDecayFactor = (float) REVERB_LOOP_TIME_SEC / REVERB_DECAY_TIME_SEC;
+        m_RvbDecay = FloatToFixed( powf(0.001f, rvbDecayFactor) );
         prepDone = TRUE;
     }
 
-    WaveTableSelect(1, m_Patch.Osc1WaveTable);
-    WaveTableSelect(2, m_Patch.Osc2WaveTable);
+    WaveTableSelect(1, g_Patch.Osc1WaveTable);
+    WaveTableSelect(2, g_Patch.Osc2WaveTable);
 
     m_VibratoControl = g_Preset.Descr[preset].VibratoMode;
-    //  m_PitchBendControl = g_Preset.Descr[preset].PitchBendMode;  // <<<<<<<<<<<<< TODO
-    m_PitchBendControl = PITCH_BEND_DISABLED;   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<< TEMP 
-    
-    m_OscFreqMultiplier = IntToFixedPt(1);
-    m_LFO_output = 0;
-    m_ContourEnvOutput = IntToFixedPt(m_Patch.ContourStartLevel) / 100;
+    m_PitchBendControl = g_Config.PitchBendCtrlMode; 
+    m_ContourEnvOutput = IntToFixedPt(g_Patch.ContourStartLevel) / 100;
+    m_RvbAtten = ((uint16)g_Config.ReverbAtten_pc << 7) / 100;  // = 0..127
+    m_RvbMix = ((uint16)g_Config.ReverbMix_pc << 7) / 100;  // = 0..127
 
-    // Find coefficients for bi-quad filter according to patch param (FilterResonance)
-    res = (float) m_Patch.FilterResonance / 10000;   // range 0 ~ 0.9999
+    // Find coefficients for bi-quad filter according to patch Filter Resonance
+    res = (float) g_Patch.FilterResonance / 10000;   // range 0 ~ 0.9999
     res_sq = res * res;
     m_FiltCoeff_a2 = FloatToFixed(res_sq);
     m_FiltCoeff_b0 = FloatToFixed(0.5f - (res_sq / 2.0f));
@@ -233,49 +185,16 @@ void  RemiSynthPrepare()
     // Coeff a1 (a1 = -c) is both resonance and frequency dependent...  
     for (idx = 0 ; idx <= 108 ; idx++)    // populate LUT
     {
-        freq_rat = m_NoteFrequency[idx] / SAMPLE_RATE_HZ;   // = Fc / Fs
+        freq_rat = m_NoteFrequency[idx] / SAMPLE_RATE_HZ;   // Fr = Fc / Fs
         m_FiltCoeff_c[idx] = FloatToFixed(2.0 * res * cosf(pi_2 * freq_rat));
     }
-    
-    if (m_Patch.FilterFrequency != 0)  // Note Tracking disabled -- Fc is fixed
-    {
-        if (m_Patch.FilterFrequency >= 16 && m_Patch.FilterFrequency < 10000)
-            filterFreq = (float) m_Patch.FilterFrequency;
-        else  filterFreq = (float) 10000;   // Effectively bypassed
-
-        for (idx = 0 ; idx < 108 ; idx++)
-        {
-            if (filterFreq < m_NoteFrequency[idx])  break;
-        }
-        m_FilterFcIndex = idx;
-    }
-    
-    // Initialize synth working variables from global (non-patch) settable params.
-    // (Note: Global set param's are all floating point.)
-    m_PressureGain_pc = (uint16) (g_PressureGain * 100); 
-    m_FilterAtten_pc = (uint8) (g_FilterInputAtten * 100); 
-    m_FilterGain_x10 = (uint8) (g_FilterOutputGain * 10); 
-    m_NoiseGain_x10 = (uint8) (g_NoiseFilterGain * 10);
-
-    m_RvbDelayLen = (int) (g_ReverbLoopTime_sec * SAMPLE_RATE_HZ);
-    if (m_RvbDelayLen > REVERB_DELAY_MAX_SIZE)  
-        m_RvbDelayLen = REVERB_DELAY_MAX_SIZE;
-    rvbDecayFactor = g_ReverbLoopTime_sec / g_ReverbDecayTime_sec;
-
-    m_RvbDecay = FloatToFixed( powf(0.001f, rvbDecayFactor) );
-    m_RvbAtten = IntToFixedPt((int) g_Config.ReverbAtten_pc) / 100;
-    m_RvbMix = IntToFixedPt((int) g_Config.ReverbMix_pc) / 100;
-    
-    // Initial values for real-time control variables, in case control routine disabled.
-    v_NoiseLevel = 0;   
-    v_OutputLevel = IntToFixedPt( 1 ) / 2;
 }
 
 
 /*`````````````````````````````````````````````````````````````````````````````````````````````````
  * Function:     Select (activate) a wave-table for a given synth oscillator.
  *               This then becomes the "active" wave-table, over-riding the table
- *               selected by any prior call to RemiSynthPatchSelect().
+ *               selected by any prior call to SynthPatchSelect().
  *
  * Entry args:   osc_num = oscillator assigned to wave-table, 1 -> OSC1, 2 -> OSC2
  *               wave_id = ID number of wave-table, range 0..250
@@ -284,7 +203,7 @@ void  RemiSynthPrepare()
  *               wave_id > 0 selects a flash-based wave-table
  * 
  *             ^ The User Wave-table is regenerated in the RAM buffer by the function
- *               RemiSynthPatchSelect() from the user waveform descriptor in EEPROM.
+ *               SynthPatchSelect() from the user waveform descriptor in EEPROM.
  *               The User Wave-table may be replaced by the Wave-table Creator utility.
  */
 PRIVATE  void  WaveTableSelect(uint8 osc_num, uint8 wave_id)
@@ -298,14 +217,14 @@ PRIVATE  void  WaveTableSelect(uint8 osc_num, uint8 wave_id)
     {
         if (osc_num == 1)
         {
-            m_Osc1WaveTableSize = g_FlashWaveTableDef[wave_id].Size;
-            m_Osc1FreqDiv = g_FlashWaveTableDef[wave_id].FreqDiv;
+            g_Osc1WaveTableSize = g_FlashWaveTableDef[wave_id].Size;
+            g_Osc1FreqDiv = g_FlashWaveTableDef[wave_id].FreqDiv;
             m_WaveTable1 = (int16 *) g_FlashWaveTableDef[wave_id].Address;
         }
         else if (osc_num == 2)
         {
-            m_Osc2WaveTableSize = g_FlashWaveTableDef[wave_id].Size;
-            m_Osc2FreqDiv = g_FlashWaveTableDef[wave_id].FreqDiv;
+            g_Osc2WaveTableSize = g_FlashWaveTableDef[wave_id].Size;
+            g_Osc2FreqDiv = g_FlashWaveTableDef[wave_id].FreqDiv;
             m_WaveTable2 = (int16 *) g_FlashWaveTableDef[wave_id].Address;
         }
     }
@@ -324,7 +243,7 @@ PRIVATE  void  WaveTableSelect(uint8 osc_num, uint8 wave_id)
  *
  * Return val:   ERROR (-1) if the given patch ID cannot be found, else OK (0).
  */
-short  RemiSynthPatchSelect(int patchNum)
+short  SynthPatchSelect(int patchNum)
 {
     short  status = 0;
     int    i;
@@ -343,40 +262,40 @@ short  RemiSynthPatchSelect(int patchNum)
             status = ERROR;
         }
 
-        memcpy(&m_Patch, &g_PatchProgram[i], sizeof(PatchParamTable_t));
+        memcpy(&g_Patch, &g_PatchProgram[i], sizeof(PatchParamTable_t));
     }
     else  // if (patchNum == 0)
     {
         // Copy User Patch (persistent data in EEPROM) to active patch
-        memcpy(&m_Patch, &g_Config.UserPatch, sizeof(PatchParamTable_t));
+        memcpy(&g_Patch, &g_Config.UserPatch, sizeof(PatchParamTable_t));
     }
     
-    // Restore User Wave-table in RAM buffer in case m_Patch.Osc#WaveTable == 0:
+    // Restore User Wave-table in RAM buffer in case g_Patch.Osc#WaveTable == 0:
     GenerateWaveTable( (WaveformDesc_t *) &g_Config.UserWaveform );
     //
-    if (m_Patch.Osc1WaveTable == 0)  // OSC1 needs User Wave-table
+    if (g_Patch.Osc1WaveTable == 0)  // OSC1 needs User Wave-table
     {
-        m_Osc1WaveTableSize = g_Config.UserWaveform.Size;
-        m_Osc1FreqDiv = g_Config.UserWaveform.FreqDiv;
+        g_Osc1WaveTableSize = g_Config.UserWaveform.Size;
+        g_Osc1FreqDiv = g_Config.UserWaveform.FreqDiv;
         m_WaveTable1 = (int16 *) WaveTableBuffer; 
     }
-    if (m_Patch.Osc2WaveTable == 0)  // OSC2 needs User Wave-table
+    if (g_Patch.Osc2WaveTable == 0)  // OSC2 needs User Wave-table
     {
-        m_Osc2WaveTableSize = g_Config.UserWaveform.Size;
-        m_Osc2FreqDiv = g_Config.UserWaveform.FreqDiv;
+        g_Osc2WaveTableSize = g_Config.UserWaveform.Size;
+        g_Osc2FreqDiv = g_Config.UserWaveform.FreqDiv;
         m_WaveTable2 = (int16 *) WaveTableBuffer; 
     }   
 
     // Ensure minimum values are assigned to envelope transition times...
     // (except for peak-hold time, which may be zero)
-    if (m_Patch.AmpldEnvAttack_ms < 5) m_Patch.AmpldEnvAttack_ms = 5;
-    if (m_Patch.AmpldEnvDecay_ms < 5) m_Patch.AmpldEnvDecay_ms = 5;
-    if (m_Patch.AmpldEnvRelease_ms < 5) m_Patch.AmpldEnvRelease_ms = 5;
-    if (m_Patch.ContourDelay_ms < 5) m_Patch.ContourDelay_ms = 5;
-    if (m_Patch.ContourRamp_ms < 5) m_Patch.ContourRamp_ms = 5;
-    if (m_Patch.VibratoRamp_ms < 5) m_Patch.VibratoRamp_ms = 5;
+    if (g_Patch.AmpldEnvAttack_ms < 5) g_Patch.AmpldEnvAttack_ms = 5;
+    if (g_Patch.AmpldEnvDecay_ms < 5) g_Patch.AmpldEnvDecay_ms = 5;
+    if (g_Patch.AmpldEnvRelease_ms < 5) g_Patch.AmpldEnvRelease_ms = 5;
+    if (g_Patch.ContourDelay_ms < 5) g_Patch.ContourDelay_ms = 5;
+    if (g_Patch.ContourRamp_ms < 5) g_Patch.ContourRamp_ms = 5;
+    if (g_Patch.LFO_RampTime < 5) g_Patch.LFO_RampTime = 5;
 
-    RemiSynthPrepare();
+    SynthPrepare();
 
     return  status;
 }
@@ -394,35 +313,44 @@ short  RemiSynthPatchSelect(int patchNum)
  * to play the given note, sets filter characteristics according to patch parameters,
  * then triggers the envelope shapers to enter the 'Attack' phase.
  */
-void  RemiSynthNoteOn(uint8 noteNum, uint8 velocity)
+void  SynthNoteOn(uint8 noteNum, uint8 velocity)
 {
-    if (!m_Note_ON)    // Note OFF -- Initiate a new note...
+    int32  oscFreqLFO;  // 24:8 bit fixed-point
+    
+    if (!m_Note_ON)  // Note OFF -- Initiate a new note...
     {
-        RemiSynthNoteChange(noteNum);  // Set OSC1 and OSC2 frequencies, etc
+        SynthNoteChange(noteNum);  // Set OSC1 and OSC2 frequencies, etc
 
+        oscFreqLFO = (((int) g_Patch.LFO_Freq_x10) << 8) / 10;  // set LFO freq.
+        m_LFO_Step = (oscFreqLFO * SINE_WAVE_TABLE_SIZE) / 1000;  // LFO Fs = 1000Hz
         m_AmpldEnvOutput = 0;   // Zero the ampld envelope output signal
 
         // A square-law curve is applied to velocity
         m_AttackVelocity = IntToFixedPt((int) velocity) / 128;  // normalized
         m_AttackVelocity = MultiplyFixed(m_AttackVelocity, m_AttackVelocity);  // squared
         
+        // Refresh synth working variables from global (non-patch) settable params.
+        m_NoiseGain_x10 = (uint8) (g_NoiseFilterGain * 10);
+        m_FilterAtten_pc = (uint8) (g_FilterInputAtten * 100); 
+        m_FilterGain_x10 = (uint8) (g_FilterOutputGain * 10); 
+
         TIMER2_IRQ_DISABLE();
         v_Osc1Angle = 0;
         v_Osc2Angle = 0;
-
-        // Initialize wave mixer input levels (range 0..1024)
-        v_Mix2Level = (1024 * (int) m_Patch.MixerOsc2Level) / 100;
-        v_Mix1Level = 1024 - v_Mix2Level;
+        v_Mix2Level = (1000 * (int) g_Patch.MixerOsc2Level) / 100;
+        v_NoiseLevel = 0;   
+        v_OutputLevel = 0;
         TIMER2_IRQ_ENABLE();
 
         m_LegatoNoteChange = 0;    // Not a Legato event
         m_TriggerAttack = 1;       // Let 'er rip, Boris
         m_ContourEnvTrigger = 1;
+        v_SynthEnable = 1; 
     }
-    else  // Note already playing -- Legato note change
+    else  // Note already playing -- do legato note change
     {
-        RemiSynthNoteChange(noteNum);  // Adjust OSC1 and OSC2 frequencies
-        m_LegatoNoteChange = 1;        // Signal Note-Change event (for vibrato fn)
+        SynthNoteChange(noteNum);  // Adjust OSC1 and OSC2 frequencies
+        m_LegatoNoteChange = 1;    // Signal Note-Change event (for vibrato fn)
     }
 }
 
@@ -431,102 +359,79 @@ void  RemiSynthNoteOn(uint8 noteNum, uint8 velocity)
  * Function:     Set the pitch of a note to be initiated, or change pitch of the note
  *               in progress, without affecting the amplitude envelope (i.e. no re-attack).
  *               This function may be used where a "legato" effect is required.
- *               (See also: RemiSynthNoteOn() function.)
+ *               (See also: SynthNoteOn() function.)
  *
  * Entry args:   noteNum = MIDI standard note number. (Note #60 = C4 = middle-C.)
- *               The REMI synth supports note numbers in the range: 12 (C0) to 108 (C8).
+ *               The REMI synth supports note numbers in the range: 12 (C0) to 120 (C9).
  *
  * The actual perceived pitch depends on the Frequency Divider values and the dominant
  * partial(s) in the waveform(s). Normally, the Osc.Freq.Div parameter value is chosen to
  * match the wave-table, so that the perceived pitch corresponds to the MIDI note number.
  */
-void  RemiSynthNoteChange(uint8 noteNum)
+void  SynthNoteChange(uint8 noteNum)
 {
     float   osc1Freq, osc2Freq;
     fixed_t osc1Step, osc2Step;
     float   osc2detune;      // ratio:  osc2Freq / osc1Freq;
     fixed_t detuneNorm;
-    int     filterCorner;    // unit = MIDI note number (semitone)
+    int     filterIdx;    // unit = MIDI note number (semitone)
     int     cents, noteTransposed;
     int     preset = g_Config.PresetLastSelected;
 
     // Apply PRESET Pitch Transpose parameter
     noteTransposed = (int) noteNum + g_Preset.Descr[preset].PitchTranspose;
 
-    // Ensure note number (transposed) is within synth range (12 ~ 108)
-    while (noteTransposed > 108)  { noteTransposed -= 12; }   // too high
-    while (noteTransposed < 12)  { noteTransposed += 12; }   // too low
+    // Ensure note number is within synth range (12 ~ 120)
+    noteTransposed &= 0x7F;
+    if (noteTransposed > 120)  noteTransposed -= 12;   // too high
+    if (noteTransposed < 12)   noteTransposed += 12;   // too low
 
     noteNum = noteTransposed;
     m_NotePlaying = noteNum;
     m_Note_ON = TRUE;
 
     // Convert MIDI note number to frequency (Hz);  apply OSC1 freq.divider param.
-    osc1Freq = m_NoteFrequency[noteNum - 12] / m_Osc1FreqDiv;
+    osc1Freq = m_NoteFrequency[noteNum - 12] / g_Osc1FreqDiv;
 
     // Calculate detune factor as a fraction of an octave
-    cents = m_Patch.Osc2Detune % 1200;     // signed
+    cents = g_Patch.Osc2Detune % 1200;     // Limit +/- 1 octave
     detuneNorm = (IntToFixedPt(1) * cents) / 1200;  // range +/-1.000
     osc2detune = FixedToFloat(Base2Exp(detuneNorm));
     osc2Freq = osc1Freq * osc2detune;      // Apply OSC2 detune factor
-    osc2Freq = osc2Freq / m_Osc2FreqDiv;   // Apply OSC2 Freq.Divider parameter
+    osc2Freq = osc2Freq / g_Osc2FreqDiv;   // Apply OSC2 Freq.Divider parameter
 
     // Initialize oscillator variables for use in audio ISR
-    osc1Step = (int32)((osc1Freq * m_Osc1WaveTableSize * 65536) / SAMPLE_RATE_HZ);
-    osc2Step = (int32)((osc2Freq * m_Osc2WaveTableSize * 65536) / SAMPLE_RATE_HZ);
+    osc1Step = (int32)((osc1Freq * g_Osc1WaveTableSize * 65536) / SAMPLE_RATE_HZ);
+    osc2Step = (int32)((osc2Freq * g_Osc2WaveTableSize * 65536) / SAMPLE_RATE_HZ);
+    
+    m_Osc1StepMedian = osc1Step;  // for Osc FM (vibrato, pitch-bend, etc)
+    m_Osc2StepMedian = osc2Step;
     
     // Calculate filter corner freq (pitch offset) for new note...
-    if (m_Patch.FilterFrequency == 0)  // ... if Note Tracking enabled
+    if (g_Patch.FilterNoteTrack)  // case 1: Note Tracking enabled
     {
-        filterCorner = noteNum + m_Patch.FilterNoteTrack;   // MIDI note #
-        if (filterCorner > 120)  filterCorner = 120;        // Cap at C9 (8370 Hz)
-        m_FilterFcIndex = filterCorner - 12;
+        filterIdx = (noteNum - 12) + g_Patch.FilterFrequency;  // MIDI note #, variable
+        if (filterIdx < 0)  filterIdx = 0;      // Min at C0 (~16Hz)
+        if (filterIdx > 108)  filterIdx = 108;  // Max at C9 (~8kHz)
+        m_FilterIndex = filterIdx;
+    }
+    else  // case 2: Note Tracking disabled .. Fc = MIDI note # - 12
+    {
+        m_FilterIndex = g_Patch.FilterFrequency;
     }
     
-    if (m_Patch.NoiseLevelCtrl && (m_Patch.NoiseMode & NOISE_PITCHED))
-        m_FilterFcIndex = 0;      // Use Fc = 16 Hz (minimum)
+    // Use Fc = 16 Hz (minimum) for pitched noise option
+    if (g_Patch.NoiseMode & NOISE_PITCHED)  m_FilterIndex = 0;  
 
-    TIMER2_IRQ_DISABLE();   // Ensure OSC1 and OSC2 are synchronized (in phase)
+    TIMER2_IRQ_DISABLE();  
     v_Osc1Step = osc1Step;
-    m_Osc1StepInit = osc1Step;   // Needed for Osc FM (vibrato, pitch-bend, etc)
     v_Osc2Step = osc2Step;
-    m_Osc2StepInit = osc2Step;
-    
     // Set filter coefficient values to be applied in the audio ISR
     v_coeff_b0 = m_FiltCoeff_b0;
     v_coeff_b2 = 0 - m_FiltCoeff_b0;      // b2 = -b0
-    v_coeff_a1 = 0 - m_FiltCoeff_c[m_FilterFcIndex];  // a1 = -c
+    v_coeff_a1 = 0 - m_FiltCoeff_c[m_FilterIndex];  // a1 = -c
     v_coeff_a2 = m_FiltCoeff_a2;
     TIMER2_IRQ_ENABLE();
-}
-
-
-/*
- * Function:     Set the "Pressure Level" according to a given data value.
- *               Equivalent to MIDI Control Change message (CC# = 02, 07 or 11).
- *
- * Entry args:   data14 = MIDI expression/pressure value (14 bits, unsigned).
- *
- * Output:       (fixed_t) m_PressureLevel = normalized pressure level (0..+1.0)
- *
- * Note:         A square-law is applied to the data value to approximate an exponential
- *               response curve. The output pressure level is fixed point, normalized.
- *               The pressure level is adjusted accordiing to m_PressureGain_pc (%)
- *               which is a user-settable param (non-patch). Use CLI "set" command.
- */
-void   RemiSynthExpression(unsigned data14)
-{
-    uint32  ulval;
-    fixed_t level;
-
-    ulval = ((uint32) data14 * data14) / 16384;  // apply square law
-    ulval = ulval << 6;   // scale to 20 bits (fractional part)
-
-    level = (fixed_t) ulval;  // convert to fixed-point fraction
-    level = (level * m_PressureGain_pc) / 100;
-    if (level > FIXED_MAX_LEVEL) level = FIXED_MAX_LEVEL;  // clip at 0.99999
-    
-    m_PressureLevel = level;  
 }
 
 
@@ -539,14 +444,20 @@ void   RemiSynthExpression(unsigned data14)
  * terminated by the synth process (B/G task) when the release time expires, or if
  * a new note is initiated prior.
  */
-void  RemiSynthNoteOff(uint8 noteNum)
+void  SynthNoteOff(uint8 noteNum)
 {
     int   noteTransposed;
     int   preset = g_Config.PresetLastSelected;
 
-    // Apply PRESET Pitch Transpose parameter:
+    // Apply PRESET Pitch Transpose parameter
     noteTransposed = (int) noteNum + g_Preset.Descr[preset].PitchTranspose;
-    if (noteTransposed >= 12 && noteTransposed <= 120) noteNum = noteTransposed;
+
+    // Ensure note number is within synth range (12 ~ 108)
+    noteTransposed &= 0x7F;
+    if (noteTransposed > 120)  noteTransposed -= 12;   // too high
+    if (noteTransposed < 12)   noteTransposed += 12;   // too low
+
+    noteNum = noteTransposed;
 
     if (noteNum == m_NotePlaying)
     {
@@ -554,6 +465,35 @@ void  RemiSynthNoteOff(uint8 noteNum)
         m_ContourEnvFinish = 1;
         m_Note_ON = FALSE;
     }
+}
+
+
+/*
+ * Function:     Set the "Pressure Level" according to a given data value.
+ *               Equivalent to MIDI Control Change message (CC# = 02, 07 or 11).
+ *
+ * Entry args:   data14 = MIDI expression/pressure value (14 bits, unsigned).
+ *
+ * Output:       (fixed_t) m_ExpressionLevel = normalized pressure level (0..+1.0)
+ *                         capped at full-scale = 0.99999
+ *
+ * Note:         A square-law is applied to the data value to approximate an exponential
+ *               response curve. The output pressure level is fixed point, normalized.
+ */
+void   SynthExpression(unsigned data14)
+{
+    uint32  ulval;
+    fixed_t level;
+    fixed_t levelMax = (IntToFixedPt(1) * 99) / 100;
+
+    ulval = ((uint32) data14 * data14) / 16384;  // apply square law
+    ulval = ulval << 6;   // scale to 20 bits (fractional part)
+    level = (fixed_t) ulval;  // convert to fixed-point fraction
+    level = (level * MIDI_EXPRN_ADJUST_PC) / 100;  // Compensate MIDI input level
+    if (level > levelMax) level = levelMax;  // limit at 0.99
+    if (level > g_ExpressionPeak)  g_ExpressionPeak = level;  // diagnostic
+    
+    m_ExpressionLevel = level;  
 }
 
 
@@ -568,11 +508,11 @@ void  RemiSynthNoteOff(uint8 noteNum)
  *
  * Todo: *****   Test this function using MIDI pitch bend data !!  ******
  */
-void   RemiSynthPitchBend(int data14)
+void   SynthPitchBend(int data14)
 {
-    // Scale lever pos'n (arg) value according to patch 'PitchBendRange' param.
+    // Scale lever position (arg) according to patch 'PitchBendRange' param.
     // PitchBendRange may be up to 1200 cents (ie. 1 octave maximum).
-    int  posnScaled = (data14 * m_Patch.PitchBendRange) / 1200;
+    int  posnScaled = (data14 * g_Config.PitchBendRange) / 1200;
     
     // Convert to 20-bit *signed* fixed-point fraction  (13 + 7 = 20 bits)
     m_PitchBendFactor = (fixed_t) (posnScaled << 7);
@@ -590,7 +530,7 @@ void   RemiSynthPitchBend(int data14)
  * Output:       m_ModulationLevel, normalized fixed-pt number in the range 0..+1.0.
  *
  */
-void   RemiSynthModulation(unsigned data14)
+void   SynthModulation(unsigned data14)
 {
     if (data14 < (16 * 1024))  
         m_ModulationLevel = (fixed_t) ((uint32) data14 << 6);  
@@ -598,27 +538,8 @@ void   RemiSynthModulation(unsigned data14)
 }
 
 
-/*
- * Function:     Control synth effect(s) according to Effect Switch state;
- *               e.g. vibrato on/off, legato on/off, portamento on/off, etc.
- *
- * Entry args:   ctrlnum = effect ID number (= MIDI Control Change number)
- *               enab    = True: enable, or False: disable switched effect(s)
- *
- * Examples:     ctrlnum = 0:   no effect
- *               ctrlnum = 85:  vibrato (ramp) start/stop
- */
-void   RemiSynthEffectSwitch(uint8 ctrlnum, uint8 enab)
-{
-    // In this version, ctrlnum is ignored;  assume effect is vibrato
-
-    if (enab) m_EffectSwitchState = 1;
-    else  m_EffectSwitchState = 0;
-}
-
-
 /*`````````````````````````````````````````````````````````````````````````````````````````````````
- * Function:  RemiSynthProcess()
+ * Function:  SynthProcess()
  *
  * Overview:  Periodic background task called at 1ms intervals which performs most of the
  *            real-time sound synthesis computations, except those which need to be executed
@@ -635,19 +556,21 @@ void   RemiSynthEffectSwitch(uint8 ctrlnum, uint8 enab)
  * While diagnostic mode is active, the synth process is suspended to allow low-level tests
  * to run without being disrupted by continuous synth functions.
  */
-void   RemiSynthProcess()
+void   SynthProcess()
 {
     static  int   count5ms;
-
-    AmpldEnvelopeShaper();
-    ContourEnvelopeShaper();
+    
+    if (!v_SynthEnable)  return;  // Synth process and audio ISR inactive
+    
     LowFrequencyOscillator();
-    VibratoRampGenerator();
+    AmpldEnvelopeShaper();
     AudioLevelController();
 
     if (++count5ms == 5)     // 5ms process interval (200Hz)
     {
         count5ms = 0;
+        ContourEnvelopeShaper();
+        VibratoRampGenerator();
         OscFreqModulation();       // Process pitch-bend and/or vibrato
         OscMixRatioModulation();   // Wave-table morphing routine
         NoiseLevelControl();       // Noise level control routine
@@ -667,41 +590,36 @@ void   RemiSynthProcess()
  */
 PRIVATE  void   AmpldEnvelopeShaper()
 {
-    static  uint32   ampldEnvPhaseTimer;     // Time elapsed in envelope phase (ms)
-    static  fixed_t  ampldSustainLevel;      // Ampld Env. sustain level (0 ~ 0.9995)
-    static  fixed_t  timeConstant;           // 20% of decay or release time (ms)
-    static  fixed_t  ampldDelta;             // Step change in Env Ampld in 1ms
-    static  fixed_t  ampldMaximum;           // Peak value of Envelope Ampld
-    static  int      envTimer;               // Envelope elapsed time (ms) -- debug use only
+    static  uint8    envSegment;          // Envelope segment (aka "phase")
+    static  uint32   envPhaseTimer;       // Time elapsed in envelope phase (ms)
+    static  fixed_t  ampldSustainLevel;   // Ampld Env. sustain level (0 ~ 0.9995)
+    static  fixed_t  timeConstant;        // 20% of Decay or Release time (ms))
+    static  fixed_t  ampldDelta;          // Step change in Env Ampld per 1ms
+    static  fixed_t  ampldMaximum;        // Peak value of Envelope Ampld
 
     if (m_TriggerAttack)
     {
         m_TriggerAttack = 0;
         m_TriggerRelease = 0;
-        ampldEnvPhaseTimer = 0;
-        envTimer = 0;
-        ampldSustainLevel = IntToFixedPt((int) m_Patch.AmpldEnvSustain) / 100;    // normalized
-        ampldSustainLevel = MultiplyFixed(ampldSustainLevel, ampldSustainLevel);  // squared
+        envPhaseTimer = 0;
+        ampldSustainLevel = IntToFixedPt((int) g_Patch.AmpldEnvSustain) / 100;    // normalized
         ampldMaximum = FIXED_MAX_LEVEL;  // for Peak-Hold phase
-        if (m_Patch.AmpldEnvPeak_ms == 0)
-            ampldMaximum = ampldSustainLevel;  // No Peak-Hold phase
-        ampldDelta = ampldMaximum / m_Patch.AmpldEnvAttack_ms;  // step change in 1ms
-
-        m_AmpldEnvSegment = ENV_ATTACK;
-        v_SynthEnable = 1;   // in case not already enabled
+        if (g_Patch.AmpldEnvPeak_ms == 0)  ampldMaximum = ampldSustainLevel;  // No Peak-Hold phase
+        ampldDelta = ampldMaximum / g_Patch.AmpldEnvAttack_ms;  // step change in 1ms
+        envSegment = ENV_ATTACK;
     }
 
     if (m_TriggerRelease)
     {
         m_TriggerRelease = 0;
-        timeConstant = m_Patch.AmpldEnvRelease_ms / 5;
-        ampldEnvPhaseTimer = 0;
-        m_AmpldEnvSegment = ENV_RELEASE;
+        timeConstant = g_Patch.AmpldEnvRelease_ms / 5;
+        envPhaseTimer = 0;
+        envSegment = ENV_RELEASE;
     }
 
-    switch (m_AmpldEnvSegment)
+    switch (envSegment)
     {
-    case ENV_IDLE:          // Idle - Sound off - zero output level
+    case ENV_IDLE:          // Idle - zero output level
     {
         m_AmpldEnvOutput = 0;
         break;
@@ -709,73 +627,54 @@ PRIVATE  void   AmpldEnvelopeShaper()
     case ENV_ATTACK:        // Attack - linear ramp up to peak - or to the sustain level
     {
         if (m_AmpldEnvOutput < ampldMaximum) m_AmpldEnvOutput += ampldDelta;
-
-        if (ampldEnvPhaseTimer >= m_Patch.AmpldEnvAttack_ms)  // attack time ended
+        if (++envPhaseTimer >= g_Patch.AmpldEnvAttack_ms)  // attack time ended
         {
             m_AmpldEnvOutput = ampldMaximum;
-            ampldEnvPhaseTimer = 0;
-
-            if (m_Patch.AmpldEnvPeak_ms == 0)         // skip peak and decay phases
-                m_AmpldEnvSegment = ENV_SUSTAIN;
-            else  m_AmpldEnvSegment = ENV_PEAK_HOLD;    // run all phases
+            envPhaseTimer = 0;
+            if (g_Patch.AmpldEnvPeak_ms == 0)  envSegment = ENV_SUSTAIN;  // skip peak and decay
+            else  envSegment = ENV_PEAK_HOLD;    // run all phases
         }
         break;
     }
     case ENV_PEAK_HOLD:     // Peak - constant output level (0.999)
     {
-        if (ampldEnvPhaseTimer >= m_Patch.AmpldEnvPeak_ms)  // Peak time ended
+        if (++envPhaseTimer >= g_Patch.AmpldEnvPeak_ms)  // Peak time ended
         {
-            timeConstant = m_Patch.AmpldEnvDecay_ms / 5;  // for Decay phase
-            ampldEnvPhaseTimer = 0;
-            m_AmpldEnvSegment = ENV_DECAY;
+            timeConstant = g_Patch.AmpldEnvDecay_ms / 5;  // for Decay phase
+            envPhaseTimer = 0;
+            envSegment = ENV_DECAY;
         }
         break;
     }
     case ENV_DECAY:         // Decay - exponential ramp down to sustain level
     {
-        ampldDelta = (m_AmpldEnvOutput - ampldSustainLevel) / timeConstant;  // step in 1ms
+        ampldDelta = (m_AmpldEnvOutput - ampldSustainLevel) / timeConstant;
         if (ampldDelta == 0)  ampldDelta = FIXED_MIN_LEVEL;
-
-        if (m_AmpldEnvOutput >= (ampldSustainLevel + ampldDelta))
-            m_AmpldEnvOutput -= ampldDelta;
-
+        if (m_AmpldEnvOutput > ampldSustainLevel)  m_AmpldEnvOutput -= ampldDelta;
         // Allow 10 x time-constant for decay phase to complete
-        if (ampldEnvPhaseTimer >= (m_Patch.AmpldEnvDecay_ms * 2))
-        {
-            m_AmpldEnvSegment = ENV_SUSTAIN;
-        }
+        if (++envPhaseTimer >= (g_Patch.AmpldEnvDecay_ms * 2))  envSegment = ENV_SUSTAIN;
         break;
     }
     case ENV_SUSTAIN:       // Sustain constant level - waiting for m_TriggerRelease
     {
+        m_AmpldEnvOutput = ampldSustainLevel;
         break;
     }
     case ENV_RELEASE:       // Release - exponential ramp down to zero level
     {
-        // timeConstant and ampldEnvPhaseTimer are set by the trigger condition, above.
-        ampldDelta = m_AmpldEnvOutput / timeConstant;
+        // timeConstant and envPhaseTimer are set by the trigger condition above.
+        ampldDelta = m_AmpldEnvOutput / timeConstant;  // step change in 1ms
         if (ampldDelta == 0)  ampldDelta = FIXED_MIN_LEVEL;
-
         if (m_AmpldEnvOutput >= ampldDelta)  m_AmpldEnvOutput -= ampldDelta;
-
         // Allow 10 x time-constant for release phase to complete
-        if (ampldEnvPhaseTimer >= (m_Patch.AmpldEnvRelease_ms * 2))
+        if (++envPhaseTimer >= (g_Patch.AmpldEnvRelease_ms * 2))
         {
-            ampldEnvPhaseTimer = 0;
-            m_AmpldEnvSegment = ENV_IDLE;
+            envPhaseTimer = 0;
+            envSegment = ENV_IDLE;
         }
         break;
     }
-    default:
-    {
-        ampldEnvPhaseTimer = 0;
-        m_AmpldEnvSegment = ENV_IDLE;
-        break;
-    }
     };  // end switch
-
-    ampldEnvPhaseTimer++;
-    envTimer++;
 }
 
 
@@ -784,7 +683,7 @@ PRIVATE  void   AmpldEnvelopeShaper()
  *
  * Overview:  This routine is called by the Synth Process at 1ms intervals.
  *            The output level is controlled (modulated) by one of a variety of options
- *            as determined by the patch parameter: m_Patch.OutputAmpldCtrl.
+ *            as determined by the patch parameter: g_Patch.OutputAmpldCtrl.
  *
  * Output:    (fixed_t) v_OutputLevel : normalized output level (0..+1.0)
  *            The output variable is used by the audio ISR to control the audio ampld,
@@ -793,25 +692,32 @@ PRIVATE  void   AmpldEnvelopeShaper()
 PRIVATE  void   AudioLevelController()
 {
     static  fixed_t  outputAmpld;         // Audio output level, normalized
-    static  fixed_t  smoothOutputAccum;   // Ampld smoothing filter accumulator
-    static  fixed_t  smoothOutputLevel;   // Audio output level, normalized, smoothed
+    static  fixed_t  smoothExprnLevel;    // Expression level, normalized, smoothed
+    static  uint8    clipLEDstate;
+    static  uint32   clipLEDduty_ms;
+    fixed_t  exprnLevel;
 
-    if (m_Patch.OutputAmpldCtrl == AMPLD_CTRL_FIXED_L2)        // mode 1
+    if (g_Patch.OutputAmpldCtrl == AMPLD_CTRL_FIXED_L2)        // mode 1
     {
         if (m_Note_ON)  outputAmpld = FIXED_MAX_LEVEL / 2;
         else  outputAmpld = 0;
     }
-    else if (m_Patch.OutputAmpldCtrl == AMPLD_CTRL_EXPRESS)    // mode 2
+    else if (g_Patch.OutputAmpldCtrl == AMPLD_CTRL_EXPRESS)    // mode 2
     {
-	// After Note-Off, Pressure Level is no longer updated
-        if (m_Note_ON)  outputAmpld = m_PressureLevel;
-        else  outputAmpld = 0;  // mute
+        // After Note-Off, MIDI Pressure/Expression Level is assumed to be zero
+        if (m_Note_ON)  exprnLevel = m_ExpressionLevel;
+        else  exprnLevel = 0;
+        
+        // Apply IIR smoothing filter to eliminate abrupt changes (K = 1/16)
+        smoothExprnLevel -= smoothExprnLevel >> 4;
+        smoothExprnLevel += exprnLevel >> 4;
+        outputAmpld = smoothExprnLevel;
     }
-    else if (m_Patch.OutputAmpldCtrl == AMPLD_CTRL_AMPLD_ENV)  // mode 3
+    else if (g_Patch.OutputAmpldCtrl == AMPLD_CTRL_AMPLD_ENV)  // mode 3
     {
-	outputAmpld = m_AmpldEnvOutput;
+	    outputAmpld = m_AmpldEnvOutput;
     }
-    else if (m_Patch.OutputAmpldCtrl == AMPLD_CTRL_ENV_VELO)   // mode 4
+    else if (g_Patch.OutputAmpldCtrl == AMPLD_CTRL_ENV_VELO)   // mode 4
     {
         outputAmpld = MultiplyFixed(m_AmpldEnvOutput, m_AttackVelocity);
     }
@@ -821,24 +727,32 @@ PRIVATE  void   AudioLevelController()
         else  outputAmpld = 0;
     }
     
-    if (g_Config.AmpldControlOverride)   // Override patch AC parameter
-        outputAmpld = MultiplyFixed(m_AmpldEnvOutput, m_AttackVelocity);
-
     if (outputAmpld > FIXED_MAX_LEVEL)  outputAmpld = FIXED_MAX_LEVEL;
 
-    // Apply smoothing filter to eliminate abrupt step changes
-    smoothOutputAccum -= smoothOutputLevel;
-    smoothOutputAccum += outputAmpld;
-    smoothOutputLevel = smoothOutputAccum >> 4;  // Filter Tc = 16ms
-
-    v_OutputLevel = smoothOutputLevel;  // accessed by audio ISR
+    v_OutputLevel = outputAmpld;  // accessed by audio ISR
+    
+    // Check mixer output for clipping -- if so, pulse LED indicator for 50ms
+    if (v_Clipping)
+    {
+        v_Clipping = 0;     // reset flag
+        CLIPPING_LED_ON();
+        clipLEDstate = 1;
+        clipLEDduty_ms = 0;
+    }
+    
+    if (clipLEDstate == 1 && clipLEDduty_ms >= 50)
+    {
+        CLIPPING_LED_OFF();
+        clipLEDstate = 0;
+    }
+    clipLEDduty_ms++;
 }
 
 
 /*
  * Function:  ContourEnvelopeShaper()
  *
- * Overview:  Routine called by the Synth Process at 1ms intervals.
+ * Overview:  Routine called by the Synth Process at 5ms intervals.
  *            All segments of the Contour Envelope are linear time-varying.
  *            The contour output may be used to control the oscillator mix ratio,
  *            noise level, filter corner frequency (Fc), or whatever.
@@ -847,164 +761,124 @@ PRIVATE  void   AudioLevelController()
  */
 PRIVATE  void   ContourEnvelopeShaper()
 {
-    static  uint32   contourSegmentTimer;   // Time elapsed in active phase (ms)
-    static  fixed_t  outputDelta;           // Step change in output level in 1ms
-
-    fixed_t  startLevel = IntToFixedPt(m_Patch.ContourStartLevel) / 100;
-    fixed_t  holdLevel = IntToFixedPt(m_Patch.ContourHoldLevel) / 100;
+    static  short    contourSegment;  // Contour envelope segment (aka phase)
+    static  uint32   contourTimer;    // Time elapsed in active phase (ms)
+    static  fixed_t  outputDelta;     // Step change in output level per 5ms
+    static  fixed_t  holdLevel;       // Output level held at finish of ramp
 
     if (m_ContourEnvTrigger)  // Note-On event
     {
         m_ContourEnvTrigger = 0;
         m_ContourEnvFinish = 0;
-        m_ContourEnvOutput = startLevel;
-        contourSegmentTimer = 0;
-        m_ContourEnvSegment = CONTOUR_ENV_DELAY;
+        m_ContourEnvOutput = IntToFixedPt(g_Patch.ContourStartLevel) / 100;
+        holdLevel = IntToFixedPt(g_Patch.ContourHoldLevel) / 100;
+        contourTimer = 0;
+        contourSegment = CONTOUR_ENV_DELAY;
     }
 
-    switch (m_ContourEnvSegment)
+    switch (contourSegment)
     {
-    case CONTOUR_ENV_IDLE:         // Waiting for trigger signal
+    case CONTOUR_ENV_IDLE:  // Waiting for trigger signal
     {
         break;
     }
-    case CONTOUR_ENV_DELAY:        // Delay before ramp up/down segment
+    case CONTOUR_ENV_DELAY:  // Delay before ramp up/down segment
     {
-        if (contourSegmentTimer >= m_Patch.ContourDelay_ms)  // Delay segment ended
+        if (contourTimer >= g_Patch.ContourDelay_ms)  // Delay segment ended
         {
-            // Prepare for ramp up/down phase (next state) to Hold level
-            outputDelta = (holdLevel - m_ContourEnvOutput) / m_Patch.ContourRamp_ms;
-            contourSegmentTimer = 0;
-            m_ContourEnvSegment = CONTOUR_ENV_RAMP;
+            outputDelta = ((holdLevel - m_ContourEnvOutput) * 5) / g_Patch.ContourRamp_ms;
+            contourTimer = 0;
+            contourSegment = CONTOUR_ENV_RAMP;
         }
         break;
     }
-    case CONTOUR_ENV_RAMP:         // Linear ramp up/down from Start to Hold level
+    case CONTOUR_ENV_RAMP:  // Linear ramp up/down from Start to Hold level
     {
-        if (contourSegmentTimer >= m_Patch.ContourRamp_ms)  // Ramp segment ended
-            m_ContourEnvSegment = CONTOUR_ENV_HOLD;
+        if (contourTimer >= g_Patch.ContourRamp_ms)  // Ramp segment ended
+            contourSegment = CONTOUR_ENV_HOLD;
         else
             m_ContourEnvOutput += outputDelta;
         break;
     }
-    case CONTOUR_ENV_HOLD:         // Hold constant level - waiting for Note-Off event
+    case CONTOUR_ENV_HOLD:  // Hold constant level - waiting for Note-Off event
     {
         m_ContourEnvOutput = holdLevel;
         break;
     }
     };  // end switch
 
-    contourSegmentTimer++;
+    contourTimer += 5;  // ms
 }
 
 
 /*
  * Function:     Synth LFO implementation.
  *
- * Called by RemiSynthProcess() at 1ms intervals, this function generates a sinusoidal
- * waveform in real time.  LFO frequency is a patch parameter, m_Patch.VibratoFreq,
+ * Called by SynthProcess() at 1ms intervals, this function generates a sinusoidal
+ * waveform in real time.  LFO frequency is a patch parameter, g_Patch.VibratoFreq,
  * unsigned 8-bit value representing LFO freq * 10 Hz; range 1..250 => 0.1 to 25 Hz.
  *
  * Effective sample rate (Fs) is 1000 Hz.
  * 
- * The output of the LFO is m_LFO_output, a normalized fixed-point variable.
+ * The output of the LFO is m_LFO_output, a normalized fixed-point variable (+|-1.0)
  */
 PRIVATE  void   LowFrequencyOscillator()
 {
-    static  int32  oscAngle = 0;   // 24:8 bit fixed-point
+    static  int32  oscAngleLFO;  // 24:8 bit fixed-point
     fixed_t sample;
     int     waveIdx;
 
-    int32  oscFreq = (((int) m_Patch.LFO_Freq_x10) << 8) / 10;  // 24:8 bit fixed-point
-    int32  oscStep = (oscFreq * SINE_WAVE_TABLE_SIZE) / 1000;   // Fs = 1000Hz
+    waveIdx = oscAngleLFO >> 8;  // integer part of oscAngleLFO
+    sample = (fixed_t) g_sinewave[waveIdx] << 5;  // normalized
+    oscAngleLFO += m_LFO_Step;
+    if (oscAngleLFO >= SINE_WAVE_TABLE_SIZE << 8)
+        oscAngleLFO -= SINE_WAVE_TABLE_SIZE << 8;
 
-    waveIdx = oscAngle >> 8;  // integer part
-    oscAngle = (oscAngle + oscStep) % (SINE_WAVE_TABLE_SIZE * 256);
-    sample = (fixed_t) g_sinewave[waveIdx] << 5; 
-
-    m_LFO_output = (fixed_t) sample;   // +/-0.9999
+    m_LFO_output = (fixed_t) sample;
 }
 
 
 /*
  * Function:     Vibrato Ramp Generator implementation.
  *
- * Called by RemiSynthProcess() at 1ms intervals, this function generates a linear ramp
- * signal in real time.
+ * Called by the SynthProcess() at 5ms intervals, this function generates a linear ramp.
  *
- * If vibrato control mode is set to "Automatic", vibrato is started at Note-On. A delay is
- * imposed before the ramp begins to rise. Otherwise, ramp start/stop is controlled by the
- * Effect Switch state and there is no delay before the ramp begins.
- *
+ * The vibrato (LFO) delayed ramp is triggered by a Note-On event. 
  * If a Legato note change occurs, vibrato is stopped (fast ramp down) and the ramp delay
  * is re-started, so that vibrato will ramp up again after the delay.
  *
- * The delay and ramp-up times are both set by the patch parameter, m_Patch.VibratoRamp_ms,
+ * The delay and ramp-up times are both set by the patch parameter, g_Patch.LFO_RampTime,
  * so the delay time value is the same as the ramp-up time.  This works well enough.
  */
 PRIVATE  void   VibratoRampGenerator()
 {
     static  short   rampState = 0;
-    static  uint32  rampTimer_ms;
-    fixed_t rampStep;
-    int     preset = g_Config.PresetLastSelected;
+    static  uint32  delayTimer_ms;
+    static  fixed_t rampStep;  // Step chnage in output per 5 ms
 
-    if (g_Preset.Descr[preset].VibratoMode == VIBRATO_BY_EFFECT_SW)
+    if (rampState == 0)  // Idle - waiting for Note-On
     {
-        if (m_EffectSwitchState)  rampState = 2;
-        else  rampState = 3;
+		rampStep = IntToFixedPt(5) / (int) g_Patch.LFO_RampTime;
+        if (m_Note_ON)  { m_RampOutput = 0;  delayTimer_ms = 0;  rampState = 1; }
     }
-
-    if (g_Preset.Descr[preset].VibratoMode == VIBRATO_AUTOMATIC)
+    else if (rampState == 1)  // Delaying before ramp-up begins
     {
-        // Check for Note-Off or Note-Change event while ramp is progressing
-        if (rampState != 3 &&  (m_AmpldEnvSegment == ENV_RELEASE || m_LegatoNoteChange))
-            rampState = 3;   //  ramp down
-
-        if (rampState == 0)  // Idle - waiting for Note-On
-        {
-            m_RampOutput = 0;
-            if (m_AmpldEnvSegment == ENV_ATTACK)
-            {
-                rampTimer_ms = 0;  // start ramp delay timer
-                rampState = 1;
-            }
-        }
-        else if (rampState == 1)  // Delaying before ramp-up begins
-        {
-            if (rampTimer_ms >= m_Patch.VibratoRamp_ms)  rampState = 2;
-            rampTimer_ms++;
-        }
-        else if (rampState == 2)  // Ramping up - hold at max. level (1.00)
-        {
-            // waiting for Note-Off or Note-Change event
-        }
-        else if (rampState == 3)  // Ramping down
-        {
-            if (m_RampOutput <= (IntToFixedPt(1) / 100))
-            {
-                // If a Note-Change has occurred, re-start the ramp (delay)
-                if (m_LegatoNoteChange)
-                    { m_LegatoNoteChange = 0;  rampState = 1; }
-                else rampState = 0;
-                rampTimer_ms = 0;
-            }
-        }
-        else  rampState = 0;
+        if (delayTimer_ms >= g_Patch.LFO_RampTime)  rampState = 2;
+        else  delayTimer_ms += 5;
     }
-
-    if (rampState == 2)  // Ramp up using VibratoRamp (time) param.
+    else if (rampState == 2)  // Ramping up - hold at max. level (1.00)
     {
-        rampStep = IntToFixedPt(1) / (int) m_Patch.VibratoRamp_ms;
         if (m_RampOutput < FIXED_MAX_LEVEL)  m_RampOutput += rampStep;
         if (m_RampOutput > FIXED_MAX_LEVEL)  m_RampOutput = FIXED_MAX_LEVEL;
     }
-
-    if (rampState == 3)  // Ramp down fast (fixed 100ms)
+    else  rampState = 0;  // Undefined state... reset
+	
+	// Check for Note-Off or Note-Change event while ramp is progressing
+    if ((rampState != 0) && (!m_Note_ON || m_LegatoNoteChange))
     {
-        rampStep = IntToFixedPt(1) / 100;
-        if (m_RampOutput > 0)  m_RampOutput -= rampStep;
-        if (m_RampOutput < 0)  m_RampOutput = 0;
+        if (m_LegatoNoteChange)  
+		  { m_LegatoNoteChange = 0;  m_RampOutput = 0;  delayTimer_ms = 0;  rampState = 1; }
+        else  rampState = 0;
     }
 }
 
@@ -1012,9 +886,9 @@ PRIVATE  void   VibratoRampGenerator()
 /*
  * Function:     Oscillator Frequency Modulation  (Pitch-bend, vibrato, etc)
  *
- * Called by RemiSynthProcess() at 5ms intervals, this function modulates the pitch of
- * the wave-table oscillators according to a multiplier variable, m_OscFreqMultiplier,
- * which may be modified while a note is in progress.
+ * Called by SynthProcess() at 5ms intervals, this function modulates the pitch of
+ * the wave-table oscillators according to a multiplier variable, smoothFreqMult,
+ * which is continuously updated while a note is in progress.
  * 
  * The linear m_PitchBendFactor is transformed into a multiplier in the range 0.5 ~ 2.0.
  * Centre (zero) m_PitchBendFactor value should give a multplier value of 1.00.
@@ -1024,52 +898,40 @@ PRIVATE  void   VibratoRampGenerator()
  */
 PRIVATE  void   OscFreqModulation()
 {
-    static  fixed_t  smoothFreqMultAccum = IntToFixedPt(10);
     static  fixed_t  smoothFreqMult = IntToFixedPt(1);
 
     fixed_t  LFO_scaled, modnLevel;  // normalized quantities (range 0..+/-1.0)
-    int      index;
+    fixed_t  freqMult;
 
-    if (m_VibratoControl == VIBRATO_BY_MODN_CC)    // Use Mod Lever position
-    {
-        modnLevel = (m_ModulationLevel * m_Patch.VibratoDepth) / 1200;
-    }
-    else
-    if (m_VibratoControl == VIBRATO_BY_EFFECT_SW   //  |
-    ||  m_VibratoControl == VIBRATO_AUTOMATIC      //  |> Use Ramp Gen.
-    ||  m_VibratoControl == VIBRATO_AUTO_ASYMM)    //  |
-    {
-        modnLevel = (m_RampOutput * m_Patch.VibratoDepth) / 1200;
-    }
+    if (m_VibratoControl == VIBRATO_BY_MODN_CC)  // Use Mod Lever position
+        modnLevel = (m_ModulationLevel * g_Patch.LFO_FM_Depth) / 1200;
+    
+    if ( m_VibratoControl == VIBRATO_AUTOMATIC)  // Use LFO ramp generator
+        modnLevel = (m_RampOutput * g_Patch.LFO_FM_Depth) / 1200;
 
     if (m_VibratoControl && !m_PitchBendControl)  
     {
         LFO_scaled = MultiplyFixed(m_LFO_output, modnLevel); 
-        m_OscFreqMultiplier = Base2Exp(LFO_scaled);   // range 0.5 ~ 2.0.
+        freqMult = Base2Exp(LFO_scaled);   // range 0.5 ~ 2.0.
     }
-    else if (m_PitchBendControl == PITCH_BEND_BY_PB_MESSAGE)  
+    else if (m_PitchBendControl == PITCH_BEND_BY_MIDI)  
     {
-         m_OscFreqMultiplier = Base2Exp(m_PitchBendFactor);
+         freqMult = Base2Exp(m_PitchBendFactor);
     }
-    else if (m_PitchBendControl == PITCH_BEND_BY_EXPRN_CC02) 
+    else if (m_PitchBendControl == PITCH_BEND_BY_EXPRN) 
     {
-        modnLevel = (m_PressureLevel * m_Patch.PitchBendRange) / 1200;
-        m_OscFreqMultiplier = Base2Exp(modnLevel);
+        modnLevel = (m_ExpressionLevel * g_Config.PitchBendRange) / 1200;
+        freqMult = Base2Exp(modnLevel);
     }
-    else  m_OscFreqMultiplier = IntToFixedPt( 1 );  // No pitch modulation
+    else  freqMult = IntToFixedPt( 1 );  // No pitch modulation
 
     if (m_VibratoControl || m_PitchBendControl)
     {
-        // Apply smoothing filter to m_OscFreqMultiplier to avoid sudden changes.
-        smoothFreqMultAccum -= smoothFreqMult;
-        smoothFreqMultAccum += m_OscFreqMultiplier;
-        smoothFreqMult = smoothFreqMultAccum / 10;  // Filter Tc = 10 * 5ms = 50ms
-
-        TIMER2_IRQ_DISABLE();
-        v_Osc1Step = MultiplyFixed(m_Osc1StepInit, smoothFreqMult);
-        if (m_VibratoControl != VIBRATO_AUTO_ASYMM)
-            v_Osc2Step = MultiplyFixed(m_Osc2StepInit, smoothFreqMult);
-        TIMER2_IRQ_ENABLE();
+        smoothFreqMult -= smoothFreqMult >> 3;  // Tc = 8 * 5ms = 40ms (approx)
+        smoothFreqMult += freqMult >> 3; 
+        // Update real-time oscillator variables (accessed by audio ISR)
+        v_Osc1Step = MultiplyFixed(m_Osc1StepMedian, smoothFreqMult);
+        v_Osc2Step = MultiplyFixed(m_Osc2StepMedian, smoothFreqMult);
     }
 }
 
@@ -1077,63 +939,56 @@ PRIVATE  void   OscFreqModulation()
 /*
  * Oscillator Mix Ratio Modulation
  *
- * Called by the RemiSynthProcess() routine at 5ms intervals, this function controls the ratio
+ * Called by the SynthProcess() routine at 5ms intervals, this function controls the ratio
  * of the 2 oscillator signals input to the wave mixer, according to a variable, mixRatio_pK,
  * which is the fraction (x1024) of the output of OSC2 relative to OSC1 fed into the mixer.
  *
  * The instantaneous value of the time-varying quantity mixRatio_pK is determined by the 
- * patch mixer control mode parameter, m_Patch.MixerControl.
+ * patch mixer control mode parameter, g_Patch.MixerControl.
  * The actual mixing operation is performed by the audio ISR, using the output variables.
  *
- * Output variables:   v_Mix1Level, v_Mix2Level  (range 0..1024)
- *            where:  (v_Mix1Level + v_Mix2Level) == 1024, always.
- *
+ * Output variable:   v_Mix2Level   (range 0..1000)
  */
 PRIVATE  void  OscMixRatioModulation()
 {
     fixed_t  LFO_scaled;
     fixed_t  modnLevel;
     fixed_t  mixRatioLFO;   // normalized
-    int      mixRatio_pK;   // fraction of OSC2 in the mix x 1024
+    int      mixRatio_pK;   // fraction of OSC2 in the mix x1000
 
-    if (m_Patch.MixerControl == MIXER_CTRL_CONTOUR)
+    if (g_Patch.MixerControl == MIXER_CTRL_CONTOUR)
     {
-        mixRatio_pK = IntegerPart(m_ContourEnvOutput * 1024);
+        mixRatio_pK = IntegerPart(m_ContourEnvOutput * 1000);
     }
-    else if (m_Patch.MixerControl == MIXER_CTRL_LFO)
+    else if (g_Patch.MixerControl == MIXER_CTRL_LFO)
     {
-        // Use vibrato depth param (0..1200) to set contour LFO modulation depth.
-        modnLevel = (m_RampOutput * m_Patch.VibratoDepth) / 1200;
+        // Use LFO depth param (0..1200) to set contour LFO modulation depth.
+        modnLevel = (m_RampOutput * g_Patch.LFO_FM_Depth) / 1200;
         LFO_scaled = MultiplyFixed(m_LFO_output, modnLevel);  // range -1.0 ~ +1.0
-        mixRatioLFO = (IntToFixedPt( 1 ) + LFO_scaled) / 2;   // range  0.0 ~ +1.0
-        mixRatio_pK = IntegerPart(mixRatioLFO * 1024);        // convert to 'per K' units
+        mixRatioLFO = (IntToFixedPt(1) + LFO_scaled) / 2;     // range  0.0 ~ +1.0
+        mixRatio_pK = IntegerPart(mixRatioLFO * 1000);        // convert to 'per K' units
     }
-    else if (m_Patch.MixerControl == MIXER_CTRL_EXPRESS)
+    else if (g_Patch.MixerControl == MIXER_CTRL_EXPRESS)
     {
-        mixRatio_pK = IntegerPart(m_PressureLevel * 1024);
+        mixRatio_pK = IntegerPart(m_ExpressionLevel * 1000);
     }
-    else if (m_Patch.MixerControl == MIXER_CTRL_MODULN)
+    else if (g_Patch.MixerControl == MIXER_CTRL_MODULN)
     {
-        mixRatio_pK = IntegerPart(m_ModulationLevel * 1024);
+        mixRatio_pK = IntegerPart(m_ModulationLevel * 1000);
     }
-    else  // assume (m_Patch.MixerControl == MIXER_CTRL_FIXED) -- default
+    else  // assume (g_Patch.MixerControl == MIXER_CTRL_FIXED) -- default
     {
-        mixRatio_pK = (1024 * (int) m_Patch.MixerOsc2Level) / 100;  // fixed %
+        mixRatio_pK = (1000 * (int) g_Patch.MixerOsc2Level) / 100;  // fixed %
     }
 
-    // Use mixRatio_pK to update individual OSC1 and OSC2 mixer input levels.
-    // Prevent Timer_2 interrupt from occurring in the middle of the update!
-    TIMER2_IRQ_DISABLE();
-    v_Mix2Level = mixRatio_pK;
-    v_Mix1Level = 1024 - v_Mix2Level;   // range: 0..1024
-    TIMER2_IRQ_ENABLE();
+    v_Mix2Level = mixRatio_pK;  // accessed by audio ISR
 }
 
 
 /*
  * Noise Generator Output level Control
  *
- * Called by the RemiSynthProcess() routine at 5ms intervals, this function sets the noise
+ * Called by the SynthProcess() routine at 5ms intervals, this function sets the noise
  * generator output level in real-time according to the noise control source (patch param).
  * The actual level control operation is performed by the audio ISR.
  *
@@ -1141,16 +996,16 @@ PRIVATE  void  OscMixRatioModulation()
  */
 PRIVATE  void   NoiseLevelControl()
 {
-    int  noiseCtrlSource = m_Patch.NoiseLevelCtrl & 7;  
+    int  noiseCtrlSource = g_Patch.NoiseLevelCtrl & 7;  
     
     if (noiseCtrlSource == NOISE_LVL_FIXED)           // option 1 (Fixed max.)
         v_NoiseLevel = FIXED_MAX_LEVEL;
     else if (noiseCtrlSource == NOISE_LVL_AMPLD_ENV)  // option 2
         v_NoiseLevel = m_AmpldEnvOutput;
     else if (noiseCtrlSource == NOISE_LVL_EXPRESS)    // option 3
-        v_NoiseLevel = (m_PressureLevel / 2);
+        v_NoiseLevel = (m_ExpressionLevel / 2);
     else if (noiseCtrlSource == NOISE_LVL_MODULN)     // option 4
-        v_NoiseLevel = (m_ModulationLevel * 75) / 100;
+        v_NoiseLevel = (m_ModulationLevel * 70) / 100;
     else  v_NoiseLevel = 0;  // ..................... // option 0 (Noise OFF)
         
 }
@@ -1159,51 +1014,46 @@ PRIVATE  void   NoiseLevelControl()
 /*
  * Bi-quad resonant filter centre frequency control (modulation)
  *
- * Called by the RemiSynthProcess() routine at 5ms intervals, this function updates the
- * bi-quad IIR filter coefficients in real-time according to the active note pitch and
- * selected control parameters. The actual DSP filter algorithm is incorporated in the 
- * audio ISR.
+ * Called by the SynthProcess() routine at 5ms intervals, this function updates the
+ * bi-quad IIR filter coefficient a1 in real-time according to the note pitch and the
+ * filter frequency control (modulation) parameter(s).
+ * The filter resonance cannot be changed while a note is in progress, hence other
+ * filter coeff's do not need to be updated here.
+ * The actual DSP filter algorithm is incorporated in the audio ISR.
  * 
- * Input variable:  m_FilterFcIndex = LUT index for coeff c (varies with fc)
- *
- * Output variables:  v_coeff_xx  = real-time filter coeff's (4 fixed-point values)
- * 
- * *** todo: Implement remaining control modes  ***********************************
+ * Input variable:  m_FilterIndex = index into filter coeff LUT, varies with fc,
+ *                                  determined at Note_ON and legato note change.
+ *     
+ * Output variables:  v_coeff_a1  = real-time filter coeff (fixed-point value)
  */
 PRIVATE  void   FilterFrequencyControl()
 {
     fixed_t  devn;   // deviation from quiescent value (+/-0.5 max)
-    int  fc_idx = m_FilterFcIndex;   // determined at Note_ON, note change
-    
-    if (m_Patch.NoiseLevelCtrl != 0)  // Noise enabled
-    {
-        return;  // filter Fc is fixed if noise is enabled
-    }
-    
-    if (m_Patch.FilterControl == FILTER_CTRL_CONTOUR)  // mode 1
-    {
-        fc_idx = IntegerPart(m_ContourEnvOutput * 108);
-    }
-    else if (m_Patch.FilterControl == FILTER_CTRL_LFO)  // mode 4
-    {
-        devn = (m_LFO_output * m_Patch.VibratoDepth) / 100;  // LFO deviation (+/-1.0 max)
-        fc_idx += IntegerPart(devn * 108);
-    }
-    else  // Assume m_Patch.FilterControl == FILTER_CTRL_FIXED) ... mode 0
-    {
-        return;  // filter Fc is fixed
-    }
+    int  fc_idx;     // index into filter coeff (c) look-up table
 
-    if (fc_idx > 108)  fc_idx = 108;   // max. (~8400 Hz)
+    if (g_Patch.NoiseMode)  
+        return;  // wave filter is bypassed while noise is enabled
+
+    if (g_Patch.FilterControl == FILTER_CTRL_CONTOUR)  // mode 1
+    {
+        fc_idx = m_FilterIndex + IntegerPart(m_ContourEnvOutput * 108) - 50;
+    }
+    else if (g_Patch.FilterControl == FILTER_CTRL_LFO)  // mode 4
+    {
+        devn = (m_LFO_output * g_Patch.LFO_FM_Depth) / 200;  // deviation (+/-0.5 max)
+        fc_idx = m_FilterIndex + IntegerPart(devn * 108);
+    }
+    else if (g_Patch.FilterControl == FILTER_CTRL_MODULN)  // mode 5
+    {
+        devn = (m_ModulationLevel * 50) / 100;  // deviation (+0.5 max)
+        fc_idx = m_FilterIndex - IntegerPart(devn * 108);  // Fc decreases with mod'n level
+    }
+    else  fc_idx = m_FilterIndex;  // filter Fc is constant or note tracking (offset)
+
+    if (fc_idx > 108)  fc_idx = 108;   // max. (~8 kHz)
     if (fc_idx < 0)  fc_idx = 0;       // min. (~16 Hz)
 
-    // Update the real-time coefficient values to be applied in the audio ISR
-    TIMER2_IRQ_DISABLE();
-    v_coeff_b0 = m_FiltCoeff_b0;
-    v_coeff_b2 = 0 - m_FiltCoeff_b0;         // b2 = -b0
     v_coeff_a1 = 0 - m_FiltCoeff_c[fc_idx];  // a1 = -c
-    v_coeff_a2 = m_FiltCoeff_a2;
-    TIMER2_IRQ_ENABLE();
 }
 
 
@@ -1231,9 +1081,11 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
     static  fixed_t  filter_out_1;        // bi-quad filter output delayed 1 sample
     static  fixed_t  filter_out_2;        // bi-quad filter output delayed 2 samples
     static  uint32   rand_last = 1;       // random number (NB: seed must be odd!)
+    static  fixed_t  reverbPrev;          // previous sample from reverb delay line
     static  int      rvbIndex;            // index into ReverbDelayLine[]
-    static  fixed_t  reverbPrev;          // previous sample from reverb processor
 
+    uint32   CC_Reg;
+    uint32   entryTime;                   // ISR entry time (core cycle count)
     int      idx;                         // index into wave-tables
     fixed_t  osc1Sample, osc2Sample;      // outputs from OSC1 and OSC2
     fixed_t  noiseSample;                 // output from white noise algorithm
@@ -1244,12 +1096,13 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
     fixed_t  totalMixOut;                 // output from wave + noise mixers
     fixed_t  filterIn;                    // input to IIR bi-quad filter 
     fixed_t  filterOut;                   // output from IIR bi-quad filter 
-    fixed_t  attenOut;                    // output from variable-gain attenuator
+    fixed_t  attenOut = 0;                // output from variable-gain attenuator
     fixed_t  reverbOut;                   // output from reverb delay line
     fixed_t  reverbLPF;                   // output from reverb loop filter
-    fixed_t  finalOutput;                 // output sample (to PWM DAC) 
+    fixed_t  finalOutput = 0;             // output sample (to PWM DAC) 
 
-    TESTPOINT_RC14_SET_HI();  // for 'scope probe -- to measure ISR execution time
+    READ_CPU_CORE_COUNT_REG(CC_Reg);
+    entryTime = CC_Reg;
 
     if (v_SynthEnable)
     {
@@ -1257,18 +1110,18 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
         idx = v_Osc1Angle >> 16;  // integer part of v_Osc1Angle
         osc1Sample = (fixed_t) m_WaveTable1[idx] << 5;  // normalize
         v_Osc1Angle += v_Osc1Step;
-        if (v_Osc1Angle >= (m_Osc1WaveTableSize << 16))
-            v_Osc1Angle -= (m_Osc1WaveTableSize << 16);
+        if (v_Osc1Angle >= (g_Osc1WaveTableSize << 16))
+            v_Osc1Angle -= (g_Osc1WaveTableSize << 16);
 
         // OSC2 Wave-table oscillator 
         idx = v_Osc2Angle >> 16;  // integer part of v_Osc2Angle
         osc2Sample = (fixed_t) m_WaveTable2[idx] << 5;  // normalize
         v_Osc2Angle += v_Osc2Step;
-        if (v_Osc2Angle >= (m_Osc2WaveTableSize << 16))
-            v_Osc2Angle -= (m_Osc2WaveTableSize << 16);
+        if (v_Osc2Angle >= (g_Osc2WaveTableSize << 16))
+            v_Osc2Angle -= (g_Osc2WaveTableSize << 16);
         
         // Wave Mixer -- add OSC1 and OSC2 samples, scaled according to mix ratio
-        mixerIn1 = (osc1Sample * v_Mix1Level) >> 10;
+        mixerIn1 = (osc1Sample * (1000 - v_Mix2Level)) >> 10;
         mixerIn2 = (osc2Sample * v_Mix2Level) >> 10;
         waveMixerOut = mixerIn1 + mixerIn2;
 
@@ -1276,8 +1129,8 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
         rand_last = (rand_last * 1103515245 + 12345) & 0x7FFFFFFF;  // unsigned
         noiseSample = (int32) (rand_last << 1);    // signed 32-bit value
         noiseSample = noiseSample >> 11;           // normalized fixed-pt (+/-1.0)
-        
-        if (m_Patch.NoiseMode)  // Noise enabled in patch
+
+        if (g_Patch.NoiseMode)  // Noise enabled in patch
         {
             // Adjust noiseSample to a level which avoids overdriving the filter
             filterIn = (noiseSample * m_FilterAtten_pc) / 100;  
@@ -1294,17 +1147,17 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
             filterOut = (filterOut * m_NoiseGain_x10) / 10;  
 
             // If enabled, Ring Modulate OSC2 output with filtered noise...
-            if (m_Patch.NoiseMode & NOISE_PITCHED)   
+            if (g_Patch.NoiseMode & NOISE_PITCHED)   
                 noiseGenOut = MultiplyFixed(filterOut, osc2Sample);  // Ring Mod.
             else  noiseGenOut = filterOut;   // unmodulated filtered noise
             
             // Add or mix noise with wave mixer output according to patch mode
-            if ((m_Patch.NoiseMode & 3) == NOISE_WAVE_ADDED)  // Add noise to total mix
+            if ((g_Patch.NoiseMode & 3) == NOISE_WAVE_ADDED)  // Add noise to total mix
             {
                 noiseGenOut = MultiplyFixed(noiseGenOut, v_NoiseLevel);
                 totalMixOut = (waveMixerOut + noiseGenOut) / 2;  // avoid clipping
             }
-            else if ((m_Patch.NoiseMode & 3) == NOISE_WAVE_MIXED)  // Ratiometric mix
+            else if ((g_Patch.NoiseMode & 3) == NOISE_WAVE_MIXED)  // Ratiometric mix
             {
                 waveRatio = IntToFixedPt(1) - v_NoiseLevel;  // wave:noise ratio (0 ~ 1.0)
                 totalMixOut = MultiplyFixed(waveMixerOut, waveRatio);
@@ -1312,7 +1165,7 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
             }
             else  totalMixOut = MultiplyFixed(noiseGenOut, v_NoiseLevel);  // Noise only
         }
-        else if (m_Patch.FilterResonance)   // Filter enabled (res != 0)
+        else if (g_Patch.FilterResonance)   // Filter enabled (res != 0)
         {
             // Adjust waveMixerOut to a level which avoids overdriving the filter
             filterIn = (waveMixerOut * m_FilterAtten_pc) / 100;
@@ -1329,31 +1182,38 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
             totalMixOut = (filterOut * m_FilterGain_x10) / 100;  
         }
         else  totalMixOut = waveMixerOut;   // No noise and no filter in patch
+        
+        // Apply ampld limiter.. 
+        if (totalMixOut > FIXED_MAX_LEVEL)  
+        {
+            totalMixOut = FIXED_MAX_LEVEL;
+            v_Clipping = TRUE;  // Trigger LED indicator
+        }
+        if (totalMixOut < -FIXED_MAX_LEVEL)  totalMixOut = -FIXED_MAX_LEVEL;
 
         // Variable-gain output attenuator -- Apply expression, envelope, etc.
         attenOut = MultiplyFixed(totalMixOut, v_OutputLevel); 
 
-        // Reverberation effect (Courtesy of Dan Mitchell, author of "BasicSynth")
-        reverbOut = MultiplyFixed(ReverbDelayLine[rvbIndex], m_RvbDecay);
-        reverbLPF = (reverbOut + reverbPrev) >> 1;  // simple low-pass filter
-        reverbPrev = reverbLPF;
-        ReverbDelayLine[rvbIndex] = MultiplyFixed(attenOut, m_RvbAtten) + reverbLPF;
-        if (++rvbIndex >= m_RvbDelayLen)  rvbIndex = 0;  // wrap
-
-        // Add reverb output to dry signal according to reverb mix setting...
-        finalOutput = MultiplyFixed(attenOut, IntToFixedPt(1) - m_RvbMix); 
-        finalOutput += MultiplyFixed(reverbOut, m_RvbMix);   // Wet part
-        
-        // Apply ampld limiter..  (Ideally a non-linear compression curve - TBD)
-        if (finalOutput > FIXED_MAX_LEVEL)  finalOutput = FIXED_MAX_LEVEL;
-        if (finalOutput < -FIXED_MAX_LEVEL)  finalOutput = -FIXED_MAX_LEVEL;
+        // Reverberation effect (Courtesy of Dan Mitchell, ref. "BasicSynth")
+        if (m_RvbMix != 0)  
+        {
+            reverbOut = MultiplyFixed(ReverbDelayLine[rvbIndex], m_RvbDecay);
+            reverbLPF = (reverbOut + reverbPrev) >> 1;  // simple low-pass filter
+            reverbPrev = reverbOut;
+            ReverbDelayLine[rvbIndex] = ((attenOut * m_RvbAtten) >> 7) + reverbLPF;
+            if (++rvbIndex >= m_RvbDelayLen)  rvbIndex = 0;  // wrap
+            // Add reverb output to dry signal according to reverb mix setting...
+            finalOutput = (attenOut * (128 - m_RvbMix)) >> 7;  // Dry portion
+            finalOutput += (reverbOut * m_RvbMix) >> 7;   // Wet portion
+        }
+        else  finalOutput = attenOut;
     }
-    else  finalOutput = 0;  // synth engine disabled
 
-    // PWM DAC output (11 bits) -- update PWM duty register (range 1..1999)
-    OC4RS = 1000 + (int)(finalOutput >> 10);
+    // PWM DAC output... Update OC4 duty register (range 1..1999)
+    PWM_AUDIO_DAC_WRITE(1000 + (int)(finalOutput >> 10));
 
-    TESTPOINT_RC14_SET_LO();
+    READ_CPU_CORE_COUNT_REG(CC_Reg);
+    v_ISRexecTime = CC_Reg - entryTime;
     IFS0bits.T2IF = 0;         // Clear the IRQ
 }
 
@@ -1387,7 +1247,7 @@ bool  isNoteOn()
  */
 PatchParamTable_t *GetActivePatchTable()
 {
-    return  &m_Patch;
+    return  &g_Patch;
 }
 
 
@@ -1396,7 +1256,7 @@ PatchParamTable_t *GetActivePatchTable()
  */
 int    GetActivePatchID()
 {
-    return  m_Patch.PatchNumber;
+    return  g_Patch.PatchNumber;
 }
 
 
@@ -1409,9 +1269,9 @@ int    GetActivePatchID()
 void  SelectUserWaveTableOsc1()
 {
     m_WaveTable1 = (int16 *) WaveTableBuffer; 
-    m_Patch.Osc1WaveTable = 0;
-    m_Patch.MixerOsc2Level = 0;
-    m_Patch.MixerControl = MIXER_CTRL_FIXED;
+    g_Patch.Osc1WaveTable = 0;
+    g_Patch.MixerOsc2Level = 0;
+    g_Patch.MixerControl = MIXER_CTRL_FIXED;
 }
 
 
@@ -1422,7 +1282,7 @@ void  SelectUserWaveTableOsc1()
  */
 int  GetActiveWaveTable(void)
 {
-    return  m_Patch.Osc1WaveTable;
+    return  g_Patch.Osc1WaveTable;
 }
 
 /*
@@ -1436,7 +1296,7 @@ int  GetActiveWaveTable(void)
  */
 void  WaveTableSizeSet(uint16 size)
 {
-    m_Osc1WaveTableSize = size;
+    g_Osc1WaveTableSize = size;
 }
 
 
@@ -1449,7 +1309,7 @@ void  WaveTableSizeSet(uint16 size)
  */
 void  Osc1FreqDividerSet(float freqDiv)
 {
-    m_Osc1FreqDiv = freqDiv;
+    g_Osc1FreqDiv = freqDiv;
 }
 
 
@@ -1460,18 +1320,7 @@ void  Osc1FreqDividerSet(float freqDiv)
  */
 float  Osc1FreqDividerGet()
 {
-    return  m_Osc1FreqDiv;
-}
-
-
-/*
- * Function sets the value of m_OscFreqMultiplier.
- * Low-level diagnostic used only by console "diag" command.
- * Pitch bend function should be disabled.
- */
-void  OscFreqMultiplierSet(float  mult)
-{
-    m_OscFreqMultiplier = FloatToFixed(mult);
+    return  g_Osc1FreqDiv;
 }
 
 
@@ -1497,24 +1346,12 @@ void  SetAudioOutputLevel(fixed_t level_pu)
 }
 
 /*
- * Function:     Set Vibrato (LFO) control mode.
- *               Intended primarily for test and debug purposes.
- *
- * Note:    <!>  Vibrato mode is restored to that defined by the active Preset
- *               whenever an Instrument Preset is selected.
- */
-void  SetVibratoModeTemp(unsigned mode)
-{
-    m_VibratoControl = mode & 7;
-}
-
-/*
  * Function:     Get Expression/pressure level (fixed-pt value).
  *               Intended primarily for test and debug purposes.
  */
 fixed_t  GetExpressionLevel(void)
 {
-    return  m_PressureLevel;
+    return  m_ExpressionLevel;
 }
 
 /*
@@ -1524,6 +1361,50 @@ fixed_t  GetExpressionLevel(void)
 fixed_t  GetModulationLevel(void)
 {
     return  m_ModulationLevel;
+}
+
+/*
+ * Function:     Get Reverb Mix (wet/dry) setting (0..128).
+ *               Intended primarily for test and debug purposes.
+ */
+int  GetReverbMixSetting(void)
+{
+    return  m_RvbMix;
+}
+
+/*
+ * Function:     Set Vibrato (Osc. FM) control mode temporarily.
+ *               Called by diagnostic routines only.
+ * 
+ * Note:    <!>  Vibrato mode is restored to that defined by the active Preset
+ *               whenever an Instrument Preset is selected.
+ */
+void  SetVibratoMode(unsigned mode)
+{
+    m_VibratoControl = mode & 7;
+}
+
+/*
+ * Function:     Set bi-quad filter resonant frequency (m_FilterIndex) temporarily.
+ *               Called by diagnostic routines only.
+ * 
+ * Note:    <!>  m_FilterIndex is restored to that defined by the active Preset
+ *               whenever an Instrument Preset is selected.
+ * 
+ * Input arg:    freqIndex = index into filter coeff. LUT (0..108)
+ */
+void  SetFilterFreqIndex(uint8 freqIndex)
+{
+    if (freqIndex <= 108)  m_FilterIndex = freqIndex;
+}
+
+/*
+ * Function:     Get bi-quad filter resonant frequency (m_FilterIndex)
+ *               Called by diagnostic routines only.
+ */
+uint8  GetFilterFreqIndex()
+{
+    return  m_FilterIndex;
 }
 
 
@@ -1585,522 +1466,148 @@ fixed_t  Base2Exp(fixed_t xval)
     return  (fixed_t)(yval << 6);   // convert to 12:20 fixed-pt format
 }
 
-
 //=================================================================================================
-//                       P A T C H    C L I    F U N C T I O N S
-/*
- * Function:     Console CLI command to manage the synth patch, incl...
- *                 -  view/modify active patch parameters
- *                 -  save active patch (param set) as 'User Patch' in EEPROM
- *                 -  load active patch from 'User Patch' in EEPROM
- *                 -  load active patch from predefined patch table in MCU flash
- *                 -  dump active patch to console as C data definition
- */
-void  Cmnd_patch(int argCount, char *argValue[])
+//
+// Lookup table to transform linear variable to base-2 exponential.
+// Index value range 0..1024 (integer) represents linear axis range -1.0 ~ +1.0.
+// Lookup value range is 0.5 to 2.0 (fixed point).  Centre (zero) value is 1.00.
+//
+// <!>  g_base2exp[] values are in 18:14 bit fixed-point format.
+//      Shift left 6 bit places to convert to 12:20 fixed-point.
+//      ````````````````````````````````````````````````````````
+// For higher precision, where required, use the function: Base2Exp()
+//
+const  uint16  g_base2exp[] =
 {
-    char    paramAcronym[4];
-    char    option = tolower(argValue[1][1]);
-    int     paramValue;
-    int     i;
+    0x2000, 0x200B, 0x2016, 0x2021, 0x202C, 0x2037, 0x2042, 0x204E,
+    0x2059, 0x2064, 0x206F, 0x207A, 0x2086, 0x2091, 0x209C, 0x20A8,
+    0x20B3, 0x20BE, 0x20CA, 0x20D5, 0x20E0, 0x20EC, 0x20F7, 0x2103,
+    0x210E, 0x211A, 0x2125, 0x2130, 0x213C, 0x2148, 0x2153, 0x215F,
+    0x216A, 0x2176, 0x2181, 0x218D, 0x2199, 0x21A4, 0x21B0, 0x21BC,
+    0x21C7, 0x21D3, 0x21DF, 0x21EB, 0x21F6, 0x2202, 0x220E, 0x221A,
+    0x2226, 0x2231, 0x223D, 0x2249, 0x2255, 0x2261, 0x226D, 0x2279,
+    0x2285, 0x2291, 0x229D, 0x22A9, 0x22B5, 0x22C1, 0x22CD, 0x22D9,
+    0x22E5, 0x22F1, 0x22FD, 0x2309, 0x2315, 0x2322, 0x232E, 0x233A,
+    0x2346, 0x2352, 0x235F, 0x236B, 0x2377, 0x2384, 0x2390, 0x239C,
+    0x23A9, 0x23B5, 0x23C1, 0x23CE, 0x23DA, 0x23E7, 0x23F3, 0x23FF,
+    0x240C, 0x2418, 0x2425, 0x2432, 0x243E, 0x244B, 0x2457, 0x2464,
+    0x2470, 0x247D, 0x248A, 0x2496, 0x24A3, 0x24B0, 0x24BD, 0x24C9,
+    0x24D6, 0x24E3, 0x24F0, 0x24FC, 0x2509, 0x2516, 0x2523, 0x2530,
+    0x253D, 0x254A, 0x2557, 0x2564, 0x2570, 0x257D, 0x258A, 0x2598,
+    0x25A5, 0x25B2, 0x25BF, 0x25CC, 0x25D9, 0x25E6, 0x25F3, 0x2600,
+    0x260D, 0x261B, 0x2628, 0x2635, 0x2642, 0x2650, 0x265D, 0x266A,
+    0x2678, 0x2685, 0x2692, 0x26A0, 0x26AD, 0x26BA, 0x26C8, 0x26D5,
+    0x26E3, 0x26F0, 0x26FE, 0x270B, 0x2719, 0x2726, 0x2734, 0x2742,
+    0x274F, 0x275D, 0x276A, 0x2778, 0x2786, 0x2794, 0x27A1, 0x27AF,
+    0x27BD, 0x27CB, 0x27D8, 0x27E6, 0x27F4, 0x2802, 0x2810, 0x281E,
+    0x282C, 0x283A, 0x2847, 0x2855, 0x2863, 0x2871, 0x287F, 0x288E,
+    0x289C, 0x28AA, 0x28B8, 0x28C6, 0x28D4, 0x28E2, 0x28F0, 0x28FF,
+    0x290D, 0x291B, 0x2929, 0x2938, 0x2946, 0x2954, 0x2962, 0x2971,
+    0x297F, 0x298E, 0x299C, 0x29AA, 0x29B9, 0x29C7, 0x29D6, 0x29E4,
+    0x29F3, 0x2A01, 0x2A10, 0x2A1F, 0x2A2D, 0x2A3C, 0x2A4A, 0x2A59,
+    0x2A68, 0x2A77, 0x2A85, 0x2A94, 0x2AA3, 0x2AB2, 0x2AC0, 0x2ACF,
+    0x2ADE, 0x2AED, 0x2AFC, 0x2B0B, 0x2B1A, 0x2B29, 0x2B38, 0x2B47,
+    0x2B56, 0x2B65, 0x2B74, 0x2B83, 0x2B92, 0x2BA1, 0x2BB0, 0x2BBF,
+    0x2BCE, 0x2BDE, 0x2BED, 0x2BFC, 0x2C0B, 0x2C1B, 0x2C2A, 0x2C39,
+    0x2C48, 0x2C58, 0x2C67, 0x2C77, 0x2C86, 0x2C95, 0x2CA5, 0x2CB4,
+    0x2CC4, 0x2CD3, 0x2CE3, 0x2CF3, 0x2D02, 0x2D12, 0x2D21, 0x2D31,
+    0x2D41, 0x2D50, 0x2D60, 0x2D70, 0x2D80, 0x2D8F, 0x2D9F, 0x2DAF,
+    0x2DBF, 0x2DCF, 0x2DDF, 0x2DEF, 0x2DFE, 0x2E0E, 0x2E1E, 0x2E2E,
+    0x2E3E, 0x2E4E, 0x2E5F, 0x2E6F, 0x2E7F, 0x2E8F, 0x2E9F, 0x2EAF,
+    0x2EBF, 0x2ED0, 0x2EE0, 0x2EF0, 0x2F00, 0x2F11, 0x2F21, 0x2F31,
+    0x2F42, 0x2F52, 0x2F62, 0x2F73, 0x2F83, 0x2F94, 0x2FA4, 0x2FB5,
+    0x2FC5, 0x2FD6, 0x2FE7, 0x2FF7, 0x3008, 0x3018, 0x3029, 0x303A,
+    0x304B, 0x305B, 0x306C, 0x307D, 0x308E, 0x309F, 0x30AF, 0x30C0,
+    0x30D1, 0x30E2, 0x30F3, 0x3104, 0x3115, 0x3126, 0x3137, 0x3148,
+    0x3159, 0x316A, 0x317C, 0x318D, 0x319E, 0x31AF, 0x31C0, 0x31D2,
+    0x31E3, 0x31F4, 0x3205, 0x3217, 0x3228, 0x323A, 0x324B, 0x325C,
+    0x326E, 0x327F, 0x3291, 0x32A2, 0x32B4, 0x32C6, 0x32D7, 0x32E9,
+    0x32FB, 0x330C, 0x331E, 0x3330, 0x3341, 0x3353, 0x3365, 0x3377,
+    0x3389, 0x339B, 0x33AC, 0x33BE, 0x33D0, 0x33E2, 0x33F4, 0x3406,
+    0x3418, 0x342A, 0x343C, 0x344F, 0x3461, 0x3473, 0x3485, 0x3497,
+    0x34AA, 0x34BC, 0x34CE, 0x34E0, 0x34F3, 0x3505, 0x3517, 0x352A,
+    0x353C, 0x354F, 0x3561, 0x3574, 0x3586, 0x3599, 0x35AB, 0x35BE,
+    0x35D1, 0x35E3, 0x35F6, 0x3609, 0x361C, 0x362E, 0x3641, 0x3654,
+    0x3667, 0x367A, 0x368D, 0x369F, 0x36B2, 0x36C5, 0x36D8, 0x36EB,
+    0x36FE, 0x3712, 0x3725, 0x3738, 0x374B, 0x375E, 0x3771, 0x3784,
+    0x3798, 0x37AB, 0x37BE, 0x37D2, 0x37E5, 0x37F8, 0x380C, 0x381F,
+    0x3833, 0x3846, 0x385A, 0x386D, 0x3881, 0x3894, 0x38A8, 0x38BC,
+    0x38CF, 0x38E3, 0x38F7, 0x390B, 0x391E, 0x3932, 0x3946, 0x395A,
+    0x396E, 0x3982, 0x3996, 0x39AA, 0x39BE, 0x39D2, 0x39E6, 0x39FA,
+    0x3A0E, 0x3A22, 0x3A36, 0x3A4A, 0x3A5F, 0x3A73, 0x3A87, 0x3A9B,
+    0x3AB0, 0x3AC4, 0x3AD8, 0x3AED, 0x3B01, 0x3B16, 0x3B2A, 0x3B3F,
+    0x3B53, 0x3B68, 0x3B7C, 0x3B91, 0x3BA6, 0x3BBA, 0x3BCF, 0x3BE4,
+    0x3BF9, 0x3C0D, 0x3C22, 0x3C37, 0x3C4C, 0x3C61, 0x3C76, 0x3C8B,
+    0x3CA0, 0x3CB5, 0x3CCA, 0x3CDF, 0x3CF4, 0x3D09, 0x3D1E, 0x3D34,
+    0x3D49, 0x3D5E, 0x3D73, 0x3D89, 0x3D9E, 0x3DB3, 0x3DC9, 0x3DDE,
+    0x3DF4, 0x3E09, 0x3E1F, 0x3E34, 0x3E4A, 0x3E5F, 0x3E75, 0x3E8B,
+    0x3EA0, 0x3EB6, 0x3ECC, 0x3EE2, 0x3EF7, 0x3F0D, 0x3F23, 0x3F39,
+    0x3F4F, 0x3F65, 0x3F7B, 0x3F91, 0x3FA7, 0x3FBD, 0x3FD3, 0x3FE9,
+    0x4000, 0x4016, 0x402C, 0x4042, 0x4058, 0x406F, 0x4085, 0x409C,
+    0x40B2, 0x40C8, 0x40DF, 0x40F5, 0x410C, 0x4122, 0x4139, 0x4150,
+    0x4166, 0x417D, 0x4194, 0x41AA, 0x41C1, 0x41D8, 0x41EF, 0x4206,
+    0x421D, 0x4234, 0x424A, 0x4261, 0x4278, 0x4290, 0x42A7, 0x42BE,
+    0x42D5, 0x42EC, 0x4303, 0x431B, 0x4332, 0x4349, 0x4360, 0x4378,
+    0x438F, 0x43A7, 0x43BE, 0x43D6, 0x43ED, 0x4405, 0x441C, 0x4434,
+    0x444C, 0x4463, 0x447B, 0x4493, 0x44AA, 0x44C2, 0x44DA, 0x44F2,
+    0x450A, 0x4522, 0x453A, 0x4552, 0x456A, 0x4582, 0x459A, 0x45B2,
+    0x45CA, 0x45E3, 0x45FB, 0x4613, 0x462B, 0x4644, 0x465C, 0x4675,
+    0x468D, 0x46A5, 0x46BE, 0x46D6, 0x46EF, 0x4708, 0x4720, 0x4739,
+    0x4752, 0x476A, 0x4783, 0x479C, 0x47B5, 0x47CE, 0x47E7, 0x47FF,
+    0x4818, 0x4831, 0x484A, 0x4864, 0x487D, 0x4896, 0x48AF, 0x48C8,
+    0x48E1, 0x48FB, 0x4914, 0x492D, 0x4947, 0x4960, 0x497A, 0x4993,
+    0x49AD, 0x49C6, 0x49E0, 0x49F9, 0x4A13, 0x4A2D, 0x4A46, 0x4A60,
+    0x4A7A, 0x4A94, 0x4AAE, 0x4AC8, 0x4AE1, 0x4AFB, 0x4B15, 0x4B30,
+    0x4B4A, 0x4B64, 0x4B7E, 0x4B98, 0x4BB2, 0x4BCC, 0x4BE7, 0x4C01,
+    0x4C1B, 0x4C36, 0x4C50, 0x4C6B, 0x4C85, 0x4CA0, 0x4CBA, 0x4CD5,
+    0x4CF0, 0x4D0A, 0x4D25, 0x4D40, 0x4D5B, 0x4D75, 0x4D90, 0x4DAB,
+    0x4DC6, 0x4DE1, 0x4DFC, 0x4E17, 0x4E32, 0x4E4D, 0x4E69, 0x4E84,
+    0x4E9F, 0x4EBA, 0x4ED5, 0x4EF1, 0x4F0C, 0x4F28, 0x4F43, 0x4F5F,
+    0x4F7A, 0x4F96, 0x4FB1, 0x4FCD, 0x4FE9, 0x5004, 0x5020, 0x503C,
+    0x5058, 0x5074, 0x508F, 0x50AB, 0x50C7, 0x50E3, 0x50FF, 0x511C,
+    0x5138, 0x5154, 0x5170, 0x518C, 0x51A9, 0x51C5, 0x51E1, 0x51FE,
+    0x521A, 0x5237, 0x5253, 0x5270, 0x528C, 0x52A9, 0x52C5, 0x52E2,
+    0x52FF, 0x531C, 0x5339, 0x5355, 0x5372, 0x538F, 0x53AC, 0x53C9,
+    0x53E6, 0x5403, 0x5421, 0x543E, 0x545B, 0x5478, 0x5495, 0x54B3,
+    0x54D0, 0x54EE, 0x550B, 0x5529, 0x5546, 0x5564, 0x5581, 0x559F,
+    0x55BD, 0x55DA, 0x55F8, 0x5616, 0x5634, 0x5652, 0x5670, 0x568E,
+    0x56AC, 0x56CA, 0x56E8, 0x5706, 0x5724, 0x5742, 0x5761, 0x577F,
+    0x579D, 0x57BC, 0x57DA, 0x57F9, 0x5817, 0x5836, 0x5854, 0x5873,
+    0x5891, 0x58B0, 0x58CF, 0x58EE, 0x590D, 0x592B, 0x594A, 0x5969,
+    0x5988, 0x59A7, 0x59C7, 0x59E6, 0x5A05, 0x5A24, 0x5A43, 0x5A63,
+    0x5A82, 0x5AA1, 0x5AC1, 0x5AE0, 0x5B00, 0x5B1F, 0x5B3F, 0x5B5F,
+    0x5B7E, 0x5B9E, 0x5BBE, 0x5BDE, 0x5BFD, 0x5C1D, 0x5C3D, 0x5C5D,
+    0x5C7D, 0x5C9D, 0x5CBE, 0x5CDE, 0x5CFE, 0x5D1E, 0x5D3E, 0x5D5F,
+    0x5D7F, 0x5DA0, 0x5DC0, 0x5DE1, 0x5E01, 0x5E22, 0x5E42, 0x5E63,
+    0x5E84, 0x5EA5, 0x5EC5, 0x5EE6, 0x5F07, 0x5F28, 0x5F49, 0x5F6A,
+    0x5F8B, 0x5FAC, 0x5FCE, 0x5FEF, 0x6010, 0x6031, 0x6053, 0x6074,
+    0x6096, 0x60B7, 0x60D9, 0x60FA, 0x611C, 0x613E, 0x615F, 0x6181,
+    0x61A3, 0x61C5, 0x61E7, 0x6209, 0x622B, 0x624D, 0x626F, 0x6291,
+    0x62B3, 0x62D5, 0x62F8, 0x631A, 0x633C, 0x635F, 0x6381, 0x63A4,
+    0x63C6, 0x63E9, 0x640B, 0x642E, 0x6451, 0x6474, 0x6497, 0x64B9,
+    0x64DC, 0x64FF, 0x6522, 0x6545, 0x6569, 0x658C, 0x65AF, 0x65D2,
+    0x65F6, 0x6619, 0x663C, 0x6660, 0x6683, 0x66A7, 0x66CA, 0x66EE,
+    0x6712, 0x6736, 0x6759, 0x677D, 0x67A1, 0x67C5, 0x67E9, 0x680D,
+    0x6831, 0x6855, 0x6879, 0x689E, 0x68C2, 0x68E6, 0x690B, 0x692F,
+    0x6954, 0x6978, 0x699D, 0x69C1, 0x69E6, 0x6A0B, 0x6A2F, 0x6A54,
+    0x6A79, 0x6A9E, 0x6AC3, 0x6AE8, 0x6B0D, 0x6B32, 0x6B57, 0x6B7D,
+    0x6BA2, 0x6BC7, 0x6BED, 0x6C12, 0x6C38, 0x6C5D, 0x6C83, 0x6CA8,
+    0x6CCE, 0x6CF4, 0x6D1A, 0x6D3F, 0x6D65, 0x6D8B, 0x6DB1, 0x6DD7,
+    0x6DFD, 0x6E24, 0x6E4A, 0x6E70, 0x6E96, 0x6EBD, 0x6EE3, 0x6F09,
+    0x6F30, 0x6F57, 0x6F7D, 0x6FA4, 0x6FCB, 0x6FF1, 0x7018, 0x703F,
+    0x7066, 0x708D, 0x70B4, 0x70DB, 0x7102, 0x7129, 0x7151, 0x7178,
+    0x719F, 0x71C7, 0x71EE, 0x7216, 0x723D, 0x7265, 0x728D, 0x72B4,
+    0x72DC, 0x7304, 0x732C, 0x7354, 0x737C, 0x73A4, 0x73CC, 0x73F4,
+    0x741C, 0x7444, 0x746D, 0x7495, 0x74BE, 0x74E6, 0x750F, 0x7537,
+    0x7560, 0x7589, 0x75B1, 0x75DA, 0x7603, 0x762C, 0x7655, 0x767E,
+    0x76A7, 0x76D0, 0x76F9, 0x7723, 0x774C, 0x7775, 0x779F, 0x77C8,
+    0x77F2, 0x781B, 0x7845, 0x786F, 0x7899, 0x78C2, 0x78EC, 0x7916,
+    0x7940, 0x796A, 0x7994, 0x79BF, 0x79E9, 0x7A13, 0x7A3D, 0x7A68,
+    0x7A92, 0x7ABD, 0x7AE7, 0x7B12, 0x7B3D, 0x7B67, 0x7B92, 0x7BBD,
+    0x7BE8, 0x7C13, 0x7C3E, 0x7C69, 0x7C94, 0x7CBF, 0x7CEB, 0x7D16,
+    0x7D41, 0x7D6D, 0x7D98, 0x7DC4, 0x7DEF, 0x7E1B, 0x7E47, 0x7E73,
+    0x7E9F, 0x7ECA, 0x7EF6, 0x7F22, 0x7F4F, 0x7F7B, 0x7FA7, 0x7FD3,
+    0x8000
+};
 
-    if (argCount == 1 || *argValue[1] == '?')   // help wanted
-    {
-        putstr( "View or modify the active (selected) patch \n" );
-        putstr( "``````````````````````````````````````````````````````````` \n" );
-        putstr( "Usage (1):  patch  <opt>  [arg] \n" );
-        putstr( "  where <opt> = \n" );
-        putstr( " -l  : List/enumerate predefined patches. \n");
-        putstr( " -d  : Dump active patch param's (alias: -i) \n");
-        putstr( " -s  : Save active patch as User Patch [arg = name] \n");
-        putstr( " -u  : Select User patch \n");
-        putstr( " -p  : Select Predefined patch (arg = Patch ID) \n");
-        putstr( " -w  : Wave-table info (active patch) \n");
-        putstr( "``````````````````````````````````````````````````````````` \n" );
-        putstr( "Usage (2):  patch  <param_ID> [=] <value> \n" );
-        putstr( "  where <param_ID> is a 2-letter mnemonic (see dump) \n");
-        putstr( "  Example: To set Vibrato Depth to 50 cents, enter:- \n" );
-        putstr( "           patch VD 50   [Alt:  patch vd = 50] \n" );
-        putstr( "___________________________________________________________ \n" );
-        return;
-    }
-
-    if (*argValue[1] == '-')  // Usage is type (1)
-    {
-        switch (option)
-        {
-        case 'l':  // List/enumerate pre-defined patches in flash PM
-        {
-            int   spaces;
-
-            putstr("      ID#  Patch Name              WT1  WT2  \n");
-            putstr("```````````````````````````````````````````` \n");
-
-            for (i = 0;  i < GetNumberOfPatchesDefined();  i++)
-            {
-                putDecimal(i, 3);
-                putstr("  ");
-                putDecimal(g_PatchProgram[i].PatchNumber, 4);
-                putstr("  ");
-                putstr((char *) g_PatchProgram[i].PatchName);
-                spaces = 24 - strlen(g_PatchProgram[i].PatchName);
-                while (spaces > 0)
-                    { putch(' ');  spaces--; }
-                putDecimal(g_PatchProgram[i].Osc1WaveTable, 3);
-                putstr("  ");
-                putDecimal(g_PatchProgram[i].Osc2WaveTable, 3);
-                putstr("\n");
-            }
-
-            putstr("____________________________________________ \n");
-            break;
-        }
-        case 'd':  // Dump active patch param's
-        case 'i':  // alias - patch info
-        {
-            DumpActivePatchParams();
-            break;
-        }
-        case 's':  // Save active patch as User Patch
-        {
-            m_Patch.PatchNumber = 0;
-            memset(&m_Patch.PatchName[0], 0, 22);  // clear existing name
-            if (argCount > 2)  // new name supplied
-                strncpy(&m_Patch.PatchName[0], argValue[2], 20);
-            else  strcpy(&m_Patch.PatchName[0], "User Patch");
-
-            memcpy(&g_Config.UserPatch, &m_Patch, sizeof(PatchParamTable_t));
-
-            if (StoreConfigData())  putstr("* Saved OK.\n");
-            else  putstr("! Error writing to EEPROM.\n");
-            break;
-        }
-        case 'u':  // Load User Patch
-        {
-            RemiSynthPatchSelect(0);
-            DumpActivePatchParams();
-            break;
-        }
-        case 'p':  // Load & activate a predefined patch (from flash PM)
-        {
-            int   patchNum = atoi(argValue[2]);
-            int   status = 0;
-
-            if (argCount == 3 && patchNum != 0)
-                status = RemiSynthPatchSelect(patchNum);
-            else  status = ERROR;
-
-            if (status == ERROR)  putstr("! Missing or invalid patch ID number.\n");
-            else  DumpActivePatchParams();
-            break;
-        }
-        case 'w':  // View patch active wave-table data
-        {
-            PrintWaveTableInfo(1);  
-            PrintWaveTableInfo(2);  
-            break;
-        }
-        default:
-        {
-            putstr("! Invalid cmd option.");
-            break;
-        }
-        } // end switch
-    }
-    else  // Usage is type (2) -- set a param value
-    {
-        char   arg2_1st_char = argValue[2][0];
-        paramAcronym[0] = toupper(argValue[1][0]);
-        paramAcronym[1] = toupper(argValue[1][1]);
-            
-        if (argCount == 4 && arg2_1st_char == '=') 
-        {
-            paramValue = atoi(argValue[3]);
-            SetPatchParameter(paramAcronym, paramValue);
-        }
-        else if (argCount == 3 && (isdigit(arg2_1st_char) || arg2_1st_char == '-'))  
-        {
-            paramValue = atoi(argValue[2]);
-            SetPatchParameter(paramAcronym, paramValue);
-        }
-        else  putstr("! Missing arg(s). Check cmd syntax.\n");
-    }
-}
-
-
-PRIVATE  void   PrintWaveTableInfo(unsigned oscNum)
-{
-    char   textBuf[120];
-    int    waveTableID;
-    int    activeTableSize;
-    float  activeOscFreqDiv;
-
-    WaveformDesc_t    *waveFormDesc;
-    FlashWaveTable_t  *waveTableDesc;
-
-    if (oscNum == 1)  
-    {
-        waveTableID = m_Patch.Osc1WaveTable;
-        activeTableSize = m_Osc1WaveTableSize;
-        activeOscFreqDiv = m_Osc1FreqDiv;
-    }
-    else if (oscNum == 2)  
-    {
-        waveTableID = m_Patch.Osc2WaveTable;
-        activeTableSize = m_Osc2WaveTableSize;
-        activeOscFreqDiv = m_Osc2FreqDiv;
-    }
-    else  return;  // undefined oscNum
-
-    sprintf(textBuf, "Wave-table assigned to OSC%d \n", oscNum);
-    putstr(textBuf);  
-    putstr("```````````````````````````````\n");
-
-    if (waveTableID != 0)   // Wave-table stored in flash PM
-    {
-        waveTableDesc = (FlashWaveTable_t *) &g_FlashWaveTableDef[waveTableID];
-
-        sprintf(textBuf, "Table ID num:  %d\n", waveTableID);
-        putstr(textBuf);
-        sprintf(textBuf, "Table Size:    %d\n", waveTableDesc->Size);
-        putstr(textBuf);
-        sprintf(textBuf, "Freq Divider:  %5.3f\n\n", waveTableDesc->FreqDiv);
-        putstr(textBuf);
-    }
-    else  // RAM-based user wave-table
-    {
-        waveFormDesc = (WaveformDesc_t *) &g_Config.UserWaveform;
-        
-        sprintf(textBuf, "Table Size:    %d\n", waveFormDesc->Size);
-        putstr(textBuf);
-        sprintf(textBuf, "Freq Divider:  %5.3f\n", waveFormDesc->FreqDiv);
-        putstr(textBuf);
-        putstr("User wave-table selected. May be affected by 'wav' utility.\n");
-        putstr("<!> Data shown above is from the wave-form descriptor in EEPROM.\n");
-    }
-    
-    putstr("Currently active settings:\n");
-    sprintf(textBuf, "Table Size:    %d\n", activeTableSize);
-    putstr(textBuf);
-    sprintf(textBuf, "Freq Divider:  %5.3f\n", activeOscFreqDiv);
-    putstr(textBuf);
-    putstr("```````````````````````````````\n");
-}
-
-
-/*
- * This function lists names and values of the active patch parameters in a format
- * suitable for import into the source code as a predefined patch definition.
- *
- * Parameters are listed in the order in which they are defined in the structure
- * PatchParamTable_t. Any change to the patch structure will require a corresponding
- * change to the listing.
- */
-PRIVATE  void   DumpActivePatchParams()
-{
-    char    textBuf[120];
-
-    putstr("Patch ID#:  ");  putDecimal(m_Patch.PatchNumber, 1);
-    putstr(" -> ");  putstr(m_Patch.PatchName);
-    putstr("\n\n");
-
-    //-------------  Oscillators, Pitch Bend and Vibrato --------------------------------
-
-    sprintf(textBuf, "\t%d,\t// W1: OSC1 Wave-table ID (0..250)\n",
-            (int) m_Patch.Osc1WaveTable);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// W2: OSC2 Wave-table ID (0..250)\n",
-            (int) m_Patch.Osc2WaveTable);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// OD: OSC2 Detune, cents (+/-1200)\n",
-            (int) m_Patch.Osc2Detune);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// PB: Pitch Bend range, cents (0..1200)\n",
-            (int) m_Patch.PitchBendRange);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// LF: LFO Freq x10 Hz (1..250)\n",
-            (int) m_Patch.LFO_Freq_x10);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// VD: Vibrato Depth, cents (0..200)\n",
-            (int) m_Patch.VibratoDepth);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// VR: Vibrato Ramp time (5..5000+ ms)\n",
-            (int) m_Patch.VibratoRamp_ms);
-    putstr(textBuf);
-    putstr("\n");
-
-    //-------------  Wave Mixer & Contour Envelope --------------------------------------
-
-    sprintf(textBuf, 
-            "\t%d,\t// MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)\n",
-            (int) m_Patch.MixerControl);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// ML: Mixer OSC2 Level in Fixed mode (0..100 %%)\n",
-            (int) m_Patch.MixerOsc2Level);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// CS: Contour Env Start level (0..100 %%)\n",
-            (int) m_Patch.ContourStartLevel);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// CD: Contour Env Delay time (5..5000+ ms)\n",
-            (int) m_Patch.ContourDelay_ms);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// CR: Contour Env Ramp time (5..5000+ ms)\n",
-            (int) m_Patch.ContourRamp_ms);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// CH: Contour Env Hold level (0..100 %%)\n",
-            (int) m_Patch.ContourHoldLevel);
-    putstr(textBuf);
-    putstr("\n");
-
-    //-------------  Noise Mixer & Bi-quad resonant Filter ------------------------------
-
-    sprintf(textBuf,
-            "\t%d,\t// NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)\n",
-            (int) m_Patch.NoiseMode);
-    putstr(textBuf);
-    sprintf(textBuf,
-            "\t%d,\t// NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Env, 3:Exprn, 4:Modn)\n",
-            (int) m_Patch.NoiseLevelCtrl);
-    putstr(textBuf);
-    sprintf(textBuf,
-            "\t%d,\t// FC: Filter Ctrl (0:Fixed, 1:Contour, 2:Env+, 3:Env-, 4:LFO, 5:Modn)\n",
-            (int) m_Patch.FilterControl);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FR: Filter Resonance x10000  (0..9999, 0:Bypass)\n",
-            (int) m_Patch.FilterResonance);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FF: Filter Freq. (10..10000 Hz,  0:NoteTracking On)\n",
-            (int) m_Patch.FilterFrequency);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FT: Filter Tracking offset (0..60 semitones)\n",
-            (int) m_Patch.FilterNoteTrack);
-    putstr(textBuf);
-    putstr("\n");
-
-    //-------------  Amplitude Envelope and Output Amplitude Control  -------------------
-
-    sprintf(textBuf, "\t%d,\t// AA: Ampld Env Attack time (5..5000+ ms)\n",
-            (int) m_Patch.AmpldEnvAttack_ms);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// AP: Ampld Env Peak time (0..5000+ ms)\n",
-            (int) m_Patch.AmpldEnvPeak_ms);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// AD: Ampld Env Decay time (5..5000+ ms)\n",
-            (int) m_Patch.AmpldEnvDecay_ms);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// AR: Ampld Env Release time (5..5000+ ms)\n",
-            (int) m_Patch.AmpldEnvRelease_ms);
-    putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// AS: Ampld Env Sustain level (0..100 %%)\n",
-            (int) m_Patch.AmpldEnvSustain);
-    putstr(textBuf);
-    sprintf(textBuf,
-            "\t%d \t// AC: Ampld Control (0:Max, 1:Fixed, 2:Exprn, 3:Env, 4:Env*Vel)\n",
-            (int) m_Patch.OutputAmpldCtrl);
-    putstr(textBuf);
-    putstr("\n");
-}
-
-
-/*
- *  Function sets an active patch parameter to a given value, if the value is valid.
- *
- *  Entry arg(s):  paramAbbr = pointer to a 2-char string identifying the parameter
- *                             to be set.
- *
- *                 paramVal = new value for the parameter
- *
- *  <!>  All param's except 'OD' (OSC2 Detune) must have positive values (>= 0).
- */
-PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal)
-{
-    int   paramHash = PARAM_HASH_VALUE(paramAbbr[0], paramAbbr[1]);
-    bool  isBadValue = 0;
-
-    if (paramVal < 0 && paramHash != PARAM_HASH_VALUE('O', 'D'))  
-    {
-        isBadValue = 1;   // negative value not accepted
-    }
-    else switch (paramHash)
-    {
-        //-------------  Oscillators, Pitch Bend and Vibrato --------------------------------
-        case PARAM_HASH_VALUE('W', '1'):
-        {
-            if (paramVal <= GetHighestWaveTableID())  
-                m_Patch.Osc1WaveTable = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('W', '2'):
-        {
-            if (paramVal <= GetHighestWaveTableID())
-                m_Patch.Osc2WaveTable = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('O', 'D'):
-        {
-            if (paramVal >= -4800 && paramVal <= 4800)
-                m_Patch.Osc2Detune = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('P', 'B'):
-        {
-            if (paramVal <= 1200)  m_Patch.PitchBendRange = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('L', 'F'):
-        {
-            if (paramVal > 1 && paramVal <= 250)  
-                m_Patch.LFO_Freq_x10 = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('V', 'D'):
-        {
-            if (paramVal <= 200)  m_Patch.VibratoDepth = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('V', 'R'):
-        {
-            if (paramVal >= 5 && paramVal <= 10000)  
-                m_Patch.VibratoRamp_ms = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        //-------------  Wave Mixer & Contour Envelope --------------------------------------
-        case PARAM_HASH_VALUE('M', 'C'):
-        {
-            if (paramVal <= 15)  m_Patch.MixerControl = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('M', 'L'):
-        {
-            if (paramVal <= 100)  m_Patch.MixerOsc2Level = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('C', 'S'):
-        {
-            if (paramVal <= 100)  m_Patch.ContourStartLevel = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('C', 'D'):
-        {
-            if (paramVal >= 5 && paramVal <= 10000)  
-                m_Patch.ContourDelay_ms = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('C', 'R'):
-        {
-            if (paramVal >= 5 && paramVal <= 10000)  
-                m_Patch.ContourRamp_ms = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('C', 'H'):
-        {
-            if (paramVal <= 100)  m_Patch.ContourHoldLevel = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        //-------------  Noise Generator & Bi-Quad Variable Filter --------------------------------
-        case PARAM_HASH_VALUE('N', 'M'):
-        {
-            if (paramVal <= 7)  m_Patch.NoiseMode = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('N', 'L'):
-        case PARAM_HASH_VALUE('N', 'C'):
-        {
-            if (paramVal <= 15)  m_Patch.NoiseLevelCtrl = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('F', 'C'):
-        {
-            if (paramVal <= 15)  m_Patch.FilterControl = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('F', 'R'):
-        {
-            if (paramVal <= 9999)  m_Patch.FilterResonance = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('F', 'F'):
-        {
-            if (paramVal <= 20000)  m_Patch.FilterFrequency = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('F', 'T'):
-        {
-            if (paramVal <= 255)  m_Patch.FilterNoteTrack = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        //-------------  Amplitude Envelope and Output Amplitude Control  -------------------
-        case PARAM_HASH_VALUE('A', 'A'):
-        {
-            if (paramVal >= 5 && paramVal <= 10000)  
-                m_Patch.AmpldEnvAttack_ms = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('A', 'P'):
-        {
-            if (paramVal <= 10000)  m_Patch.AmpldEnvPeak_ms = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('A', 'D'):
-        {
-            if (paramVal >= 5 && paramVal <= 10000)  
-                m_Patch.AmpldEnvDecay_ms = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('A', 'R'):
-        {
-            if (paramVal >= 5 && paramVal <= 10000)  
-                m_Patch.AmpldEnvRelease_ms = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('A', 'S'):
-        {
-            if (paramVal <= 100)  m_Patch.AmpldEnvSustain = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        case PARAM_HASH_VALUE('A', 'C'):
-        {
-            if (paramVal <= 15)  m_Patch.OutputAmpldCtrl = paramVal;
-            else  isBadValue = 1;
-            break;
-        }
-        default:
-        {
-            putstr("! Parameter acronym undefined: ");
-            putch(paramAbbr[0]);
-            putch(paramAbbr[1]);
-            putstr(" \n");
-            return;
-        }
-    }  // end switch
-
-    if (isBadValue)  putstr("! Value rejected - out of bounds.\n");
-    else  
-    {
-        RemiSynthPrepare();
-        putstr("* OK \n");
-    }
-}
+// end of file

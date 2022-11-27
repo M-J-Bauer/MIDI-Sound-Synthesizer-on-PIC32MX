@@ -31,13 +31,45 @@ void  Init_MCU_IO_ports(void)
     TRISGbits.TRISG9 = 0;     // RG9 pin is output (SS2#/UEXT-CS#)
     LATGbits.LATG9 = 1;       // RG9 pin set High
     
-   // RB3:RB0 (4 pins) are configured as ADC inputs by default, whereas...
-    AD1PCFGbits.PCFG8 = 1;    // RB8 is a logic input (HW.CFG0 jumper)
-    AD1PCFGbits.PCFG9 = 1;    // RB9 is a logic input (HW.CFG1 jumper)
-    AD1PCFG |= 0xFC00;        // RB15:RB10 are logic inputs (6 push-buttons)
+    // RB7:RB0 (8 pins) are configured as ADC inputs by default, whereas...
+    AD1PCFG |= 0xFF00;        // RB15:RB8 (8 pins) are LOGIC inputs
 	
     TRISCbits.TRISC14 = 0;    // RC14 pin is output (Testpoint TP2)
     LATCbits.LATC14 = 0;
+    
+    Init_I2C1();              // for ext. EEPROM, etc
+    ADC_Init();               // for Control Panel, etc
+}
+
+
+/*`````````````````````````````````````````````````````````````````````````````````````````````````
+ * Function:  Initialize Timer #2 and OC4 pin for PWM audio DAC operation.
+ *
+ * Timer_2 is set up to generate the PWM audio output signal using a sampling
+ * rate of 40ks/s.  Prescaler = 1:1;  Fclk = FCY = 80MHz;  Tclk = 12.5ns.
+ * Timer_2 period := 50.00us (4000 x 12.5ns);  PR2 = 1999;  PWM freq = 40kHz.
+ * Maximum duty register value is 1999.
+ * Output Compare module OC4 is set up for PWM (fault-detect disabled).
+ */
+void  PWM_audioDAC_init(void)
+{
+    TRISDbits.TRISD3 = 0;    // RD3/OC4 is an output pin
+    TRISDbits.TRISD4 = 0;    // RD4/OC5 ..   ..   ..
+
+    OC4CON = 0x0000;         // Disable OC4 while timer is set up
+
+    T2CON = 0;               // Timer_2 setup for 40KHz PWM freq.
+    T2CONbits.TCKPS = 0;     // Prescaler set to 1:1
+    PR2 = 1999;              // Period = 2000 x 12.5ns (-> freq = 40kHz)
+    IFS0bits.T2IF = 0;       // Clear IRQ flag
+    IPC2bits.T2IP = 6;       // Set IRQ priority (highest!)
+    T2CONbits.TON = 1;       // Start Timer
+
+    OC4R = 1000;             // PWM Set initial duty (50%)
+    OC4RS = 1000;
+    OC4CON = 0x8006;         // Enable OC4 for PWM
+
+    TIMER2_IRQ_ENABLE();
 }
 
 
@@ -58,6 +90,15 @@ void  DebugLEDControl(uint8 state)
     if (state == 0) { DEBUG_LED_OFF(); }
     else if (state == 1) { DEBUG_LED_ON(); }
     else { DEBUG_LED_TOGGLE(); }
+}
+
+
+void  ToggleBacklight(void)
+{
+    static uint8 flipflop;
+    
+    if (flipflop == 0) { LCD_BACKLIGHT_SET_HIGH();  flipflop = 1; }
+    else  { LCD_BACKLIGHT_SET_LOW();  flipflop = 0; }
 }
 
 
