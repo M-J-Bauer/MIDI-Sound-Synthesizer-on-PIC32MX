@@ -11,6 +11,7 @@
 #include "GenericTypeDefs.h"
 #include "system_def.h"
 #include "TimeDelay.h"
+#include "../Drivers/HardwareProfile.h"
 
 
 /******************************************************************************

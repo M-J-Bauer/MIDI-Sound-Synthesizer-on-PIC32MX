@@ -18,7 +18,7 @@
 
 #define SYSTEM_CLOCK_HZ      (80000000UL)
 #define PERIPH_CLOCK_HZ      (80000000UL)
-#define LITTLE_ENDIAN   1    // True for PIC32 and XC32-gcc
+#define LITTLE_ENDEAN   1    // True for PIC32 and XC32-gcc
 #define CP0_PREFETCH_CACHE_ENABLED
 
 // This macro returns the system clock frequency in Hertz.
@@ -77,7 +77,7 @@ typedef void (* pfnvoid)(void);     // pointer to void function
 
 #define SWAP(w)     ((((w) & 0xFF) << 8) | (((w) >> 8) & 0xFF))
 
-#if LITTLE_ENDIAN
+#if LITTLE_ENDEAN
 #define LSB_MSB(w)  (w)        // LSB is already first
 #else
 #define LSB_MSB(w)  SWAP(w)    // Swap bytes to put LSB first
@@ -118,12 +118,11 @@ typedef void (* pfnvoid)(void);     // pointer to void function
 #define FractionPart(z,n)   ((z & 0xFFFFF) >> (20 - n))  // get n MS bits of fractional part
 #define MultiplyFixed(v,w)  (((int64)v * w) >> 20)       // product of two fixed-pt numbers
 //
-// <!> Disable IRQ while MultiplyFixed(v,w) executes if an ISR uses the product!
+// <!> Disable IRQ while MultiplyFixed(v,w) executes if an ISR accesses the product!
 //
 #else 
 #error "Fixed-point format undefined!"
 #endif  // FIXED_POINT_FORMAT
-
 
 /***** Commonly used symbolic constants *****/
 
@@ -133,22 +132,5 @@ typedef void (* pfnvoid)(void);     // pointer to void function
 #define HI          1
 #define DISABLE     0
 #define ENABLE      1
-
-// ======================================================================================
-// ------------- kernel functions --------------------
-//
-uint32 ReadCoreCountReg();
-uint32 milliseconds(void);
-void   WaitMilliseconds(unsigned int timeout_ms);
-void   Delay_ms(unsigned int timeout_ms);
-void   Delay_Nx25ns(unsigned int count);
-void   InitializeMCUclock(void);
-BOOL   isTaskPending_1ms();
-BOOL   isTaskPending_5ms();
-BOOL   isTaskPending_50ms();
-BOOL   isTaskPending_500ms();
-void   BackgroundTaskExec(void);  // call-back
-//
-// ======================================================================================
 
 #endif // SYSTEM_DEF_H
