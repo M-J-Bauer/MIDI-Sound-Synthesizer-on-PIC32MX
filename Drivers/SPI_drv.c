@@ -7,9 +7,10 @@
  * Author:          M.J.Bauer
  *
  * This driver assumes that all slave devices on the same SPI channel
- * use the same SPI clock mode (3) and data transfer size (8 bits).
+ * use the same SPI clock mode and data transfer size (8 bits).
  *
- * SPI channels 1 and 2 are supported.
+ * Note:  PIC32MX460 has 2 SPI channels... 1 & 2.
+ *        PIC32MX440 and PIC32MX340 have only SPI channel 2.
  *
 \*****************************************************************************/
 
@@ -21,13 +22,14 @@ static int spiMutex[5] = { 0, 0, 0, 0, 0 };   // up to 4 channels
 
 /*^
  * Entry arg(s):  channel  = SPI channel (1 or 2)
- *                clk_mode = SPI clock mode (0..3), see table below
+ *                clk_mode = SPI clock mode (0..3)
  *                brg_val  = BRG reg value to set SPI clock freq.
  * 
- * See file "SPI_drv.h" for details.
+ * See file "SPI_drv.h" for details of clocking modes, etc.
  */
 void  SPI_Init(char channel, char clk_mode, unsigned int brg_val)
 {
+#ifdef __32MX460F512L__ 
     if (channel == 1)  
     {
         SPI1BRG = brg_val;
@@ -42,7 +44,8 @@ void  SPI_Init(char channel, char clk_mode, unsigned int brg_val)
         SPI1CON |= (1 << 15);    // SPI1CONbits.ON = 1;
         spiMutex[1] = 0;
     }
-    else if (channel == 2) 
+#endif        
+    if (channel == 2) 
     {
         SPI2BRG = brg_val;
         SPI2STAT = 0;
@@ -66,6 +69,7 @@ BYTE  SPI_Transfer(unsigned int channel, unsigned char data)
 {
     BYTE spiData;
 
+#ifdef __32MX460F512L__ 
     if (channel == 1)
     {
         while (!SPI1STATbits.SPITBE)
@@ -78,7 +82,8 @@ BYTE  SPI_Transfer(unsigned int channel, unsigned char data)
 
         spiData = SPI1BUF;    // read RX buffer
     }
-    else if (channel == 2)
+#endif        
+    if (channel == 2)
     {
         while (!SPI2STATbits.SPITBE)
             ;;;  // wait for TX buffer empty
@@ -135,6 +140,7 @@ void  SPIUnLock(unsigned int channel)
 //
 void  SPIPut(unsigned int channel, unsigned char data)
 {
+#ifdef __32MX460F512L__ 
     if (channel == 1)
     {
         while (!SPI1STATbits.SPITBE)
@@ -145,7 +151,8 @@ void  SPIPut(unsigned int channel, unsigned char data)
         while (!SPI1STATbits.SPIRBF)
             ;;;  // wait for RX buffer full
     }
-    else if (channel == 2)
+#endif
+    if (channel == 2)
     {
         while (!SPI2STATbits.SPITBE)
             ;;;  // wait for TX buffer empty
@@ -165,7 +172,9 @@ BYTE  SPIGet(unsigned int channel)
 {
     BYTE spiData;
 
+#ifdef __32MX460F512L__ 
     if (channel == 1)  spiData = SPI1BUF;
+#endif    
     if (channel == 2)  spiData = SPI2BUF;
 
     return  spiData;
