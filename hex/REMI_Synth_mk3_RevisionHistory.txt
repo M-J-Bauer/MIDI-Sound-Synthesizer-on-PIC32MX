@@ -80,12 +80,15 @@ Added option to Audio Ampld Control parameter (AAC):  mode 3 = "Auto-detect";
 if REMI(2) handset detected, use MIDI Expression (CC02), else ENV * Velocity.
 
 
+v3.0.12  2023-03-21
+````````````````````````````
+Added support for MCP4921 12-bit SPI DAC for audio output.  Tested... OK.
+
+
 --------------------------------------------------------------------------------
 
 To do:
 ```````
-* Support SPI DAC output. (Measure ISR exec. time.)
-
 * Test MIDI Pitch Bend operation.
 
 * Add patches for percussive instruments -- pianos, plucked strings, etc.
