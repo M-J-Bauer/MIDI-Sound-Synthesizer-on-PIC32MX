@@ -26,3 +26,5 @@ Software DSP computations use 32-bit normalized fixed-point numbers with 20-bit 
 to run on 32-bit microcontrollers without hardware floating-point capability.
 
 For details of the project, visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth.htm
+
+If you need a custom firmware variant, e.g. to support LCD with ST7920 controller, or whatever, send me a request.
