@@ -361,8 +361,8 @@ PRIVATE  void  ProcessMidiMessage(uint8 *midiMessage, short msgLength)
         }
         case PITCH_BEND_CMD:
         {
-            uint8  leverPosn_Hi = midiMessage[1];  // PB lever position, 7 MS bits
-            uint8  leverPosn_Lo = midiMessage[2];  // PB lever position, 7 MS bits
+            uint8  leverPosn_Lo = midiMessage[1];  // PB lever position, 7 LS bits
+            uint8  leverPosn_Hi = midiMessage[2];  // PB lever position, 7 MS bits
             int16  bipolarPosn;
             
             bipolarPosn = ((int16)(leverPosn_Hi << 7) | leverPosn_Lo) - 0x2000;
@@ -391,41 +391,41 @@ PRIVATE  void  ProcessControlChange(uint8 *midiMessage)
     uint8  midiCCnum;
     uint8  channel = g_Config.MidiOutChannel;
     
-    if (midiMessage[1] == g_Config.MidiInExpressionCCnum)
+    if (midiMessage[1] == g_Config.MidiInExpressionCCnum)  // Pressure Hi byte
     {
         pressureHi = midiMessage[2];
-        data14 = (((int) pressureHi) << 7) + pressureLo;
+        pressureLo = 0;  // compliant with MIDI spec v4.2 (1995)
+        data14 = (((int) pressureHi) << 7);
         SynthExpression(data14);
         midiCCnum = g_Config.MidiOutExpressionCCnum;
         if (g_Config.MidiOutEnabled) 
             MIDI_SendControlChange(channel, midiCCnum, pressureHi);
     }
-    else if (midiMessage[1] == (g_Config.MidiInExpressionCCnum + 32))
+    else if (midiMessage[1] == (g_Config.MidiInExpressionCCnum + 0x20))  // Pressure Lo byte
     {
         pressureLo = midiMessage[2];
         data14 = (((int) pressureHi) << 7) + pressureLo;
         SynthExpression(data14);
-        midiCCnum = g_Config.MidiOutExpressionCCnum + 32;
+        midiCCnum = g_Config.MidiOutExpressionCCnum + 0x20;
         if (g_Config.MidiOutEnabled)
             MIDI_SendControlChange(channel, midiCCnum, pressureLo);
     }
     else if (midiMessage[1] == 0x01)  // CC-01 = modulation Hi byte
     {
         modulationHi = midiMessage[2];
-        data14 = (((int) modulationHi) << 7) + modulationLo;
+        modulationLo = 0;  // compliant with MIDI spec v4.2 (1995)
+        data14 = (((int) modulationHi) << 7);
         SynthModulation(data14);
-        midiCCnum = 0x01;
         if (g_Config.MidiOutEnabled)
-            MIDI_SendControlChange(channel, midiCCnum, modulationHi);
+            MIDI_SendControlChange(channel, 0x01, modulationHi);
     }
     else if (midiMessage[1] == 0x21)  // CC-33 = modulation Lo byte
     {
         modulationLo = midiMessage[2];
         data14 = (((int) modulationHi) << 7) + modulationLo;
         SynthModulation(data14);
-        midiCCnum = 0x21;
         if (g_Config.MidiOutEnabled)
-            MIDI_SendControlChange(channel, midiCCnum, modulationLo);
+            MIDI_SendControlChange(channel, 0x21, modulationLo);
     }
     else if (midiMessage[1] == 120 || midiMessage[1] == 121)  // 'Mode Change' command
     {

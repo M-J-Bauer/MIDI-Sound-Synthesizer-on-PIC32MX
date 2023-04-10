@@ -1314,7 +1314,7 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
         putstr( " -d  :  LCD backlight toggle \n");
         putstr( " -e  :  Expression peak value \n");
         putstr( " -i  :  Test I2C bus signals \n");
-        putstr( " -p  :  Test Pitch Bend (arg: +/-8000) \n");
+        putstr( " -p  :  Pitch Bend (arg: +/-8000) \n");
         putstr( " -r  :  Reverb mix setting \n");
         putstr( " -s  :  Disable/enable Synth ISR (arg: 0|1) \n");
         putstr( " -u  :  UART errors.\n");
@@ -1435,10 +1435,14 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
     {
         if (argCount >= 3) 
         {
-            arg = atoi(argValue[2]) & 0x3FFF;
+            arg = atoi(argValue[2]);
             SynthPitchBend(arg);
         }
-        else  putstr("! Need arg (0..+/-8000) \n ");  
+        else  
+        {
+            putstr("While note is sounding, enter command with arg = 0..+/-8000.\n"); 
+            putstr("Value is scaled according to g_Config.PitchBendRange. \n"); 
+        }
         break;
     }
     case 'r':  // Show *active* Reverb Mix setting (% wet)

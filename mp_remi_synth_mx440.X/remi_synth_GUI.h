@@ -10,8 +10,6 @@
 #include "../Common/system_def.h"
 #include "pic32_low_level.h"
 
-#define POT_MODULE_CONNECTED  FALSE   // temp -- todo:  (READ_HW_CFG_JUMPER_P0 == 0) 
-
 #define SCREEN_UPDATE_INTERVAL     (50)     // Time (ms) between active screen updates
 #define GUI_INACTIVE_TIMEOUT    (30*1000)   // Time (ms) before revert to quiescent screen
 #define SELF_TEST_WAIT_TIME_MS     2000     // Duration of self-test message display (ms)

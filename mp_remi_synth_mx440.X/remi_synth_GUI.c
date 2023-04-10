@@ -207,7 +207,7 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
     },
     {
         SCN_EDIT_PITCH_BEND_RANGE,
-        ScreenFunc_ValidatePitchBendRange,  // todo
+        ScreenFunc_ValidatePitchBendRange,
         " PITCH-BEND RANGE"
     },
     {
@@ -1503,10 +1503,9 @@ PRIVATE  void  ScreenFunc_SetPitchBendMode(bool isNewScreen)
 {
     static uint8  ctrlMode;   // may be: 0, 1, or 2
     static char  *pitchBendModeName[] = 
-            { "Disabled", "MIDI PB msg", "MIDI Exprn", "Analog CV" };
+            { "Disabled", "MIDI PB msg", "MIDI Exprn", "Analog CV (TBD!)" };
     char   textBuf[40];
     bool   doRefresh = 0;
-    
 
     if (isNewScreen)
     {
@@ -1599,7 +1598,7 @@ PRIVATE  void  ScreenFunc_ValidatePitchBendRange(bool isNewScreen)
             else  // value OK
             {
                 g_Config.PitchBendRange = m_DataEntryValue;
-                StorePresetData();
+                StoreConfigData();
                 GoToNextScreen(SCN_SET_PITCH_BEND_MODE);
             }
         }

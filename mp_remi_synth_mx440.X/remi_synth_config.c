@@ -36,7 +36,7 @@ void  DefaultConfigData(void)
     g_Config.MidiOutModnEnabled = 1;        // 0:none, 1:mod-lever (CC01:33)
     
     g_Config.PitchBendCtrlMode = 0;         // 0 = disabled, 1:MIDI PB msg, 2:Exprn
-    g_Config.PitchBendRange = 600;          // 0..1200 cents
+    g_Config.PitchBendRange = 200;          // 0..1200 cents
     g_Config.ReverbAtten_pc = 80;
     g_Config.ReverbMix_pc = 20;
     g_Config.AudioAmpldControlMode = 3;     // 1: ENV*Velo, 2: Exprn (CC), 3: Auto

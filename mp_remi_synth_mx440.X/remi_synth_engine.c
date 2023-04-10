@@ -899,7 +899,7 @@ PRIVATE  void   OscFreqModulation()
     if (m_VibratoControl == VIBRATO_BY_MODN_CC)  // Use Mod Lever position
         modnLevel = (m_ModulationLevel * g_Patch.LFO_FM_Depth) / 1200;
     
-    if ( m_VibratoControl == VIBRATO_AUTOMATIC)  // Use LFO ramp generator
+    if (m_VibratoControl == VIBRATO_AUTOMATIC)  // Use LFO ramp generator
         modnLevel = (m_RampOutput * g_Patch.LFO_FM_Depth) / 1200;
 
     if (m_VibratoControl && !m_PitchBendControl)  
@@ -924,8 +924,8 @@ PRIVATE  void   OscFreqModulation()
 
     if (m_VibratoControl || m_PitchBendControl)
     {
-        smoothFreqMult -= smoothFreqMult >> 3;  // Tc = 8 * 5ms = 40ms (approx)
-        smoothFreqMult += freqMult >> 3; 
+        smoothFreqMult -= smoothFreqMult >> 2;  // Tc = 4 * 5ms = 20ms (approx)
+        smoothFreqMult += freqMult >> 2; 
         // Update real-time oscillator variables (accessed by audio ISR)
         v_Osc1Step = MultiplyFixed(m_Osc1StepMedian, smoothFreqMult);
         v_Osc2Step = MultiplyFixed(m_Osc2StepMedian, smoothFreqMult);
