@@ -85,13 +85,32 @@ v3.0.12  2023-03-21
 Added support for MCP4921 12-bit SPI DAC for audio output.  Tested... OK.
 
 
---------------------------------------------------------------------------------
+v3.0.13  2023-04-07
+````````````````````````````
+Fixed bugs in Pot Control Module detect code -- macro not implemented!
+Revised Pot Control Module service routine -- TO BE TESTED.
+
+v3.0.14  2023-04-07
+````````````````````````````
+Added usage help for CLI command 'diag -b' -- pitch bend test.
+Fixed bug in GUI screen to set Pitch Bend range -- Config param not saved!
+
+v3.0.15  2023-04-07
+````````````````````````````
+Fixed bug in MIDI pitch bend message handler... data LSB and MSB reversed!
+
+v3.0.16  2023-04-10
+````````````````````````````
+Reduced time-lag (IIR filter K = 0.25) in function OscFreqModulation() to
+improve pitch bend operation.
+
 
 To do:
-```````
-* Test MIDI Pitch Bend operation.
+``````
+* Further testing of pitch bend.
 
-* Add patches for percussive instruments -- pianos, plucked strings, etc.
+* Debug Pot Control Panel functions in GUI.
+
 
 
 ================================================================================
