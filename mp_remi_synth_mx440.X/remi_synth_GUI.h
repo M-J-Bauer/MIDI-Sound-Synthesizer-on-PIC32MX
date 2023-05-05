@@ -66,6 +66,7 @@ enum  Set_of_Screen_ID_numbers   // Any arbitrary order
     SCN_CONTROL_PANEL_1,
     SCN_CONTROL_PANEL_2,
     SCN_CUSTOM_FUNC_MENU,
+    SCN_SOUND_PLAYER,
     SCN_DATA_ENTRY,
     SCN_DATA_ENTRY_TEST
 };

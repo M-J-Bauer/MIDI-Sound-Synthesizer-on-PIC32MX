@@ -18,8 +18,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         10,     // Patch ID Number
         "Recorder, simple",
-        13,     // W1: OSC1 Wave-table ID (0..250) = alto/treble recorder
-        13,     // W2: OSC2 Wave-table ID (0..250)
+        13,     // W1: OSC1 Wave-table ID (0..250) = recorder_alto
+        13,     // W2: OSC2 Wave-table ID (0..250) = recorder_alto
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
@@ -39,10 +39,10 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
         0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
         99,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
@@ -50,8 +50,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         11,     // Patch ID Number
         "Recorder Celeste",
-        4,      // W1: OSC1 Wave-table ID (0..250)
-        13,     // W2: OSC2 Wave-table ID (0..250)
+        2,      // W1: OSC1 Wave-table ID (0..250) = square_wave
+        13,     // W2: OSC2 Wave-table ID (0..250) = recorder_alto
         -7,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
@@ -71,10 +71,10 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
         0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
         99,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },    
@@ -145,9 +145,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
 
     {
         14,     // Patch ID Number
-        "Analogue Flute",
-        7,      // W1: OSC1 Wave-table ID (0..250)
-        3,      // W2: OSC2 Wave-table ID (0..250)
+        "Electric Horn",  // awful sound !!  *********** to be replaced **********************
+        3,      // W1: OSC1 Wave-table ID (0..250)
+        14,     // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
@@ -177,42 +177,42 @@ const  PatchParamTable_t  g_PatchProgram[] =
 
     {
         15,     // Patch ID Number
-        "Pan Pipe Dream",
+        "Pitched Noise",  // Wave mixed with pitched noise
         2,      // W1: OSC1 Wave-table ID (0..250)
-        8,      // W2: OSC2 Wave-table ID (0..250)
+        4,      // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
         0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        10,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
         0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        200,    // CR: Contour Env Ramp time (5..5000+ ms)
-        80,     // CH: Contour Env Hold level (0..100 %)
+        5,      // CD: Contour Env Delay time (5..5000+ ms)
+        500,    // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
         
-        7,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        1,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        2,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        9800,   // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
+        24,     // FF: Filter Freq. (MIDI note number, 0..108)
+        1,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        50,     // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
     //---------------  R E E D E D   W O O D W I N D S  --------------------
     {
         21,     // Patch ID Number
-        "Reed Woodwind 1",  // aka "Mellow Reed" -- Breath-controlled wave morph
-        8,      // W1: OSC1 Wave-table ID (0..250)
-        3,      // W2: OSC2 Wave-table ID (0..250)
+        "Reed Woodwind 1",  // Breath-controlled wave morph  *** wave-tables OK ? ****************
+        4,      // W1: OSC1 Wave-table ID (0..250)
+        23,     // W2: OSC2 Wave-table ID (0..250)
        -3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -274,9 +274,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         24,     // Patch ID Number
-        "Oboe, drawbar organ",
-        32,     // W1: OSC1 Wave-table ID (0..250)    // <<<<<<<<<<<<<<<<<<
-        32,     // W2: OSC2 Wave-table ID (0..250)   
+        "to be replaced!",  // Was another oboe (w1 = w2 = 32) ***** to be replaced *************
+        9,      // W1: OSC1 Wave-table ID (0..250)
+        9,      // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -308,7 +308,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         25,     // Patch ID Number   
         "Psychedelic Oboe",
         10,     // W1: OSC1 Wave-table ID (0..250)
-        32,     // W2: OSC2 Wave-table ID (0..250)
+        9,      // W2: OSC2 Wave-table ID (0..250)
         -7,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -341,13 +341,13 @@ const  PatchParamTable_t  g_PatchProgram[] =
         "Electric Clarinet",
         11,     // W1: OSC1 Wave-table ID (0..250)
         11,     // W2: OSC2 Wave-table ID (0..250)
-        0,      // OD: OSC2 Detune, cents (+/-1200)
+        3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
         0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
         0,      // CS: Contour Env Start level (0..100 %)
         0,      // CD: Contour Env Delay time (5..5000+ ms)
         200,    // CR: Contour Env Ramp time (5..5000+ ms)
@@ -374,13 +374,13 @@ const  PatchParamTable_t  g_PatchProgram[] =
         "Violin #1",
         3,      // W1: OSC1 Wave-table ID (0..250) 
         3,      // W2: OSC2 Wave-table ID (0..250)   
-        0,      // OD: OSC2 Detune, cents (+/-1200)
+        3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         330,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
         0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        30,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
         0,      // CS: Contour Env Start level (0..100 %)
         0,      // CD: Contour Env Delay time (5..5000+ ms)
         200,    // CR: Contour Env Ramp time (5..5000+ ms)
@@ -404,9 +404,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     //------------------  O R G A N S   &  A C C O R D I O N  -----------------
     {
         40,     // Patch ID Number
-        "Jazz Organ Celeste",
-        5,      // W1: OSC1 Wave-table ID (0..250)
-        5,      // W2: OSC2 Wave-table ID (0..250)
+        "Jazz Organ Celeste",  // Experiment with wave-tables  **************************
+        14,     // W1: OSC1 Wave-table ID (0..250) = jazz_organ_v1
+        14,     // W2: OSC2 Wave-table ID (0..250) = jazz_organ_v1
         -6,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -436,9 +436,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         41,     // Patch ID Number
-        "Hammond Organ 1",  // Hammond-ish jazz organ variant
-        24,     // W1: OSC1 Wave-table ID (0..250)   
-        24,     // W2: OSC2 Wave-table ID (0..250) 
+        "Hammond Organ 1",  // Hammond-ish jazz-rock organ #1
+        17,     // W1: OSC1 Wave-table ID (0..250)   
+        17,     // W2: OSC2 Wave-table ID (0..250) 
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -468,9 +468,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
 
     {
         42,     // Patch ID Number
-        "Hammond Organ 2",  // Hammond-ish jazz organ variant
-        25,     // W1: OSC1 Wave-table ID (0..250)   
-        25,     // W2: OSC2 Wave-table ID (0..250)   
+        "Hammond Organ 2",  // Hammond-ish jazz-rock organ #2 (sounds much the same as patch 41)
+        18,     // W1: OSC1 Wave-table ID (0..250)   
+        18,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -500,7 +500,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         43,     // Patch ID Number
-        "Rock organ #1",  // Drawbars: 
+        "Rock organ #1",  // Classic Hammond organ tone.  Slightly percussive.
         14,     // W1: OSC1 Wave-table ID (0..250)   
         14,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
@@ -532,9 +532,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         44,     // Patch ID Number
-        "Rock organ #2",  // Drawbars: 
-        25,     // W1: OSC1 Wave-table ID (0..250)   
-        25,     // W2: OSC2 Wave-table ID (0..250)   
+        "to be replaced!",  // Wave-table duplicate of patch #42  *** to be replaced *********
+        18,     // W1: OSC1 Wave-table ID (0..250)   
+        18,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -564,7 +564,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         45,     // Patch ID Number
-        "Pink Floyd organ",  // 
+        "Pink Floyd organ",  // Essential complex flutey tone -- use reverb!
         20,     // W1: OSC1 Wave-table ID (0..250)   
         20,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
@@ -596,9 +596,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         46,     // Patch ID Number
-        "Theatre Organ",  // 
-        27,     // W1: OSC1 Wave-table ID (0..250)   
-        27,     // W2: OSC2 Wave-table ID (0..250)   
+        "Theatre Organ",  // "All stops out" -- rich harmonic content
+        21,     // W1: OSC1 Wave-table ID (0..250)   
+        21,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -628,9 +628,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         47,     // Patch ID Number
-        "Bauer Organ",  // 
+        "Bauer Organ",  // Bright, rich tone  (experiment with detune, contour, etc)
         22,     // W1: OSC1 Wave-table ID (0..250)   
-        22,     // W2: OSC2 Wave-table ID (0..250)   
+        25,     // W2: OSC2 Wave-table ID (0..250) -- experiment with morph  *************
         7,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -657,44 +657,12 @@ const  PatchParamTable_t  g_PatchProgram[] =
         70,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-    
+   
     {
         48,     // Patch ID Number
-        "Dulciana",  // 
-        30,     // W1: OSC1 Wave-table ID (0..250)   
-        30,     // W2: OSC2 Wave-table ID (0..250)   
-        -3,     // OD: OSC2 Detune, cents (+/-1200)
-        70,     // LF: LFO Freq x10 Hz (1..250)
-        30,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        10,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        200,    // CR: Contour Env Ramp time (5..5000+ ms)
-        80,     // CH: Contour Env Hold level (0..100 %)
-        
-        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
-                
-        10,     // EA: Envelope Attack time (5..5000+ ms)
-        50,     // EP: Envelope Peak time (0..5000+ ms)
-        200,    // ED: Envelope Decay time (5..5000+ ms)
-        100,     // ER: Envelope Release time (5..5000+ ms)
-        70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-    
-    {
-        49,     // Patch ID Number
-        "Bright Comping",  // 
-        35,     // W1: OSC1 Wave-table ID (0..250)   
-        35,     // W2: OSC2 Wave-table ID (0..250)   
+        "to be replaced!",  //  ********* duplicate *****8*** to be replaced *********
+        22,     // W1: OSC1 Wave-table ID (0..250)   
+        22,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -717,7 +685,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
         200,    // ED: Envelope Decay time (5..5000+ ms)
-        100,     // ER: Envelope Release time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
@@ -725,13 +693,13 @@ const  PatchParamTable_t  g_PatchProgram[] =
     //----------------  P E R C U S S I V E    I N S T R U M E N T S  ------------
     {
         50,     // Patch ID Number
-        "Plucked String #1",
+        "Plucked String",
         3,      // W1: OSC1 Wave-table ID (0..250) 
-        7,      // W2: OSC2 Wave-table ID (0..250)   
-        0,      // OD: OSC2 Detune, cents (+/-1200)
+        5,      // W2: OSC2 Wave-table ID (0..250)   
+        3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
-        30,     // VD: Vibrato Depth, cents (0..200)
-        330,    // VR: Vibrato Ramp time, (5..5000+ ms)
+        0,      // VD: Vibrato Depth, cents (0..200)
+        10,     // VR: Vibrato Ramp time, (5..5000+ ms)
 
         1,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
@@ -747,56 +715,55 @@ const  PatchParamTable_t  g_PatchProgram[] =
         60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
         0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
                 
-        30,     // EA: Envelope Attack time (5..5000+ ms)
+        5,     // EA: Envelope Attack time (5..5000+ ms)
+        50,     // EP: Envelope Peak time (0..5000+ ms)
+        500,    // ED: Envelope Decay time (5..5000+ ms)
+        50,     // ER: Envelope Release time (5..5000+ ms)
+        0,      // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+    
+    {
+        51,     // Patch ID Number
+        "Glockenspiel",
+        19,     // W1: OSC1 Wave-table ID (0..250) 
+        19,     // W2: OSC2 Wave-table ID (0..250)   
+        0,      // OD: OSC2 Detune, cents (+/-1200)
+        50,     // LF: LFO Freq x10 Hz (1..250)
+        30,     // VD: Vibrato Depth, cents (0..200)
+        330,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
+        60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+                
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
         1000,   // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         0,      // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-
-    //---------------  T E S T   &   D E M O   P A T C H E S  ------------------------
+    
     {
-        90,     // Patch ID Number :: Tests ampld envelope shaper and attenuator
-        "Test Patch", 
-        1,      // W1: OSC1 Wave-table ID (0..250)  <------ sinewave
-        3,      // W2: OSC2 Wave-table ID (0..250)  <------ sawtooth
+        52,     // Patch ID Number
+        "Wave Morph",
+        4,      // W1: OSC1 Wave-table ID (0..250)
+        10,     // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
-        250,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        3000,   // CR: Contour Env Ramp time (5..5000+ ms)
-        100,    // CH: Contour Env Hold level (0..100 %)
-        
-        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Off/bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
-                
-        50,     // EA: Envelope Attack time (5..5000+ ms)
-        500,    // EP: Envelope Peak time (0..5000+ ms)
-        1000,   // ED: Envelope Decay time (5..5000+ ms)
-        100,    // ER: Envelope Release time (5..5000+ ms)
-        70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-    
-    {
-        91,     // Patch ID Number
-        "Wave Morph Demo #1",
-        4,      // W1: OSC1 Wave-table ID (0..250)
-        3,      // W2: OSC2 Wave-table ID (0..250)
-        0,      // OD: OSC2 Detune, cents (+/-1200)
-        70,     // LF: LFO Freq x10 Hz (1..250)
-        50,     // VD: Vibrato Depth, cents (0..200)
-        300,    // VR: Vibrato Ramp time, (5..5000+ ms)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
         1,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
@@ -817,6 +784,71 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         500,    // ER: Envelope Release time (5..5000+ ms)
         95,     // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+    
+    {
+        53,     // Patch ID Number
+        "Ding", 
+        12,     // W1: OSC1 Wave-table ID (0..250) 
+        12,     // W2: OSC2 Wave-table ID (0..250)   
+        3,      // OD: OSC2 Detune, cents (+/-1200)
+        50,     // LF: LFO Freq x10 Hz (1..250)
+        0,      // VD: Vibrato Depth, cents (0..200)
+        300,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
+        60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+                
+        5,      // EA: Envelope Attack time (5..5000+ ms)
+        50,     // EP: Envelope Peak time (0..5000+ ms)
+        1000,   // ED: Envelope Decay time (5..5000+ ms)
+        50,     // ER: Envelope Release time (5..5000+ ms)
+        0,      // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+
+    //---------------  T E S T   &   D E M O   P A T C H E S  ------------------------
+    {
+        90,     // Patch ID Number
+        "Test Patch", 
+        1,      // W1: OSC1 Wave-table ID (0..250)  <------ sinewave
+        3,      // W2: OSC2 Wave-table ID (0..250)  <------ sawtooth
+        0,      // OD: OSC2 Detune, cents (+/-1200)
+        70,     // LF: LFO Freq x10 Hz (1..250)
+        0,      // VD: Vibrato Depth, cents (0..200)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        1000,   // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FR: Filter Resonance x10000 (0..9999, 0:Off/bypass)
+        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
+        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+                
+        50,     // EA: Envelope Attack time (5..5000+ ms)
+        0,      // EP: Envelope Peak time (0..5000+ ms)
+        1000,   // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        80,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
 
@@ -1508,280 +1540,6 @@ const  int16  blunt_sawtooth[] =
      20216,  20265,  20313,  20361,  20410,  20458,  20506,  20554,  20603,  20651
 };
 
-/*
- * Waveform name: "recorder_v1" (variant #1), size: 1260 samples
- * Osc. Freq. Divider:   1.0000
- * Waveform Partial Distribution:
- * Order # |  1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 |
- * Ampld % | 66 |    | 33 |    | 13 |    |  9 |    |  7 |    |  6 |    |
- * This is NOT a square wave!  (Maybe a rough approx.)
- */
-const  int16  recorder_v1[] =
-{
-         0,    669,   1342,   2012,   2682,   3349,   4009,   4668,   5321,   5967,
-      6611,   7244,   7870,   8485,   9095,   9692,  10279,  10854,  11421,  11976,
-     12517,  13046,  13558,  14058,  14546,  15017,  15474,  15916,  16341,  16753,
-     17147,  17524,  17887,  18232,  18563,  18877,  19171,  19453,  19713,  19962,
-     20192,  20408,  20605,  20789,  20956,  21110,  21246,  21368,  21472,  21566,
-     21646,  21713,  21766,  21806,  21835,  21852,  21860,  21850,  21836,  21812,
-     21779,  21737,  21687,  21630,  21564,  21493,  21415,  21329,  21241,  21151,
-     21055,  20958,  20856,  20753,  20648,  20541,  20432,  20324,  20217,  20110,
-     20005,  19902,  19800,  19701,  19602,  19510,  19419,  19333,  19250,  19172,
-     19098,  19027,  18962,  18905,  18847,  18799,  18757,  18718,  18683,  18656,
-     18634,  18617,  18604,  18598,  18597,  18606,  18614,  18630,  18648,  18672,
-     18701,  18732,  18770,  18810,  18860,  18906,  18958,  19012,  19067,  19126,
-     19186,  19249,  19312,  19377,  19448,  19512,  19579,  19646,  19711,  19776,
-     19838,  19901,  19963,  20024,  20081,  20135,  20188,  20237,  20282,  20325,
-     20362,  20398,  20427,  20455,  20477,  20494,  20508,  20517,  20521,  20521,
-     20512,  20504,  20485,  20465,  20439,  20407,  20370,  20330,  20285,  20234,
-     20178,  20118,  20051,  19981,  19907,  19831,  19748,  19666,  19576,  19485,
-     19390,  19287,  19187,  19083,  18978,  18872,  18762,  18651,  18539,  18425,
-     18311,  18192,  18077,  17963,  17848,  17734,  17620,  17508,  17396,  17285,
-     17175,  17067,  16964,  16859,  16760,  16661,  16567,  16472,  16382,  16296,
-     16212,  16134,  16057,  15983,  15913,  15848,  15785,  15725,  15669,  15621,
-     15574,  15531,  15490,  15453,  15420,  15387,  15361,  15337,  15316,  15302,
-     15288,  15275,  15266,  15259,  15254,  15251,  15250,  15249,  15256,  15260,
-     15264,  15270,  15277,  15284,  15291,  15301,  15308,  15314,  15328,  15335,
-     15341,  15346,  15350,  15353,  15354,  15354,  15355,  15352,  15346,  15340,
-     15329,  15317,  15301,  15283,  15265,  15243,  15218,  15190,  15159,  15125,
-     15088,  15050,  15009,  14965,  14918,  14869,  14813,  14758,  14701,  14642,
-     14581,  14517,  14452,  14385,  14315,  14243,  14169,  14094,  14019,  13944,
-     13867,  13790,  13712,  13635,  13557,  13476,  13399,  13326,  13252,  13178,
-     13104,  13033,  12963,  12895,  12830,  12762,  12700,  12643,  12588,  12534,
-     12484,  12439,  12395,  12353,  12314,  12283,  12253,  12227,  12206,  12188,
-     12174,  12165,  12158,  12156,  12159,  12167,  12177,  12191,  12210,  12233,
-     12258,  12289,  12322,  12362,  12403,  12448,  12493,  12545,  12599,  12655,
-     12712,  12774,  12838,  12907,  12973,  13044,  13114,  13186,  13260,  13334,
-     13409,  13485,  13566,  13641,  13714,  13791,  13864,  13940,  14013,  14087,
-     14158,  14228,  14301,  14367,  14433,  14493,  14555,  14613,  14668,  14721,
-     14773,  14821,  14866,  14908,  14948,  14985,  15019,  15049,  15077,  15102,
-     15123,  15143,  15159,  15172,  15183,  15191,  15197,  15199,  15200,  15201,
-     15194,  15190,  15181,  15173,  15163,  15151,  15138,  15125,  15110,  15096,
-     15077,  15062,  15046,  15030,  15017,  15004,  14990,  14979,  14970,  14955,
-     14949,  14945,  14942,  14942,  14945,  14950,  14957,  14968,  14982,  14993,
-     15015,  15038,  15065,  15097,  15133,  15171,  15216,  15261,  15311,  15366,
-     15424,  15486,  15553,  15624,  15701,  15780,  15861,  15948,  16039,  16134,
-     16230,  16331,  16434,  16540,  16651,  16762,  16876,  16994,  17114,  17232,
-     17354,  17477,  17600,  17724,  17848,  17974,  18098,  18227,  18350,  18474,
-     18595,  18716,  18836,  18952,  19067,  19179,  19292,  19398,  19502,  19601,
-     19697,  19790,  19877,  19963,  20039,  20114,  20189,  20254,  20315,  20368,
-     20419,  20462,  20501,  20534,  20562,  20586,  20604,  20614,  20620,  20620,
-     20613,  20605,  20589,  20570,  20543,  20512,  20477,  20437,  20392,  20346,
-     20294,  20241,  20181,  20121,  20053,  19985,  19916,  19845,  19771,  19697,
-     19622,  19548,  19471,  19396,  19315,  19239,  19166,  19093,  19021,  18952,
-     18885,  18821,  18760,  18698,  18643,  18591,  18546,  18503,  18465,  18431,
-     18404,  18381,  18364,  18348,  18341,  18343,  18347,  18358,  18376,  18401,
-     18430,  18464,  18504,  18553,  18607,  18664,  18731,  18804,  18878,  18959,
-     19046,  19137,  19232,  19333,  19437,  19545,  19654,  19769,  19884,  20003,
-     20121,  20245,  20367,  20489,  20611,  20733,  20852,  20969,  21084,  21198,
-     21305,  21415,  21514,  21611,  21699,  21784,  21861,  21931,  21992,  22044,
-     22093,  22127,  22151,  22164,  22167,  22157,  22136,  22103,  22057,  21997,
-     21928,  21839,  21736,  21618,  21486,  21338,  21172,  20993,  20797,  20587,
-     20357,  20112,  19848,  19569,  19272,  18961,  18631,  18284,  17922,  17542,
-     17147,  16735,  16306,  15864,  15406,  14933,  14445,  13942,  13423,  12896,
-     12352,  11797,  11229,  10650,  10063,   9464,   8855,   8235,   7606,   6971,
-      6329,   5683,   5030,   4371,   3708,   3044,   2375,   1698,   1027,    354,
-      -314,   -981,  -1651,  -2318,  -2984,  -3645,  -4298,  -4954,  -5599,  -6236,
-     -6865,  -7488,  -8102,  -8705,  -9302,  -9887, -10462, -11022, -11573, -12111,
-    -12636, -13149, -13644, -14128, -14599, -15053, -15492, -15916, -16323, -16718,
-    -17095, -17456, -17802, -18130, -18446, -18740, -19019, -19285, -19534, -19768,
-    -19985, -20188, -20374, -20546, -20702, -20842, -20969, -21082, -21183, -21270,
-    -21345, -21407, -21456, -21494, -21516, -21533, -21540, -21536, -21524, -21503,
-    -21473, -21435, -21391, -21341, -21278, -21215, -21146, -21075, -20997, -20919,
-    -20835, -20751, -20662, -20570, -20480, -20388, -20297, -20205, -20114, -20024,
-    -19935, -19849, -19764, -19683, -19602, -19528, -19454, -19385, -19318, -19257,
-    -19200, -19145, -19099, -19057, -19015, -18978, -18951, -18925, -18903, -18887,
-    -18877, -18871, -18872, -18875, -18883, -18894, -18910, -18931, -18954, -18982,
-    -19013, -19051, -19089, -19130, -19174, -19218, -19267, -19318, -19369, -19422,
-    -19475, -19535, -19590, -19646, -19702, -19756, -19811, -19866, -19918, -19971,
-    -20021, -20069, -20115, -20159, -20200, -20238, -20274, -20307, -20335, -20361,
-    -20380, -20398, -20409, -20420, -20425, -20426, -20423, -20415, -20403, -20384,
-    -20360, -20336, -20306, -20271, -20232, -20187, -20139, -20087, -20031, -19966,
-    -19902, -19832, -19762, -19685, -19606, -19524, -19438, -19354, -19257, -19166,
-    -19071, -18973, -18875, -18774, -18672, -18569, -18466, -18362, -18253, -18147,
-    -18042, -17938, -17833, -17731, -17628, -17527, -17425, -17325, -17228, -17133,
-    -17040, -16948, -16861, -16773, -16690, -16608, -16531, -16454, -16382, -16314,
-    -16247, -16186, -16125, -16068, -16015, -15966, -15922, -15877, -15837, -15800,
-    -15768, -15738, -15710, -15684, -15663, -15641, -15629, -15614, -15602, -15591,
-    -15584, -15576, -15572, -15569, -15566, -15570, -15569, -15569, -15570, -15572,
-    -15573, -15575, -15579, -15580, -15580, -15587, -15586, -15583, -15582, -15579,
-    -15573, -15566, -15557, -15548, -15537, -15522, -15507, -15487, -15465, -15443,
-    -15415, -15387, -15354, -15319, -15283, -15242, -15200, -15155, -15107, -15057,
-    -15003, -14948, -14891, -14828, -14766, -14701, -14634, -14564, -14494, -14422,
-    -14350, -14274, -14198, -14117, -14038, -13957, -13880, -13798, -13718, -13638,
-    -13557, -13478, -13393, -13316, -13237, -13162, -13088, -13017, -12946, -12876,
-    -12808, -12744, -12677, -12617, -12561, -12508, -12456, -12411, -12368, -12327,
-    -12289, -12256, -12227, -12201, -12179, -12164, -12150, -12141, -12136, -12135,
-    -12138, -12147, -12158, -12174, -12194, -12219, -12245, -12276, -12312, -12351,
-    -12395, -12441, -12490, -12541, -12597, -12655, -12713, -12776, -12842, -12909,
-    -12980, -13051, -13124, -13196, -13269, -13345, -13420, -13496, -13572, -13653,
-    -13728, -13805, -13880, -13953, -14023, -14096, -14166, -14236, -14302, -14373,
-    -14436, -14497, -14555, -14611, -14665, -14713, -14762, -14807, -14851, -14889,
-    -14925, -14956, -14985, -15011, -15034, -15055, -15072, -15085, -15095, -15102,
-    -15105, -15108, -15107, -15104, -15098, -15089, -15079, -15062, -15048, -15033,
-    -15015, -14996, -14974, -14953, -14932, -14907, -14884, -14857, -14833, -14810,
-    -14788, -14766, -14745, -14724, -14707, -14692, -14671, -14660, -14650, -14641,
-    -14637, -14636, -14636, -14640, -14649, -14661, -14671, -14690, -14713, -14739,
-    -14771, -14806, -14846, -14890, -14938, -14988, -15048, -15109, -15176, -15247,
-    -15321, -15400, -15483, -15571, -15665, -15762, -15861, -15966, -16074, -16186,
-    -16298, -16416, -16536, -16658, -16788, -16913, -17044, -17173, -17308, -17439,
-    -17574, -17708, -17843, -17978, -18116, -18251, -18384, -18516, -18646, -18775,
-    -18901, -19026, -19148, -19271, -19386, -19499, -19606, -19710, -19811, -19907,
-    -19999, -20086, -20166, -20249, -20317, -20383, -20443, -20498, -20547, -20588,
-    -20626, -20657, -20684, -20702, -20714, -20721, -20723, -20717, -20706, -20690,
-    -20666, -20641, -20607, -20569, -20525, -20477, -20425, -20369, -20307, -20244,
-    -20176, -20104, -20029, -19953, -19874, -19791, -19709, -19625, -19540, -19454,
-    -19368, -19280, -19194, -19110, -19026, -18943, -18865, -18787, -18711, -18640,
-    -18566, -18502, -18440, -18384, -18331, -18282, -18240, -18201, -18169, -18142,
-    -18118, -18103, -18095, -18094, -18097, -18109, -18127, -18151, -18181, -18218,
-    -18262, -18312, -18369, -18434, -18504, -18578, -18661, -18751, -18843, -18941,
-    -19046, -19155, -19267, -19385, -19505, -19630, -19756, -19887, -20021, -20155,
-    -20289, -20424, -20561, -20696, -20831, -20964, -21095, -21223, -21352, -21475,
-    -21591, -21704, -21810, -21912, -22005, -22094, -22173, -22250, -22311, -22364,
-    -22407, -22439, -22460, -22470, -22469, -22453, -22425, -22389, -22335, -22266,
-    -22182, -22083, -21968, -21838, -21693, -21533, -21355, -21161, -20949, -20722,
-    -20476, -20215, -19934, -19639, -19325, -18996, -18649, -18284, -17904, -17507,
-    -17095, -16667, -16221, -15762, -15288, -14797, -14293, -13774, -13244, -12701,
-    -12145, -11577, -10998, -10407,  -9809,  -9195,  -8578,  -7949,  -7317,  -6675,
-     -6028,  -5377,  -4720,  -4059,  -3389,  -2725,  -2055,  -1384,   -715,    -45
-};
-
-/*
- * Waveform name: jazz_organ_v1, size: 1260 samples
- * Osc. Freq. Divider:   1.0000
- * Waveform Partial Distribution:
- * Order # |  1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 |
- * Ampld % | 25 | 25 |    | 25 |    | 25 |    |    |    |    |    |    |
- */
-const  int16  jazz_organ_v1[] =
-{
-         0,    516,   1035,   1553,   2070,   2585,   3100,   3613,   4123,   4631,
-      5137,   5639,   6139,   6636,   7129,   7618,   8103,   8582,   9058,   9527,
-      9994,  10454,  10908,  11356,  11799,  12235,  12664,  13086,  13502,  13908,
-     14310,  14703,  15088,  15464,  15834,  16195,  16545,  16889,  17222,  17549,
-     17864,  18172,  18469,  18757,  19035,  19304,  19562,  19810,  20049,  20278,
-     20497,  20703,  20902,  21089,  21266,  21432,  21590,  21734,  21869,  21995,
-     22109,  22213,  22307,  22390,  22463,  22523,  22576,  22618,  22651,  22671,
-     22684,  22685,  22676,  22659,  22632,  22594,  22547,  22493,  22428,  22353,
-     22271,  22180,  22080,  21972,  21856,  21731,  21598,  21458,  21311,  21157,
-     20995,  20825,  20649,  20468,  20279,  20085,  19885,  19678,  19467,  19250,
-     19030,  18803,  18572,  18337,  18097,  17856,  17609,  17359,  17106,  16851,
-     16592,  16333,  16070,  15805,  15538,  15272,  15003,  14734,  14464,  14194,
-     13922,  13652,  13383,  13112,  12844,  12576,  12310,  12045,  11782,  11520,
-     11260,  11004,  10748,  10497,  10249,  10003,   9760,   9522,   9286,   9055,
-      8828,   8604,   8386,   8172,   7962,   7758,   7558,   7364,   7173,   6990,
-      6811,   6638,   6470,   6309,   6154,   6003,   5861,   5721,   5591,   5468,
-      5348,   5235,   5129,   5030,   4937,   4850,   4771,   4697,   4630,   4568,
-      4515,   4467,   4427,   4391,   4364,   4342,   4327,   4319,   4316,   4318,
-      4328,   4344,   4366,   4393,   4426,   4465,   4511,   4560,   4615,   4676,
-      4742,   4813,   4889,   4969,   5054,   5143,   5239,   5338,   5440,   5546,
-      5656,   5769,   5887,   6007,   6131,   6257,   6387,   6518,   6652,   6789,
-      6928,   7068,   7210,   7354,   7500,   7645,   7792,   7941,   8090,   8238,
-      8388,   8538,   8687,   8835,   8985,   9133,   9280,   9426,   9572,   9715,
-      9859,   9999,  10137,  10274,  10410,  10541,  10672,  10799,  10924,  11046,
-     11164,  11280,  11392,  11501,  11607,  11709,  11806,  11902,  11990,  12077,
-     12159,  12237,  12310,  12379,  12443,  12503,  12558,  12607,  12654,  12695,
-     12730,  12761,  12788,  12809,  12823,  12835,  12841,  12842,  12838,  12829,
-     12815,  12796,  12771,  12741,  12707,  12668,  12624,  12574,  12522,  12462,
-     12400,  12332,  12259,  12183,  12102,  12016,  11926,  11833,  11734,  11632,
-     11526,  11416,  11304,  11186,  11068,  10944,  10817,  10688,  10554,  10420,
-     10282,  10141,   9999,   9854,   9706,   9559,   9408,   9255,   9103,   8947,
-      8791,   8635,   8477,   8317,   8158,   8000,   7840,   7681,   7521,   7361,
-      7203,   7045,   6887,   6731,   6574,   6421,   6268,   6115,   5967,   5819,
-      5672,   5528,   5388,   5246,   5111,   4976,   4844,   4716,   4590,   4468,
-      4348,   4232,   4120,   4011,   3906,   3804,   3706,   3613,   3523,   3438,
-      3356,   3279,   3206,   3138,   3074,   3014,   2959,   2909,   2861,   2820,
-      2783,   2751,   2724,   2700,   2683,   2669,   2661,   2655,   2656,   2661,
-      2670,   2685,   2704,   2727,   2754,   2785,   2821,   2861,   2906,   2955,
-      3007,   3063,   3124,   3186,   3256,   3325,   3399,   3477,   3558,   3642,
-      3728,   3818,   3910,   4005,   4102,   4201,   4302,   4406,   4511,   4617,
-      4725,   4835,   4944,   5058,   5168,   5281,   5395,   5509,   5623,   5736,
-      5848,   5962,   6074,   6185,   6296,   6405,   6512,   6620,   6724,   6828,
-      6928,   7027,   7122,   7216,   7307,   7395,   7479,   7561,   7639,   7713,
-      7784,   7850,   7912,   7970,   8025,   8075,   8120,   8159,   8193,   8223,
-      8248,   8268,   8281,   8288,   8291,   8289,   8278,   8263,   8242,   8214,
-      8180,   8140,   8092,   8039,   7979,   7914,   7840,   7761,   7673,   7581,
-      7481,   7374,   7260,   7139,   7011,   6878,   6737,   6588,   6435,   6273,
-      6104,   5930,   5749,   5563,   5367,   5167,   4960,   4747,   4528,   4302,
-      4071,   3834,   3591,   3342,   3088,   2828,   2564,   2294,   2020,   1740,
-      1456,   1167,    874,    578,    278,    -29,   -337,   -647,   -962,  -1280,
-     -1600,  -1924,  -2250,  -2577,  -2906,  -3238,  -3570,  -3904,  -4239,  -4574,
-     -4910,  -5248,  -5584,  -5921,  -6257,  -6592,  -6926,  -7259,  -7592,  -7923,
-     -8250,  -8577,  -8900,  -9223,  -9541,  -9856, -10167, -10477, -10782, -11081,
-    -11378, -11670, -11957, -12238, -12515, -12787, -13051, -13313, -13565, -13813,
-    -14053, -14287, -14513, -14734, -14946, -15151, -15350, -15538, -15720, -15892,
-    -16057, -16213, -16362, -16501, -16629, -16750, -16862, -16963, -17056, -17139,
-    -17212, -17275, -17329, -17372, -17406, -17429, -17443, -17446, -17439, -17421,
-    -17393, -17357, -17307, -17248, -17180, -17100, -17010, -16911, -16800, -16679,
-    -16549, -16408, -16257, -16096, -15924, -15744, -15553, -15353, -15143, -14924,
-    -14694, -14457, -14210, -13955, -13689, -13417, -13136, -12844, -12546, -12241,
-    -11926, -11604, -11276, -10940, -10596, -10247,  -9889,  -9526,  -9158,  -8782,
-     -8402,  -8015,  -7624,  -7228,  -6829,  -6424,  -6013,  -5600,  -5183,  -4763,
-     -4341,  -3915,  -3485,  -3055,  -2622,  -2187,  -1752,  -1315,   -877,   -438,
-         0,    438,    877,   1315,   1752,   2187,   2622,   3055,   3485,   3915,
-      4341,   4763,   5183,   5600,   6013,   6424,   6829,   7228,   7624,   8015,
-      8402,   8782,   9158,   9526,   9889,  10247,  10596,  10940,  11276,  11604,
-     11926,  12241,  12546,  12844,  13136,  13417,  13689,  13955,  14210,  14457,
-     14694,  14924,  15143,  15353,  15553,  15744,  15924,  16096,  16257,  16408,
-     16549,  16679,  16800,  16911,  17010,  17100,  17180,  17248,  17307,  17357,
-     17393,  17421,  17439,  17446,  17443,  17429,  17406,  17372,  17329,  17275,
-     17212,  17139,  17055,  16963,  16862,  16750,  16629,  16501,  16362,  16213,
-     16057,  15892,  15720,  15538,  15350,  15151,  14946,  14734,  14513,  14287,
-     14053,  13813,  13565,  13312,  13051,  12787,  12515,  12238,  11957,  11670,
-     11378,  11081,  10782,  10477,  10167,   9856,   9541,   9223,   8900,   8577,
-      8250,   7923,   7592,   7259,   6926,   6592,   6257,   5920,   5584,   5248,
-      4910,   4574,   4239,   3904,   3570,   3238,   2906,   2577,   2250,   1924,
-      1600,   1280,    962,    647,    337,     29,   -278,   -578,   -874,  -1167,
-     -1456,  -1740,  -2020,  -2294,  -2564,  -2828,  -3088,  -3342,  -3591,  -3834,
-     -4071,  -4302,  -4528,  -4747,  -4960,  -5167,  -5367,  -5563,  -5749,  -5930,
-     -6104,  -6273,  -6435,  -6588,  -6737,  -6878,  -7011,  -7139,  -7260,  -7374,
-     -7481,  -7581,  -7673,  -7761,  -7840,  -7914,  -7979,  -8039,  -8092,  -8140,
-     -8180,  -8214,  -8242,  -8263,  -8278,  -8289,  -8291,  -8288,  -8281,  -8268,
-     -8248,  -8223,  -8193,  -8159,  -8120,  -8075,  -8025,  -7970,  -7912,  -7850,
-     -7784,  -7713,  -7639,  -7561,  -7479,  -7395,  -7307,  -7216,  -7122,  -7027,
-     -6928,  -6828,  -6724,  -6620,  -6512,  -6405,  -6296,  -6185,  -6074,  -5962,
-     -5848,  -5736,  -5623,  -5509,  -5395,  -5281,  -5168,  -5058,  -4944,  -4835,
-     -4725,  -4617,  -4511,  -4406,  -4302,  -4201,  -4102,  -4005,  -3910,  -3818,
-     -3728,  -3642,  -3558,  -3477,  -3399,  -3325,  -3256,  -3186,  -3124,  -3063,
-     -3007,  -2955,  -2906,  -2861,  -2821,  -2785,  -2754,  -2727,  -2704,  -2685,
-     -2670,  -2661,  -2656,  -2655,  -2661,  -2669,  -2683,  -2700,  -2724,  -2751,
-     -2783,  -2820,  -2861,  -2909,  -2959,  -3014,  -3074,  -3138,  -3206,  -3280,
-     -3356,  -3438,  -3523,  -3613,  -3706,  -3804,  -3906,  -4011,  -4120,  -4232,
-     -4348,  -4468,  -4590,  -4716,  -4844,  -4976,  -5111,  -5246,  -5388,  -5528,
-     -5672,  -5819,  -5967,  -6116,  -6268,  -6421,  -6574,  -6731,  -6887,  -7045,
-     -7203,  -7361,  -7521,  -7681,  -7840,  -8000,  -8158,  -8317,  -8477,  -8635,
-     -8791,  -8947,  -9103,  -9255,  -9408,  -9559,  -9706,  -9855,  -9999, -10141,
-    -10282, -10420, -10554, -10688, -10817, -10944, -11068, -11186, -11304, -11416,
-    -11526, -11632, -11734, -11833, -11926, -12016, -12102, -12183, -12259, -12332,
-    -12400, -12463, -12522, -12574, -12624, -12668, -12707, -12741, -12771, -12796,
-    -12815, -12829, -12838, -12842, -12841, -12835, -12823, -12809, -12788, -12761,
-    -12730, -12695, -12654, -12607, -12558, -12503, -12443, -12379, -12310, -12237,
-    -12159, -12077, -11990, -11902, -11806, -11709, -11607, -11501, -11392, -11280,
-    -11164, -11046, -10924, -10799, -10672, -10541, -10410, -10274, -10137,  -9999,
-     -9859,  -9715,  -9572,  -9426,  -9280,  -9133,  -8985,  -8835,  -8687,  -8538,
-     -8388,  -8238,  -8090,  -7941,  -7792,  -7645,  -7500,  -7354,  -7210,  -7068,
-     -6928,  -6789,  -6652,  -6518,  -6387,  -6257,  -6131,  -6007,  -5887,  -5769,
-     -5656,  -5546,  -5440,  -5338,  -5239,  -5143,  -5054,  -4969,  -4889,  -4813,
-     -4742,  -4676,  -4615,  -4560,  -4511,  -4465,  -4426,  -4393,  -4366,  -4344,
-     -4328,  -4318,  -4316,  -4319,  -4327,  -4342,  -4364,  -4391,  -4427,  -4467,
-     -4515,  -4568,  -4630,  -4697,  -4771,  -4850,  -4937,  -5030,  -5129,  -5235,
-     -5348,  -5468,  -5591,  -5721,  -5861,  -6003,  -6154,  -6309,  -6470,  -6638,
-     -6811,  -6990,  -7173,  -7364,  -7558,  -7758,  -7962,  -8172,  -8386,  -8604,
-     -8828,  -9055,  -9286,  -9522,  -9760, -10003, -10249, -10497, -10748, -11004,
-    -11260, -11520, -11782, -12045, -12310, -12576, -12844, -13112, -13383, -13652,
-    -13922, -14194, -14464, -14735, -15003, -15272, -15538, -15805, -16070, -16333,
-    -16592, -16851, -17106, -17359, -17609, -17855, -18097, -18337, -18572, -18803,
-    -19030, -19250, -19467, -19678, -19885, -20085, -20279, -20469, -20649, -20825,
-    -20995, -21157, -21311, -21458, -21598, -21731, -21856, -21972, -22080, -22180,
-    -22271, -22353, -22428, -22493, -22547, -22594, -22632, -22659, -22676, -22685,
-    -22684, -22671, -22651, -22618, -22576, -22523, -22463, -22390, -22307, -22213,
-    -22109, -21995, -21869, -21734, -21590, -21432, -21266, -21089, -20902, -20703,
-    -20497, -20278, -20049, -19810, -19562, -19304, -19035, -18757, -18469, -18172,
-    -17864, -17549, -17222, -16889, -16545, -16195, -15834, -15464, -15088, -14703,
-    -14310, -13908, -13502, -13086, -12664, -12235, -11799, -11356, -10908, -10454,
-     -9994,  -9527,  -9058,  -8582,  -8103,  -7618,  -7129,  -6636,  -6139,  -5639,
-     -5137,  -4631,  -4123,  -3613,  -3100,  -2585,  -2070,  -1553,  -1035,   -516
-};
 
 /*
  * Waveform name: alto_saxophone, size: 1260 samples
@@ -2881,7 +2639,7 @@ const  int16  hammond_rock_8080[] =
 
 /*
  * Waveform name: hammond_rock_0808, size: 1260 samples
- * Osc. Freq. Divider:   1.000 OR 2.000
+ * Osc. Freq. Divider:   2.000
  * Hammond registration:
  * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
  * Setting | 0 | 8 | 0 | 8 | 0 | 0 | 0 | 0 | 0 |
@@ -3702,13 +3460,13 @@ const  int16  jazz_organ_305060040[] =
 };
 
 /*
- * Waveform name: somekinda_pipe_008360400, size: 1260 samples
+ * Waveform name: glockenspiel_008360400, size: 1260 samples (Use percussive ENV)
  * Osc. Freq. Divider:   2.000
  * Hammond registration:
  * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
  * Setting | 0 | 0 | 8 | 3 | 6 | 0 | 4 | 0 | 0 |
  */
-const  int16  somekinda_pipe_008360400[] =
+const  int16  glockenspiel_008360400[] =
 {
          0,    963,   1930,   2897,   3859,   4818,   5771,   6717,   7658,   8589,
       9513,  10425,  11330,  12220,  13098,  13962,  14814,  15650,  16469,  17271,
@@ -3975,1241 +3733,6 @@ const  int16  theatre_organ_878656463[] =
     -10639,  -9417,  -8182,  -6934,  -5673,  -4411,  -3144,  -1872,   -602,    667
 };
 
-/*
- * Waveform name: meditation_007800453, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 0 | 0 | 7 | 8 | 0 | 0 | 4 | 5 | 3 |
- */
-const  int16  meditation_007800453[] =
-{
-         0,   1209,   2423,   3628,   4825,   6011,   7183,   8340,   9478,  10590,
-     11682,  12743,  13781,  14786,  15755,  16692,  17594,  18455,  19278,  20061,
-     20802,  21500,  22159,  22768,  23336,  23859,  24339,  24771,  25163,  25509,
-     25813,  26076,  26298,  26476,  26618,  26721,  26788,  26822,  26822,  26791,
-     26731,  26641,  26529,  26390,  26233,  26057,  25861,  25653,  25432,  25197,
-     24958,  24710,  24460,  24210,  23957,  23708,  23462,  23221,  22985,  22761,
-     22546,  22345,  22156,  21983,  21825,  21682,  21560,  21452,  21365,  21298,
-     21250,  21221,  21216,  21226,  21261,  21314,  21385,  21478,  21589,  21714,
-     21863,  22025,  22206,  22399,  22609,  22829,  23062,  23307,  23564,  23826,
-     24095,  24372,  24652,  24936,  25223,  25512,  25800,  26084,  26368,  26648,
-     26924,  27190,  27452,  27707,  27951,  28184,  28405,  28617,  28813,  29000,
-     29172,  29326,  29466,  29591,  29701,  29793,  29864,  29925,  29963,  29983,
-     29986,  29970,  29938,  29886,  29813,  29724,  29613,  29487,  29341,  29175,
-     28991,  28790,  28573,  28335,  28080,  27808,  27520,  27209,  26886,  26543,
-     26183,  25812,  25420,  25013,  24591,  24152,  23696,  23230,  22746,  22246,
-     21736,  21209,  20670,  20116,  19549,  18972,  18379,  17777,  17167,  16543,
-     15911,  15265,  14611,  13951,  13281,  12606,  11923,  11234,  10540,   9844,
-      9143,   8442,   7737,   7034,   6331,   5628,   4929,   4234,   3546,   2864,
-      2187,   1521,    862,    217,   -419,  -1043,  -1652,  -2243,  -2820,  -3380,
-     -3921,  -4441,  -4940,  -5421,  -5880,  -6315,  -6727,  -7114,  -7477,  -7814,
-     -8126,  -8413,  -8675,  -8905,  -9114,  -9299,  -9453,  -9581,  -9685,  -9762,
-     -9817,  -9849,  -9855,  -9839,  -9800,  -9742,  -9664,  -9568,  -9455,  -9323,
-     -9181,  -9022,  -8851,  -8672,  -8486,  -8287,  -8088,  -7884,  -7673,  -7464,
-     -7257,  -7050,  -6849,  -6651,  -6463,  -6282,  -6111,  -5949,  -5799,  -5663,
-     -5542,  -5433,  -5346,  -5270,  -5214,  -5177,  -5158,  -5155,  -5172,  -5210,
-     -5265,  -5340,  -5433,  -5544,  -5673,  -5819,  -5978,  -6154,  -6345,  -6548,
-     -6763,  -6989,  -7222,  -7463,  -7713,  -7964,  -8220,  -8477,  -8735,  -8987,
-     -9236,  -9482,  -9720,  -9947, -10160, -10367, -10553, -10728, -10881, -11019,
-    -11135, -11226, -11299, -11344, -11366, -11360, -11327, -11267, -11178, -11060,
-    -10915, -10738, -10533, -10298, -10036,  -9743,  -9422,  -9076,  -8701,  -8302,
-     -7878,  -7431,  -6960,  -6468,  -5958,  -5430,  -4884,  -4324,  -3752,  -3170,
-     -2579,  -1980,  -1375,   -769,   -161,    445,   1050,   1647,   2241,   2828,
-      3399,   3960,   4506,   5038,   5552,   6048,   6523,   6975,   7406,   7814,
-      8194,   8550,   8879,   9184,   9459,   9707,   9928,  10120,  10285,  10422,
-     10531,  10614,  10671,  10702,  10709,  10692,  10652,  10590,  10509,  10406,
-     10287,  10152,  10002,   9839,   9661,   9478,   9281,   9082,   8872,   8662,
-      8446,   8232,   8021,   7808,   7603,   7399,   7206,   7017,   6839,   6673,
-      6516,   6370,   6237,   6118,   6014,   5927,   5851,   5791,   5749,   5723,
-      5711,   5717,   5738,   5772,   5826,   5891,   5969,   6060,   6166,   6281,
-      6408,   6542,   6688,   6841,   6999,   7161,   7329,   7499,   7670,   7840,
-      8012,   8178,   8341,   8502,   8653,   8794,   8931,   9055,   9167,   9269,
-      9358,   9431,   9491,   9532,   9557,   9564,   9552,   9523,   9472,   9404,
-      9310,   9197,   9067,   8913,   8739,   8544,   8324,   8085,   7827,   7547,
-      7247,   6925,   6586,   6226,   5848,   5449,   5032,   4601,   4151,   3686,
-      3207,   2711,   2203,   1678,   1145,    597,     36,   -533,  -1110,  -1698,
-     -2294,  -2901,  -3510,  -4126,  -4751,  -5381,  -6014,  -6651,  -7291,  -7935,
-     -8577,  -9226,  -9871, -10520, -11168, -11816, -12461, -13103, -13746, -14387,
-    -15022, -15652, -16278, -16899, -17514, -18124, -18729, -19326, -19915, -20495,
-    -21068, -21629, -22181, -22723, -23250, -23769, -24275, -24766, -25242, -25704,
-    -26147, -26580, -26994, -27387, -27767, -28124, -28464, -28781, -29080, -29355,
-    -29609, -29844, -30055, -30241, -30403, -30544, -30661, -30751, -30817, -30859,
-    -30878, -30872, -30842, -30791, -30712, -30613, -30491, -30346, -30180, -29995,
-    -29790, -29565, -29320, -29063, -28789, -28500, -28199, -27885, -27560, -27227,
-    -26887, -26540, -26191, -25837, -25484, -25128, -24777, -24429, -24087, -23754,
-    -23427, -23112, -22809, -22517, -22242, -21981, -21744, -21521, -21317, -21133,
-    -20974, -20836, -20724, -20630, -20565, -20524, -20507, -20512, -20547, -20603,
-    -20684, -20791, -20919, -21069, -21244, -21435, -21647, -21875, -22120, -22382,
-    -22654, -22938, -23233, -23537, -23845, -24154, -24464, -24776, -25077, -25379,
-    -25672, -25952, -26221, -26473, -26709, -26922, -27112, -27279, -27420, -27530,
-    -27610, -27656, -27670, -27642, -27578, -27476, -27332, -27145, -26916, -26641,
-    -26320, -25955, -25547, -25088, -24586, -24037, -23444, -22804, -22122, -21392,
-    -20625, -19813, -18962, -18072, -17148, -16185, -15190, -14168, -13112, -12029,
-    -10928,  -9800,  -8658,  -7492,  -6317,  -5133,  -3937,  -2736,  -1534,   -330,
-       865,   2057,   3243,   4417,   5580,   6725,   7852,   8958,  10043,  11097,
-     12128,  13126,  14097,  15034,  15933,  16800,  17630,  18419,  19170,  19883,
-     20555,  21184,  21776,  22322,  22829,  23294,  23721,  24103,  24449,  24754,
-     25024,  25255,  25450,  25611,  25739,  25832,  25896,  25933,  25943,  25925,
-     25883,  25821,  25739,  25636,  25519,  25388,  25244,  25088,  24924,  24751,
-     24575,  24394,  24212,  24033,  23849,  23671,  23498,  23329,  23163,  23008,
-     22863,  22729,  22602,  22490,  22391,  22300,  22229,  22166,  22120,  22087,
-     22070,  22069,  22082,  22105,  22150,  22206,  22274,  22357,  22455,  22563,
-     22683,  22815,  22960,  23113,  23278,  23447,  23628,  23814,  24009,  24209,
-     24412,  24620,  24830,  25044,  25260,  25475,  25692,  25907,  26121,  26332,
-     26540,  26744,  26945,  27142,  27333,  27515,  27691,  27862,  28024,  28180,
-     28324,  28461,  28588,  28703,  28809,  28904,  28985,  29060,  29115,  29163,
-     29197,  29216,  29224,  29217,  29195,  29159,  29106,  29041,  28958,  28859,
-     28743,  28612,  28465,  28299,  28117,  27916,  27697,  27457,  27202,  26926,
-     26629,  26319,  25985,  25631,  25260,  24866,  24451,  24020,  23566,  23094,
-     22602,  22087,  21559,  21008,  20438,  19851,  19245,  18625,  17987,  17333,
-     16666,  15979,  15280,  14569,  13846,  13113,  12369,  11617,  10856,  10091,
-      9320,   8550,   7773,   6998,   6223,   5450,   4681,   3918,   3163,   2418,
-      1680,    955,    244,   -451,  -1133,  -1798,  -2442,  -3064,  -3668,  -4245,
-     -4799,  -5330,  -5832,  -6310,  -6759,  -7180,  -7575,  -7935,  -8267,  -8569,
-     -8840,  -9082,  -9293,  -9471,  -9621,  -9745,  -9836,  -9897,  -9932,  -9940,
-     -9925,  -9886,  -9819,  -9731,  -9622,  -9494,  -9348,  -9185,  -9009,  -8816,
-     -8615,  -8404,  -8183,  -7958,  -7731,  -7498,  -7267,  -7036,  -6807,  -6586,
-     -6368,  -6159,  -5960,  -5772,  -5598,  -5434,  -5290,  -5159,  -5044,  -4949,
-     -4873,  -4815,  -4780,  -4763,  -4769,  -4793,  -4841,  -4907,  -4994,  -5102,
-     -5229,  -5376,  -5541,  -5721,  -5921,  -6135,  -6361,  -6600,  -6852,  -7113,
-     -7381,  -7658,  -7936,  -8217,  -8503,  -8784,  -9068,  -9342,  -9613,  -9876,
-    -10128, -10371, -10598, -10813, -11008, -11187, -11343, -11483, -11595, -11688,
-    -11752, -11792, -11806, -11790, -11749, -11677, -11575, -11445, -11286, -11097,
-    -10878, -10630, -10355, -10050,  -9720,  -9360,  -8977,  -8569,  -8136,  -7684,
-     -7209,  -6717,  -6205,  -5678,  -5137,  -4582,  -4018,  -3446,  -2863,  -2278,
-     -1690,  -1101,   -509,     78,    658,   1235,   1805,   2361,   2909,   3446,
-      3964,   4467,   4952,   5421,   5869,   6296,   6701,   7082,   7442,   7777,
-      8086,   8372,   8631,   8867,   9076,   9261,   9421,   9555,   9667,   9753,
-      9817,   9860,   9881,   9881,   9861,   9826,   9774,   9701,   9618,   9517,
-      9408,   9287,   9154,   9019,   8872,   8723,   8567,   8413,   8254,   8097,
-      7939,   7786,   7638,   7492,   7355,   7221,   7098,   6980,   6875,   6781,
-      6693,   6618,   6553,   6501,   6460,   6434,   6417,   6409,   6418,   6437,
-      6466,   6507,   6558,   6621,   6692,   6769,   6858,   6951,   7055,   7160,
-      7273,   7390,   7508,   7630,   7754,   7875,   7997,   8117,   8235,   8347,
-      8458,   8561,   8658,   8749,   8831,   8902,   8968,   9019,   9060,   9092,
-      9111,   9115,   9108,   9086,   9049,   8998,   8934,   8854,   8758,   8649,
-      8521,   8376,   8219,   8047,   7860,   7655,   7432,   7196,   6948,   6682,
-      6399,   6105,   5796,   5471,   5134,   4780,   4414,   4036,   3644,   3240,
-      2823,   2395,   1955,   1500,   1037,    560,     72,   -425,   -932,  -1451,
-     -1978,  -2517,  -3064,  -3619,  -4186,  -4763,  -5346,  -5937,  -6536,  -7145,
-     -7757,  -8378,  -9006,  -9641, -10279, -10925, -11572, -12224, -12880, -13539,
-    -14202, -14862, -15523, -16185, -16845, -17506, -18164, -18819, -19469, -20112,
-    -20751, -21381, -22003, -22615, -23214, -23805, -24382, -24943, -25490, -26020,
-    -26530, -27026, -27501, -27952, -28385, -28793, -29178, -29536, -29870, -30176,
-    -30457, -30709, -30933, -31130, -31295, -31433, -31540, -31617, -31665, -31680,
-    -31668, -31627, -31556, -31459, -31330, -31178, -30998, -30792, -30563, -30311,
-    -30037, -29743, -29428, -29099, -28752, -28392, -28021, -27638, -27244, -26843,
-    -26441, -26033, -25625, -25219, -24815, -24414, -24023, -23639, -23266, -22906,
-    -22561, -22233, -21920, -21626, -21353, -21103, -20878, -20673, -20496, -20343,
-    -20220, -20122, -20055, -20013, -19999, -20017, -20061, -20129, -20231, -20355,
-    -20507, -20683, -20882, -21105, -21352, -21612, -21895, -22191, -22503, -22828,
-    -23161, -23504, -23851, -24206, -24559, -24908, -25254, -25596, -25925, -26245,
-    -26551, -26841, -27113, -27362, -27588, -27788, -27960, -28099, -28210, -28284,
-    -28324, -28325, -28287, -28207, -28085, -27922, -27715, -27461, -27164, -26819,
-    -26428, -25991, -25510, -24980, -24409, -23789, -23128, -22421, -21677, -20885,
-    -20059, -19195, -18293, -17358, -16393, -15395, -14369, -13320, -12246, -11151,
-    -10039,  -8908,  -7769,  -6613,  -5452,  -4285,  -3116,  -1946,   -779,    383
-};
-
-/*
- * Waveform name: stopped_flute_00532, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 0 | 0 | 5 | 3 | 2 | 0 | 0 | 0 | 0 |
- */
-const  int16  stopped_flute_00532[] =
-{
-         0,    536,   1083,   1623,   2169,   2709,   3250,   3790,   4327,   4865,
-      5399,   5934,   6465,   6993,   7519,   8041,   8564,   9080,   9595,  10105,
-     10613,  11115,  11615,  12109,  12601,  13088,  13569,  14047,  14519,  14988,
-     15448,  15906,  16360,  16805,  17244,  17678,  18105,  18530,  18946,  19356,
-     19756,  20154,  20543,  20928,  21305,  21671,  22036,  22390,  22737,  23078,
-     23411,  23734,  24052,  24364,  24666,  24961,  25248,  25528,  25797,  26062,
-     26317,  26566,  26807,  27038,  27261,  27478,  27686,  27887,  28080,  28262,
-     28440,  28609,  28769,  28921,  29066,  29203,  29331,  29452,  29568,  29672,
-     29770,  29865,  29945,  30022,  30093,  30153,  30210,  30257,  30295,  30330,
-     30357,  30378,  30390,  30400,  30400,  30390,  30381,  30360,  30337,  30307,
-     30268,  30230,  30183,  30129,  30069,  30007,  29939,  29865,  29787,  29705,
-     29618,  29523,  29428,  29328,  29223,  29114,  29000,  28885,  28763,  28642,
-     28514,  28386,  28253,  28116,  27979,  27840,  27694,  27550,  27401,  27252,
-     27098,  26943,  26790,  26632,  26475,  26315,  26150,  25990,  25827,  25661,
-     25495,  25328,  25162,  24996,  24830,  24660,  24491,  24325,  24158,  23989,
-     23823,  23655,  23488,  23322,  23156,  22990,  22825,  22662,  22499,  22339,
-     22176,  22016,  21855,  21698,  21543,  21386,  21232,  21080,  20925,  20778,
-     20626,  20480,  20335,  20189,  20047,  19902,  19765,  19625,  19489,  19353,
-     19218,  19088,  18957,  18827,  18699,  18574,  18450,  18325,  18203,  18085,
-     17966,  17850,  17735,  17619,  17505,  17393,  17283,  17173,  17066,  16959,
-     16853,  16748,  16645,  16541,  16440,  16340,  16238,  16140,  16042,  15944,
-     15846,  15748,  15653,  15556,  15461,  15366,  15271,  15176,  15081,  14986,
-     14893,  14796,  14701,  14606,  14511,  14416,  14321,  14223,  14125,  14026,
-     13928,  13827,  13729,  13629,  13528,  13423,  13320,  13216,  13112,  13005,
-     12896,  12788,  12676,  12563,  12450,  12337,  12218,  12100,  11981,  11862,
-     11737,  11613,  11488,  11357,  11230,  11096,  10963,  10826,  10689,  10550,
-     10410,  10265,  10122,   9975,   9826,   9674,   9520,   9365,   9208,   9048,
-      8887,   8724,   8561,   8395,   8222,   8051,   7881,   7706,   7528,   7347,
-      7169,   6987,   6800,   6616,   6430,   6240,   6050,   5856,   5660,   5464,
-      5269,   5070,   4870,   4669,   4465,   4259,   4055,   3847,   3642,   3434,
-      3223,   3013,   2799,   2588,   2375,   2161,   1947,   1733,   1516,   1300,
-      1083,    866,    649,    432,    213,      0,   -213,   -432,   -649,   -866,
-     -1083,  -1300,  -1516,  -1733,  -1947,  -2161,  -2375,  -2588,  -2799,  -3013,
-     -3223,  -3434,  -3642,  -3847,  -4055,  -4259,  -4465,  -4669,  -4870,  -5070,
-     -5269,  -5464,  -5660,  -5856,  -6050,  -6240,  -6430,  -6616,  -6800,  -6987,
-     -7169,  -7347,  -7528,  -7706,  -7881,  -8051,  -8222,  -8395,  -8561,  -8724,
-     -8887,  -9048,  -9208,  -9365,  -9520,  -9674,  -9826,  -9975, -10122, -10265,
-    -10410, -10550, -10689, -10826, -10963, -11096, -11230, -11357, -11488, -11613,
-    -11737, -11862, -11981, -12100, -12218, -12337, -12450, -12563, -12676, -12788,
-    -12896, -13005, -13112, -13216, -13320, -13423, -13528, -13629, -13729, -13827,
-    -13928, -14026, -14125, -14223, -14321, -14416, -14511, -14606, -14701, -14796,
-    -14893, -14986, -15081, -15176, -15271, -15366, -15461, -15556, -15653, -15748,
-    -15846, -15944, -16042, -16140, -16238, -16340, -16440, -16541, -16645, -16748,
-    -16853, -16959, -17066, -17173, -17283, -17393, -17505, -17619, -17735, -17850,
-    -17966, -18085, -18203, -18325, -18450, -18574, -18699, -18827, -18957, -19088,
-    -19218, -19353, -19489, -19625, -19765, -19902, -20047, -20189, -20335, -20480,
-    -20626, -20778, -20925, -21080, -21232, -21386, -21543, -21698, -21855, -22016,
-    -22176, -22339, -22499, -22662, -22825, -22990, -23156, -23322, -23488, -23655,
-    -23823, -23989, -24158, -24325, -24491, -24660, -24830, -24996, -25162, -25328,
-    -25495, -25661, -25827, -25990, -26150, -26315, -26475, -26632, -26790, -26943,
-    -27098, -27252, -27401, -27550, -27694, -27840, -27979, -28116, -28253, -28386,
-    -28514, -28642, -28763, -28885, -29000, -29114, -29223, -29328, -29428, -29523,
-    -29618, -29705, -29787, -29865, -29939, -30007, -30069, -30129, -30183, -30230,
-    -30268, -30307, -30337, -30360, -30381, -30390, -30400, -30400, -30390, -30378,
-    -30357, -30330, -30295, -30257, -30210, -30153, -30093, -30022, -29945, -29865,
-    -29770, -29672, -29568, -29452, -29331, -29203, -29066, -28921, -28769, -28609,
-    -28440, -28262, -28080, -27887, -27686, -27478, -27261, -27038, -26807, -26566,
-    -26317, -26062, -25797, -25528, -25248, -24961, -24666, -24364, -24052, -23734,
-    -23411, -23078, -22737, -22390, -22036, -21671, -21305, -20928, -20543, -20154,
-    -19756, -19356, -18946, -18530, -18105, -17678, -17244, -16805, -16360, -15906,
-    -15448, -14988, -14519, -14047, -13569, -13088, -12601, -12109, -11615, -11115,
-    -10613, -10105,  -9595,  -9080,  -8564,  -8041,  -7519,  -6993,  -6465,  -5934,
-     -5399,  -4865,  -4327,  -3790,  -3250,  -2709,  -2169,  -1623,  -1083,   -536,
-         0,    536,   1083,   1623,   2169,   2709,   3250,   3790,   4327,   4865,
-      5399,   5934,   6465,   6993,   7519,   8041,   8564,   9080,   9595,  10105,
-     10613,  11115,  11615,  12109,  12601,  13088,  13569,  14047,  14519,  14988,
-     15448,  15906,  16360,  16805,  17244,  17678,  18105,  18530,  18946,  19356,
-     19756,  20154,  20543,  20928,  21305,  21671,  22036,  22390,  22737,  23078,
-     23411,  23734,  24052,  24364,  24666,  24961,  25248,  25528,  25797,  26062,
-     26317,  26566,  26807,  27038,  27261,  27478,  27686,  27887,  28080,  28262,
-     28440,  28609,  28769,  28921,  29066,  29203,  29331,  29452,  29568,  29672,
-     29770,  29865,  29945,  30022,  30093,  30153,  30210,  30257,  30295,  30330,
-     30357,  30378,  30390,  30400,  30400,  30390,  30381,  30360,  30337,  30307,
-     30268,  30230,  30183,  30129,  30069,  30007,  29939,  29865,  29787,  29705,
-     29618,  29523,  29428,  29328,  29223,  29114,  29000,  28885,  28763,  28642,
-     28514,  28386,  28253,  28116,  27979,  27840,  27694,  27550,  27401,  27252,
-     27098,  26943,  26790,  26632,  26475,  26315,  26150,  25990,  25827,  25661,
-     25495,  25328,  25162,  24996,  24830,  24660,  24491,  24325,  24158,  23989,
-     23823,  23655,  23488,  23322,  23156,  22990,  22825,  22662,  22499,  22339,
-     22176,  22016,  21855,  21698,  21543,  21386,  21232,  21080,  20925,  20778,
-     20626,  20480,  20335,  20189,  20047,  19902,  19765,  19625,  19489,  19353,
-     19218,  19088,  18957,  18827,  18699,  18574,  18450,  18325,  18203,  18085,
-     17966,  17850,  17735,  17619,  17505,  17393,  17283,  17173,  17066,  16959,
-     16853,  16748,  16645,  16541,  16440,  16340,  16238,  16140,  16042,  15944,
-     15846,  15748,  15653,  15556,  15461,  15366,  15271,  15176,  15081,  14986,
-     14893,  14796,  14701,  14606,  14511,  14416,  14321,  14223,  14125,  14026,
-     13928,  13827,  13729,  13629,  13528,  13423,  13320,  13216,  13112,  13005,
-     12896,  12788,  12676,  12563,  12450,  12337,  12218,  12100,  11981,  11862,
-     11737,  11613,  11488,  11357,  11230,  11096,  10963,  10826,  10689,  10550,
-     10410,  10265,  10122,   9975,   9826,   9674,   9520,   9365,   9208,   9048,
-      8887,   8724,   8561,   8395,   8222,   8051,   7881,   7706,   7528,   7347,
-      7169,   6987,   6800,   6616,   6430,   6240,   6050,   5856,   5660,   5464,
-      5269,   5070,   4870,   4669,   4465,   4259,   4055,   3847,   3642,   3434,
-      3223,   3013,   2799,   2588,   2375,   2161,   1947,   1733,   1516,   1300,
-      1083,    866,    649,    432,    213,      0,   -213,   -432,   -649,   -866,
-     -1083,  -1300,  -1516,  -1733,  -1947,  -2161,  -2375,  -2588,  -2799,  -3013,
-     -3223,  -3434,  -3642,  -3847,  -4055,  -4259,  -4465,  -4669,  -4870,  -5070,
-     -5269,  -5464,  -5660,  -5856,  -6050,  -6240,  -6430,  -6616,  -6800,  -6987,
-     -7169,  -7347,  -7528,  -7706,  -7881,  -8051,  -8222,  -8395,  -8561,  -8724,
-     -8887,  -9048,  -9208,  -9365,  -9520,  -9674,  -9826,  -9975, -10122, -10265,
-    -10410, -10550, -10689, -10826, -10963, -11096, -11230, -11357, -11488, -11613,
-    -11737, -11862, -11981, -12100, -12218, -12337, -12450, -12563, -12676, -12788,
-    -12896, -13005, -13112, -13216, -13320, -13423, -13528, -13629, -13729, -13827,
-    -13928, -14026, -14125, -14223, -14321, -14416, -14511, -14606, -14701, -14796,
-    -14893, -14986, -15081, -15176, -15271, -15366, -15461, -15556, -15653, -15748,
-    -15846, -15944, -16042, -16140, -16238, -16340, -16440, -16541, -16645, -16748,
-    -16853, -16959, -17066, -17173, -17283, -17393, -17505, -17619, -17735, -17850,
-    -17966, -18085, -18203, -18325, -18450, -18574, -18699, -18827, -18957, -19088,
-    -19218, -19353, -19489, -19625, -19765, -19902, -20047, -20189, -20335, -20480,
-    -20626, -20778, -20925, -21080, -21232, -21386, -21543, -21698, -21855, -22016,
-    -22176, -22339, -22499, -22662, -22825, -22990, -23156, -23322, -23488, -23655,
-    -23823, -23989, -24158, -24325, -24491, -24660, -24830, -24996, -25162, -25328,
-    -25495, -25661, -25827, -25990, -26150, -26315, -26475, -26632, -26790, -26943,
-    -27098, -27252, -27401, -27550, -27694, -27840, -27979, -28116, -28253, -28386,
-    -28514, -28642, -28763, -28885, -29000, -29114, -29223, -29328, -29428, -29523,
-    -29618, -29705, -29787, -29865, -29939, -30007, -30069, -30129, -30183, -30230,
-    -30268, -30307, -30337, -30360, -30381, -30390, -30400, -30400, -30390, -30378,
-    -30357, -30330, -30295, -30257, -30210, -30153, -30093, -30022, -29945, -29865,
-    -29770, -29672, -29568, -29452, -29331, -29203, -29066, -28921, -28769, -28609,
-    -28440, -28262, -28080, -27887, -27686, -27478, -27261, -27038, -26807, -26566,
-    -26317, -26062, -25797, -25528, -25248, -24961, -24666, -24364, -24052, -23734,
-    -23411, -23078, -22737, -22390, -22036, -21671, -21305, -20928, -20543, -20154,
-    -19756, -19356, -18946, -18530, -18105, -17678, -17244, -16805, -16360, -15906,
-    -15448, -14988, -14519, -14047, -13569, -13088, -12601, -12109, -11615, -11115,
-    -10613, -10105,  -9595,  -9080,  -8564,  -8041,  -7519,  -6993,  -6465,  -5934,
-     -5399,  -4865,  -4327,  -3790,  -3250,  -2709,  -2169,  -1623,  -1083,   -536
-};
-
-/*
- * Waveform name: dulciana_004432, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 0 | 0 | 4 | 4 | 3 | 2 | 0 | 0 | 0 |
- */
-const  int16  dulciana_004432[] =
-{
-         0,    720,   1450,   2170,   2895,   3620,   4335,   5055,   5765,   6475,
-      7180,   7875,   8570,   9255,   9935,  10610,  11275,  11935,  12585,  13225,
-     13855,  14480,  15095,  15695,  16290,  16865,  17435,  17995,  18535,  19070,
-     19590,  20095,  20590,  21070,  21535,  21985,  22425,  22845,  23255,  23645,
-     24025,  24385,  24735,  25065,  25380,  25680,  25965,  26230,  26485,  26720,
-     26940,  27145,  27335,  27505,  27665,  27805,  27930,  28040,  28130,  28210,
-     28275,  28325,  28355,  28375,  28375,  28365,  28340,  28300,  28250,  28185,
-     28100,  28010,  27905,  27785,  27655,  27515,  27355,  27195,  27015,  26830,
-     26635,  26430,  26210,  25985,  25750,  25505,  25255,  24995,  24725,  24455,
-     24170,  23885,  23590,  23295,  22985,  22680,  22365,  22050,  21730,  21405,
-     21075,  20745,  20410,  20075,  19740,  19405,  19065,  18730,  18390,  18050,
-     17710,  17375,  17035,  16700,  16365,  16030,  15700,  15375,  15050,  14725,
-     14405,  14090,  13780,  13470,  13165,  12865,  12570,  12275,  11985,  11705,
-     11430,  11155,  10885,  10625,  10370,  10115,   9870,   9630,   9395,   9165,
-      8945,   8725,   8515,   8305,   8105,   7910,   7725,   7540,   7360,   7190,
-      7025,   6865,   6710,   6560,   6415,   6275,   6140,   6010,   5885,   5770,
-      5650,   5545,   5435,   5335,   5240,   5145,   5055,   4970,   4890,   4810,
-      4735,   4665,   4595,   4530,   4465,   4405,   4345,   4290,   4235,   4185,
-      4135,   4085,   4035,   3990,   3950,   3905,   3860,   3820,   3780,   3735,
-      3700,   3655,   3620,   3580,   3540,   3500,   3460,   3415,   3375,   3335,
-      3290,   3250,   3205,   3160,   3115,   3070,   3020,   2970,   2925,   2870,
-      2820,   2765,   2710,   2650,   2595,   2540,   2480,   2420,   2355,   2295,
-      2230,   2165,   2100,   2030,   1960,   1895,   1825,   1750,   1680,   1610,
-      1535,   1460,   1385,   1310,   1240,   1160,   1090,   1010,    940,    860,
-       785,    710,    640,    565,    490,    420,    350,    275,    205,    135,
-        70,      0,    -55,   -120,   -185,   -245,   -305,   -360,   -415,   -470,
-      -525,   -570,   -620,   -665,   -705,   -750,   -785,   -820,   -855,   -885,
-      -915,   -940,   -960,   -985,  -1000,  -1015,  -1030,  -1040,  -1050,  -1050,
-     -1055,  -1055,  -1050,  -1045,  -1040,  -1025,  -1015,   -995,   -980,   -960,
-      -940,   -910,   -885,   -855,   -825,   -790,   -755,   -720,   -685,   -640,
-      -600,   -560,   -515,   -470,   -420,   -375,   -325,   -275,   -225,   -175,
-      -125,    -70,    -20,     25,     75,    130,    185,    230,    285,    335,
-       385,    435,    480,    525,    575,    615,    660,    700,    745,    780,
-       820,    855,    890,    920,    950,    975,   1000,   1025,   1045,   1065,
-      1080,   1095,   1105,   1110,   1120,   1125,   1125,   1120,   1115,   1110,
-      1100,   1085,   1070,   1055,   1030,   1010,    980,    955,    925,    890,
-       855,    815,    775,    730,    685,    640,    585,    535,    480,    425,
-       365,    305,    245,    180,    115,     50,    -15,    -85,   -155,   -225,
-      -295,   -370,   -445,   -515,   -595,   -670,   -745,   -820,   -895,   -970,
-     -1050,  -1125,  -1200,  -1275,  -1350,  -1425,  -1500,  -1575,  -1645,  -1720,
-     -1790,  -1860,  -1930,  -1995,  -2065,  -2130,  -2195,  -2255,  -2320,  -2380,
-     -2440,  -2495,  -2550,  -2610,  -2660,  -2710,  -2760,  -2810,  -2855,  -2900,
-     -2950,  -2990,  -3035,  -3075,  -3110,  -3150,  -3185,  -3220,  -3255,  -3290,
-     -3320,  -3355,  -3385,  -3415,  -3445,  -3475,  -3505,  -3535,  -3565,  -3590,
-     -3620,  -3650,  -3680,  -3715,  -3745,  -3780,  -3815,  -3850,  -3885,  -3925,
-     -3965,  -4005,  -4050,  -4095,  -4145,  -4195,  -4250,  -4310,  -4370,  -4435,
-     -4500,  -4570,  -4645,  -4720,  -4805,  -4890,  -4980,  -5075,  -5175,  -5280,
-     -5390,  -5505,  -5620,  -5745,  -5875,  -6010,  -6155,  -6300,  -6450,  -6610,
-     -6775,  -6940,  -7120,  -7300,  -7490,  -7680,  -7885,  -8090,  -8300,  -8520,
-     -8745,  -8975,  -9210,  -9455,  -9700,  -9955, -10215, -10485, -10755, -11030,
-    -11310, -11600, -11890, -12190, -12490, -12800, -13110, -13425, -13745, -14070,
-    -14395, -14725, -15055, -15395, -15730, -16070, -16415, -16760, -17105, -17455,
-    -17800, -18150, -18500, -18850, -19195, -19545, -19890, -20235, -20575, -20915,
-    -21255, -21590, -21925, -22250, -22575, -22895, -23210, -23520, -23820, -24120,
-    -24415, -24700, -24975, -25245, -25510, -25765, -26010, -26245, -26475, -26690,
-    -26900, -27095, -27280, -27460, -27620, -27770, -27915, -28040, -28155, -28260,
-    -28350, -28425, -28485, -28535, -28570, -28590, -28595, -28585, -28560, -28520,
-    -28465, -28390, -28305, -28205, -28085, -27950, -27800, -27635, -27455, -27255,
-    -27040, -26815, -26565, -26300, -26025, -25730, -25420, -25095, -24750, -24395,
-    -24020, -23630, -23230, -22810, -22380, -21930, -21470, -20995, -20505, -20000,
-    -19485, -18955, -18415, -17860, -17295, -16715, -16125, -15525, -14915, -14295,
-    -13665, -13025, -12380, -11720, -11060, -10385,  -9705,  -9020,  -8330,  -7630,
-     -6930,  -6220,  -5510,  -4795,  -4080,  -3355,  -2635,  -1910,  -1185,   -455,
-       260,    985,   1710,   2435,   3155,   3875,   4590,   5305,   6015,   6715,
-      7420,   8110,   8800,   9480,  10155,  10820,  11480,  12130,  12775,  13410,
-     14035,  14650,  15255,  15845,  16430,  17000,  17560,  18110,  18645,  19165,
-     19675,  20170,  20655,  21125,  21580,  22020,  22445,  22860,  23255,  23635,
-     24005,  24355,  24695,  25015,  25320,  25610,  25885,  26140,  26385,  26610,
-     26820,  27015,  27195,  27360,  27505,  27640,  27755,  27860,  27945,  28015,
-     28070,  28115,  28140,  28155,  28150,  28135,  28105,  28060,  28000,  27935,
-     27850,  27755,  27645,  27525,  27390,  27250,  27095,  26930,  26755,  26565,
-     26370,  26165,  25950,  25725,  25495,  25250,  25005,  24750,  24485,  24215,
-     23940,  23660,  23370,  23075,  22775,  22475,  22170,  21860,  21550,  21230,
-     20910,  20590,  20265,  19935,  19610,  19285,  18955,  18625,  18300,  17970,
-     17640,  17310,  16985,  16660,  16335,  16015,  15695,  15375,  15060,  14750,
-     14440,  14135,  13835,  13535,  13240,  12950,  12665,  12380,  12105,  11830,
-     11560,  11295,  11040,  10785,  10535,  10295,  10055,   9825,   9595,   9375,
-      9155,   8945,   8740,   8535,   8340,   8150,   7965,   7790,   7615,   7445,
-      7280,   7120,   6970,   6820,   6680,   6540,   6405,   6275,   6150,   6030,
-      5915,   5800,   5695,   5590,   5490,   5390,   5300,   5210,   5120,   5040,
-      4960,   4880,   4805,   4735,   4665,   4595,   4530,   4465,   4405,   4345,
-      4285,   4230,   4170,   4115,   4065,   4010,   3955,   3905,   3855,   3805,
-      3755,   3700,   3650,   3605,   3550,   3500,   3450,   3400,   3345,   3295,
-      3240,   3190,   3135,   3080,   3025,   2965,   2910,   2850,   2795,   2735,
-      2670,   2605,   2545,   2480,   2415,   2350,   2285,   2215,   2150,   2080,
-      2010,   1935,   1865,   1795,   1720,   1645,   1575,   1500,   1425,   1350,
-      1275,   1200,   1125,   1045,    975,    900,    825,    750,    675,    600,
-       530,    455,    385,    315,    245,    175,    110,     40,    -15,    -80,
-      -140,   -200,   -260,   -315,   -370,   -425,   -475,   -525,   -575,   -620,
-      -660,   -700,   -740,   -775,   -810,   -840,   -865,   -895,   -915,   -935,
-      -955,   -970,   -980,   -990,  -1000,  -1005,  -1005,  -1005,  -1005,   -995,
-      -990,   -980,   -965,   -950,   -930,   -910,   -890,   -865,   -840,   -810,
-      -775,   -745,   -710,   -670,   -635,   -595,   -550,   -510,   -465,   -420,
-      -370,   -325,   -275,   -225,   -175,   -120,    -70,    -20,     30,     80,
-       135,    185,    240,    290,    340,    395,    445,    495,    545,    590,
-       640,    685,    725,    770,    810,    850,    890,    925,    960,    995,
-      1025,   1055,   1080,   1105,   1125,   1145,   1165,   1175,   1190,   1195,
-      1205,   1210,   1210,   1210,   1205,   1200,   1190,   1175,   1160,   1145,
-      1125,   1100,   1075,   1045,   1015,    980,    945,    905,    860,    820,
-       775,    725,    675,    620,    565,    510,    450,    385,    325,    260,
-       195,    125,     55,    -10,    -85,   -155,   -230,   -305,   -380,   -455,
-      -535,   -610,   -690,   -765,   -845,   -925,  -1000,  -1080,  -1160,  -1235,
-     -1315,  -1390,  -1465,  -1540,  -1615,  -1690,  -1760,  -1830,  -1905,  -1970,
-     -2040,  -2105,  -2170,  -2235,  -2295,  -2355,  -2415,  -2475,  -2530,  -2580,
-     -2635,  -2685,  -2735,  -2780,  -2825,  -2870,  -2910,  -2950,  -2985,  -3020,
-     -3060,  -3095,  -3125,  -3155,  -3180,  -3210,  -3235,  -3260,  -3285,  -3310,
-     -3330,  -3350,  -3370,  -3390,  -3410,  -3430,  -3450,  -3470,  -3485,  -3505,
-     -3525,  -3545,  -3565,  -3590,  -3610,  -3635,  -3665,  -3690,  -3715,  -3750,
-     -3780,  -3815,  -3850,  -3890,  -3935,  -3980,  -4025,  -4080,  -4135,  -4195,
-     -4255,  -4320,  -4395,  -4465,  -4545,  -4630,  -4720,  -4810,  -4910,  -5015,
-     -5125,  -5240,  -5360,  -5480,  -5615,  -5755,  -5895,  -6045,  -6200,  -6360,
-     -6530,  -6705,  -6885,  -7070,  -7265,  -7465,  -7670,  -7885,  -8105,  -8325,
-     -8560,  -8800,  -9040,  -9295,  -9550,  -9815, -10085, -10360, -10640, -10925,
-    -11215, -11515, -11815, -12125, -12435, -12755, -13075, -13400, -13730, -14065,
-    -14400, -14745, -15085, -15430, -15780, -16130, -16485, -16840, -17195, -17555,
-    -17910, -18270, -18630, -18985, -19345, -19700, -20050, -20405, -20755, -21105,
-    -21450, -21795, -22135, -22470, -22795, -23120, -23440, -23760, -24065, -24370,
-    -24660, -24950, -25230, -25505, -25770, -26025, -26275, -26510, -26735, -26955,
-    -27160, -27360, -27540, -27720, -27880, -28030, -28165, -28290, -28400, -28500,
-    -28585, -28655, -28710, -28755, -28785, -28800, -28795, -28780, -28745, -28700,
-    -28635, -28555, -28460, -28350, -28225, -28080, -27920, -27745, -27555, -27345,
-    -27125, -26885, -26625, -26350, -26065, -25760, -25440, -25100, -24750, -24380,
-    -23995, -23600, -23185, -22755, -22315, -21855, -21380, -20900, -20400, -19885,
-    -19360, -18820, -18270, -17710, -17130, -16545, -15950, -15340, -14725, -14095,
-    -13460, -12815, -12160, -11495, -10830, -10150,  -9465,  -8775,  -8080,  -7380,
-     -6675,  -5965,  -5250,  -4535,  -3815,  -3095,  -2370,  -1645,   -920,   -195
-};
-
-/*
- * Waveform name: salicional_006766444, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 0 | 0 | 4 | 5 | 4 | 4 | 2 | 2 | 2 |
- */
-const  int16  salicional_004544222[] =
-{
-         0,   1161,   2331,   3495,   4653,   5799,   6936,   8061,   9168,  10260,
-     11334,  12384,  13413,  14415,  15393,  16341,  17262,  18153,  19011,  19839,
-     20628,  21387,  22110,  22794,  23445,  24060,  24633,  25173,  25674,  26139,
-     26568,  26958,  27312,  27630,  27915,  28164,  28377,  28563,  28710,  28830,
-     28920,  28980,  29013,  29019,  29001,  28959,  28890,  28803,  28692,  28566,
-     28419,  28260,  28080,  27891,  27687,  27468,  27234,  27000,  26751,  26496,
-     26232,  25962,  25686,  25407,  25125,  24834,  24543,  24246,  23949,  23649,
-     23349,  23043,  22743,  22431,  22125,  21816,  21504,  21192,  20877,  20562,
-     20244,  19923,  19602,  19278,  18951,  18621,  18291,  17955,  17619,  17274,
-     16932,  16581,  16227,  15870,  15510,  15150,  14784,  14412,  14037,  13665,
-     13281,  12900,  12516,  12129,  11742,  11355,  10965,  10575,  10188,   9801,
-      9417,   9033,   8652,   8277,   7905,   7539,   7179,   6825,   6480,   6141,
-      5811,   5490,   5178,   4881,   4590,   4314,   4044,   3792,   3552,   3324,
-      3111,   2913,   2730,   2559,   2403,   2259,   2133,   2019,   1917,   1833,
-      1758,   1701,   1656,   1620,   1596,   1584,   1581,   1590,   1608,   1632,
-      1665,   1704,   1746,   1797,   1851,   1911,   1968,   2025,   2088,   2151,
-      2211,   2265,   2319,   2370,   2415,   2457,   2493,   2517,   2541,   2553,
-      2559,   2550,   2541,   2520,   2487,   2448,   2400,   2343,   2274,   2199,
-      2109,   2016,   1908,   1797,   1677,   1551,   1416,   1278,   1134,    981,
-       828,    669,    507,    345,    180,     15,   -144,   -309,   -474,   -633,
-      -792,   -945,  -1092,  -1236,  -1374,  -1509,  -1635,  -1752,  -1866,  -1968,
-     -2064,  -2157,  -2235,  -2310,  -2370,  -2427,  -2472,  -2514,  -2544,  -2568,
-     -2586,  -2595,  -2601,  -2601,  -2595,  -2583,  -2571,  -2553,  -2532,  -2511,
-     -2493,  -2469,  -2448,  -2427,  -2409,  -2397,  -2385,  -2379,  -2379,  -2382,
-     -2394,  -2409,  -2439,  -2469,  -2511,  -2562,  -2622,  -2688,  -2769,  -2856,
-     -2952,  -3057,  -3177,  -3300,  -3435,  -3576,  -3726,  -3885,  -4047,  -4218,
-     -4395,  -4575,  -4758,  -4944,  -5133,  -5325,  -5514,  -5706,  -5892,  -6075,
-     -6255,  -6429,  -6597,  -6753,  -6900,  -7044,  -7173,  -7290,  -7392,  -7482,
-     -7557,  -7614,  -7653,  -7680,  -7686,  -7674,  -7641,  -7590,  -7518,  -7425,
-     -7314,  -7182,  -7032,  -6855,  -6663,  -6453,  -6222,  -5967,  -5700,  -5415,
-     -5109,  -4794,  -4461,  -4110,  -3750,  -3381,  -2997,  -2604,  -2205,  -1797,
-     -1389,   -972,   -555,   -135,    279,    696,   1110,   1521,   1926,   2322,
-      2709,   3087,   3456,   3813,   4155,   4482,   4797,   5091,   5373,   5637,
-      5880,   6108,   6315,   6504,   6675,   6822,   6954,   7062,   7155,   7224,
-      7278,   7311,   7326,   7323,   7308,   7272,   7221,   7155,   7074,   6981,
-      6876,   6762,   6639,   6504,   6360,   6213,   6054,   5895,   5730,   5565,
-      5397,   5229,   5058,   4893,   4728,   4566,   4404,   4251,   4104,   3960,
-      3825,   3693,   3570,   3456,   3345,   3246,   3153,   3069,   2994,   2922,
-      2862,   2811,   2766,   2724,   2694,   2667,   2649,   2631,   2622,   2616,
-      2613,   2610,   2613,   2616,   2619,   2622,   2625,   2628,   2628,   2625,
-      2622,   2613,   2598,   2580,   2556,   2526,   2493,   2454,   2403,   2349,
-      2289,   2223,   2148,   2067,   1977,   1884,   1782,   1674,   1563,   1446,
-      1317,   1185,   1056,    918,    780,    639,    495,    351,    207,     63,
-       -75,   -219,   -360,   -498,   -627,   -756,   -882,   -999,  -1110,  -1218,
-     -1317,  -1404,  -1488,  -1563,  -1626,  -1686,  -1734,  -1773,  -1803,  -1827,
-     -1836,  -1842,  -1836,  -1821,  -1797,  -1770,  -1731,  -1689,  -1641,  -1581,
-     -1524,  -1461,  -1392,  -1320,  -1245,  -1173,  -1098,  -1026,   -951,   -882,
-      -816,   -753,   -696,   -639,   -594,   -555,   -525,   -504,   -492,   -489,
-      -501,   -522,   -555,   -600,   -657,   -729,   -813,   -912,  -1026,  -1149,
-     -1287,  -1443,  -1611,  -1794,  -1989,  -2199,  -2421,  -2652,  -2898,  -3156,
-     -3426,  -3705,  -3996,  -4296,  -4605,  -4920,  -5247,  -5577,  -5910,  -6252,
-     -6600,  -6951,  -7305,  -7659,  -8019,  -8379,  -8739,  -9102,  -9462,  -9825,
-    -10182, -10539, -10896, -11250, -11601, -11949, -12294, -12636, -12975, -13311,
-    -13644, -13977, -14304, -14628, -14952, -15270, -15588, -15903, -16218, -16536,
-    -16851, -17163, -17475, -17784, -18102, -18411, -18729, -19050, -19365, -19689,
-    -20010, -20337, -20664, -20994, -21327, -21663, -22002, -22341, -22683, -23025,
-    -23373, -23715, -24060, -24405, -24750, -25092, -25434, -25767, -26097, -26424,
-    -26742, -27054, -27357, -27651, -27930, -28200, -28455, -28692, -28911, -29115,
-    -29295, -29457, -29595, -29712, -29802, -29862, -29895, -29898, -29871, -29814,
-    -29721, -29595, -29436, -29238, -29004, -28734, -28425, -28077, -27690, -27264,
-    -26799, -26295, -25752, -25167, -24546, -23889, -23193, -22458, -21687, -20883,
-    -20043, -19173, -18270, -17334, -16374, -15384, -14370, -13332, -12273, -11196,
-    -10098,  -8982,  -7857,  -6720,  -5574,  -4419,  -3258,  -2097,   -936,    219,
-      1371,   2520,   3663,   4794,   5913,   7017,   8109,   9180,  10230,  11262,
-     12270,  13251,  14205,  15132,  16038,  16905,  17748,  18555,  19335,  20079,
-     20790,  21468,  22110,  22719,  23295,  23835,  24339,  24813,  25251,  25659,
-     26031,  26370,  26679,  26958,  27207,  27423,  27615,  27777,  27909,  28020,
-     28101,  28164,  28200,  28218,  28212,  28188,  28146,  28086,  28008,  27915,
-     27804,  27684,  27549,  27405,  27243,  27072,  26889,  26700,  26502,  26292,
-     26076,  25854,  25620,  25386,  25143,  24888,  24633,  24369,  24099,  23823,
-     23547,  23259,  22968,  22665,  22365,  22056,  21738,  21417,  21090,  20757,
-     20418,  20073,  19722,  19365,  19002,  18633,  18261,  17880,  17496,  17106,
-     16710,  16308,  15903,  15498,  15087,  14670,  14253,  13836,  13413,  12993,
-     12570,  12147,  11727,  11307,  10890,  10476,  10071,   9663,   9264,   8871,
-      8484,   8106,   7737,   7374,   7023,   6684,   6354,   6036,   5733,   5442,
-      5160,   4896,   4644,   4413,   4191,   3984,   3792,   3615,   3453,   3309,
-      3180,   3063,   2964,   2877,   2805,   2748,   2700,   2667,   2646,   2634,
-      2634,   2646,   2664,   2691,   2724,   2763,   2808,   2859,   2913,   2970,
-      3024,   3078,   3138,   3195,   3246,   3297,   3342,   3384,   3420,   3453,
-      3477,   3489,   3495,   3498,   3486,   3465,   3435,   3396,   3345,   3285,
-      3213,   3129,   3042,   2940,   2826,   2706,   2577,   2442,   2292,   2139,
-      1977,   1809,   1638,   1458,   1275,   1089,    903,    714,    522,    330,
-       144,    -45,   -231,   -414,   -594,   -771,   -939,  -1101,  -1260,  -1416,
-     -1554,  -1692,  -1815,  -1932,  -2040,  -2139,  -2229,  -2307,  -2376,  -2436,
-     -2487,  -2535,  -2565,  -2589,  -2604,  -2613,  -2613,  -2607,  -2595,  -2577,
-     -2553,  -2529,  -2496,  -2469,  -2433,  -2400,  -2367,  -2331,  -2301,  -2274,
-     -2247,  -2226,  -2211,  -2202,  -2196,  -2199,  -2214,  -2235,  -2262,  -2298,
-     -2349,  -2406,  -2475,  -2553,  -2643,  -2742,  -2853,  -2973,  -3105,  -3243,
-     -3393,  -3549,  -3720,  -3894,  -4074,  -4263,  -4455,  -4656,  -4857,  -5058,
-     -5265,  -5472,  -5679,  -5877,  -6078,  -6279,  -6471,  -6654,  -6831,  -6999,
-     -7161,  -7308,  -7443,  -7566,  -7674,  -7767,  -7845,  -7908,  -7947,  -7974,
-     -7980,  -7965,  -7932,  -7878,  -7806,  -7710,  -7593,  -7458,  -7302,  -7125,
-     -6930,  -6714,  -6480,  -6222,  -5952,  -5661,  -5361,  -5037,  -4701,  -4356,
-     -3993,  -3624,  -3243,  -2850,  -2457,  -2049,  -1644,  -1233,   -819,   -405,
-         3,    411,    816,   1221,   1611,   2001,   2382,   2748,   3108,   3453,
-      3789,   4104,   4410,   4698,   4971,   5226,   5463,   5682,   5889,   6069,
-      6234,   6381,   6510,   6621,   6711,   6783,   6840,   6876,   6903,   6906,
-      6897,   6873,   6834,   6783,   6717,   6642,   6558,   6462,   6354,   6243,
-      6123,   6000,   5865,   5733,   5598,   5457,   5313,   5172,   5031,   4893,
-      4755,   4620,   4488,   4362,   4236,   4119,   4002,   3894,   3795,   3699,
-      3609,   3525,   3447,   3375,   3309,   3252,   3198,   3150,   3108,   3066,
-      3033,   3003,   2976,   2955,   2931,   2910,   2895,   2877,   2862,   2844,
-      2823,   2808,   2784,   2760,   2733,   2700,   2667,   2628,   2586,   2535,
-      2481,   2421,   2355,   2286,   2211,   2127,   2040,   1947,   1845,   1743,
-      1632,   1518,   1401,   1278,   1149,   1023,    891,    759,    621,    489,
-       351,    213,     78,    -51,   -177,   -303,   -429,   -549,   -660,   -768,
-      -870,   -963,  -1053,  -1134,  -1209,  -1269,  -1329,  -1374,  -1410,  -1437,
-     -1455,  -1464,  -1464,  -1452,  -1431,  -1404,  -1368,  -1323,  -1269,  -1209,
-     -1143,  -1071,   -990,   -906,   -813,   -723,   -627,   -531,   -432,   -330,
-      -237,   -138,    -45,     42,    129,    213,    288,    357,    420,    474,
-       513,    549,    573,    591,    591,    576,    555,    516,    468,    402,
-       324,    231,    120,      0,   -132,   -279,   -447,   -624,   -816,  -1020,
-     -1233,  -1464,  -1707,  -1959,  -2223,  -2496,  -2781,  -3072,  -3372,  -3678,
-     -3993,  -4311,  -4635,  -4965,  -5301,  -5637,  -5976,  -6318,  -6657,  -6999,
-     -7341,  -7683,  -8022,  -8361,  -8697,  -9030,  -9360,  -9690, -10014, -10335,
-    -10653, -10968, -11280, -11586, -11892, -12192, -12492, -12789, -13083, -13374,
-    -13665, -13959, -14244, -14535, -14826, -15114, -15408, -15702, -15999, -16299,
-    -16605, -16911, -17223, -17535, -17859, -18183, -18516, -18852, -19194, -19545,
-    -19899, -20259, -20625, -21000, -21378, -21762, -22146, -22536, -22935, -23331,
-    -23730, -24126, -24525, -24924, -25323, -25713, -26106, -26487, -26862, -27231,
-    -27588, -27933, -28269, -28587, -28887, -29175, -29442, -29688, -29910, -30108,
-    -30279, -30426, -30546, -30636, -30693, -30720, -30711, -30669, -30591, -30474,
-    -30321, -30132, -29904, -29637, -29325, -28977, -28587, -28158, -27684, -27174,
-    -26625, -26034, -25404, -24735, -24033, -23292, -22515, -21702, -20859, -19980,
-    -19074, -18141, -17175, -16188, -15177, -14142, -13092, -12018, -10935,  -9837,
-     -8724,  -7602,  -6474,  -5340,  -4203,  -3063,  -1926,   -792,    333,   1455
-};
-
-/*
- * Waveform name: hammond_oboe_004675300, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 0 | 0 | 4 | 6 | 7 | 5 | 3 | 0 | 0 |
- */
-const  int16  hammond_oboe_004675300[] =
-{
-         0,    977,   1957,   2935,   3910,   4879,   5845,   6802,   7754,   8699,
-      9631,  10554,  11464,  12365,  13249,  14121,  14977,  15815,  16639,  17446,
-     18231,  18998,  19744,  20470,  21175,  21856,  22516,  23152,  23762,  24348,
-     24911,  25446,  25956,  26439,  26894,  27322,  27722,  28096,  28443,  28760,
-     29047,  29308,  29539,  29743,  29918,  30061,  30180,  30271,  30330,  30364,
-     30369,  30346,  30296,  30221,  30118,  29987,  29833,  29651,  29444,  29216,
-     28962,  28686,  28384,  28063,  27721,  27354,  26970,  26566,  26144,  25702,
-     25243,  24769,  24278,  23772,  23252,  22716,  22169,  21612,  21041,  20462,
-     19873,  19275,  18667,  18053,  17435,  16810,  16180,  15546,  14911,  14268,
-     13630,  12988,  12346,  11706,  11068,  10431,   9798,   9165,   8539,   7919,
-      7301,   6691,   6088,   5492,   4905,   4326,   3753,   3192,   2642,   2099,
-      1567,   1046,    536,     39,   -444,   -918,  -1379,  -1825,  -2260,  -2682,
-     -3089,  -3481,  -3864,  -4230,  -4583,  -4923,  -5248,  -5559,  -5854,  -6138,
-     -6406,  -6661,  -6901,  -7126,  -7339,  -7540,  -7725,  -7899,  -8058,  -8204,
-     -8338,  -8458,  -8568,  -8665,  -8752,  -8823,  -8886,  -8936,  -8978,  -9009,
-     -9026,  -9037,  -9037,  -9028,  -9009,  -8982,  -8948,  -8905,  -8854,  -8795,
-     -8727,  -8656,  -8577,  -8492,  -8403,  -8304,  -8204,  -8097,  -7985,  -7869,
-     -7748,  -7628,  -7501,  -7369,  -7236,  -7098,  -6960,  -6821,  -6678,  -6530,
-     -6386,  -6237,  -6088,  -5937,  -5785,  -5632,  -5481,  -5325,  -5175,  -5021,
-     -4867,  -4714,  -4560,  -4409,  -4256,  -4105,  -3953,  -3803,  -3654,  -3507,
-     -3360,  -3213,  -3069,  -2924,  -2784,  -2642,  -2501,  -2360,  -2225,  -2089,
-     -1953,  -1821,  -1690,  -1560,  -1429,  -1303,  -1174,  -1051,   -928,   -805,
-      -685,   -569,   -451,   -335,   -221,   -109,      0,    108,    214,    323,
-       428,    530,    630,    730,    828,    923,   1019,   1112,   1202,   1289,
-      1377,   1461,   1545,   1626,   1707,   1783,   1857,   1929,   1999,   2068,
-      2133,   2198,   2259,   2317,   2374,   2427,   2479,   2525,   2571,   2616,
-      2654,   2693,   2727,   2758,   2786,   2812,   2835,   2851,   2870,   2882,
-      2890,   2897,   2901,   2900,   2897,   2890,   2880,   2866,   2850,   2828,
-      2804,   2778,   2748,   2716,   2678,   2637,   2596,   2548,   2500,   2448,
-      2390,   2333,   2268,   2206,   2139,   2070,   1997,   1921,   1842,   1763,
-      1682,   1595,   1508,   1419,   1330,   1238,   1145,   1049,    951,    853,
-       751,    653,    553,    450,    346,    243,    140,     36,    -66,   -169,
-      -273,   -378,   -480,   -582,   -686,   -786,   -886,   -985,  -1085,  -1180,
-     -1276,  -1371,  -1461,  -1552,  -1642,  -1729,  -1810,  -1894,  -1972,  -2052,
-     -2125,  -2199,  -2268,  -2335,  -2400,  -2460,  -2520,  -2575,  -2627,  -2675,
-     -2723,  -2765,  -2804,  -2842,  -2875,  -2904,  -2931,  -2954,  -2976,  -2990,
-     -3003,  -3012,  -3019,  -3020,  -3020,  -3016,  -3009,  -2997,  -2982,  -2965,
-     -2943,  -2919,  -2890,  -2859,  -2827,  -2789,  -2748,  -2702,  -2656,  -2608,
-     -2554,  -2498,  -2439,  -2377,  -2313,  -2244,  -2174,  -2099,  -2024,  -1944,
-     -1863,  -1776,  -1691,  -1600,  -1508,  -1412,  -1315,  -1214,  -1112,  -1008,
-      -901,   -790,   -677,   -563,   -447,   -328,   -206,    -82,     41,    170,
-       300,    431,    566,    703,    841,    984,   1126,   1270,   1417,   1565,
-      1714,   1865,   2021,   2174,   2332,   2491,   2652,   2813,   2977,   3139,
-      3305,   3473,   3639,   3808,   3977,   4149,   4320,   4491,   4662,   4836,
-      5006,   5179,   5353,   5522,   5695,   5862,   6034,   6202,   6368,   6533,
-      6697,   6857,   7018,   7175,   7329,   7479,   7628,   7774,   7915,   8053,
-      8184,   8312,   8437,   8556,   8669,   8776,   8877,   8972,   9061,   9142,
-      9217,   9284,   9343,   9393,   9436,   9468,   9493,   9506,   9512,   9509,
-      9491,   9466,   9429,   9379,   9320,   9248,   9165,   9069,   8961,   8840,
-      8707,   8558,   8399,   8226,   8036,   7836,   7620,   7392,   7149,   6893,
-      6619,   6333,   6031,   5718,   5388,   5044,   4686,   4313,   3927,   3527,
-      3113,   2686,   2245,   1791,   1325,    843,    352,   -150,   -667,  -1195,
-     -1736,  -2285,  -2844,  -3414,  -3992,  -4580,  -5178,  -5781,  -6392,  -7010,
-     -7635,  -8266,  -8902,  -9540, -10184, -10829, -11478, -12127, -12776, -13427,
-    -14078, -14725, -15372, -16013, -16653, -17288, -17918, -18538, -19154, -19765,
-    -20361, -20950, -21531, -22098, -22654, -23198, -23729, -24246, -24745, -25231,
-    -25699, -26151, -26583, -26996, -27391, -27764, -28118, -28448, -28760, -29048,
-    -29309, -29550, -29765, -29954, -30122, -30258, -30373, -30460, -30518, -30550,
-    -30555, -30532, -30480, -30402, -30291, -30154, -29992, -29797, -29573, -29323,
-    -29042, -28735, -28398, -28034, -27639, -27219, -26773, -26298, -25796, -25269,
-    -24715, -24136, -23532, -22903, -22253, -21577, -20879, -20160, -19417, -18657,
-    -17877, -17077, -16259, -15423, -14571, -13706, -12824, -11931, -11022, -10102,
-     -9172,  -8233,  -7283,  -6327,  -5366,  -4395,  -3422,  -2447,  -1468,   -489,
-       488,   1465,   2444,   3419,   4388,   5354,   6317,   7268,   8212,   9149,
-     10074,  10988,  11889,  12780,  13653,  14513,  15357,  16184,  16993,  17787,
-     18559,  19310,  20041,  20750,  21440,  22105,  22747,  23365,  23958,  24527,
-     25070,  25587,  26076,  26540,  26976,  27384,  27766,  28122,  28447,  28745,
-     29013,  29254,  29465,  29651,  29807,  29931,  30030,  30102,  30145,  30160,
-     30146,  30107,  30041,  29947,  29828,  29682,  29512,  29316,  29097,  28854,
-     28586,  28299,  27987,  27653,  27300,  26924,  26532,  26118,  25688,  25241,
-     24776,  24296,  23799,  23291,  22766,  22230,  21679,  21124,  20553,  19973,
-     19386,  18790,  18185,  17576,  16962,  16342,  15718,  15090,  14463,  13830,
-     13200,  12569,  11936,  11309,  10681,  10055,   9436,   8818,   8204,   7600,
-      6997,   6402,   5815,   5236,   4666,   4103,   3549,   3005,   2473,   1949,
-      1435,    934,    444,    -33,   -498,   -951,  -1394,  -1821,  -2235,  -2636,
-     -3026,  -3400,  -3762,  -4109,  -4444,  -4764,  -5071,  -5363,  -5641,  -5907,
-     -6157,  -6398,  -6621,  -6830,  -7028,  -7213,  -7385,  -7544,  -7689,  -7823,
-     -7945,  -8054,  -8154,  -8241,  -8318,  -8380,  -8434,  -8479,  -8512,  -8537,
-     -8552,  -8558,  -8553,  -8539,  -8521,  -8492,  -8458,  -8416,  -8365,  -8308,
-     -8245,  -8177,  -8103,  -8022,  -7936,  -7847,  -7753,  -7654,  -7551,  -7446,
-     -7335,  -7224,  -7109,  -6989,  -6867,  -6744,  -6619,  -6494,  -6365,  -6234,
-     -6104,  -5972,  -5839,  -5707,  -5573,  -5436,  -5304,  -5167,  -5036,  -4900,
-     -4764,  -4632,  -4497,  -4364,  -4232,  -4099,  -3968,  -3837,  -3708,  -3581,
-     -3453,  -3326,  -3199,  -3074,  -2951,  -2827,  -2704,  -2582,  -2464,  -2344,
-     -2226,  -2110,  -1993,  -1879,  -1763,  -1650,  -1537,  -1426,  -1314,  -1204,
-     -1095,   -988,   -881,   -774,   -670,   -565,   -461,   -356,   -256,   -154,
-       -52,     45,    143,    240,    340,    435,    530,    624,    716,    808,
-       899,    988,   1078,   1165,   1252,   1334,   1419,   1499,   1580,   1659,
-      1736,   1811,   1884,   1955,   2025,   2093,   2159,   2221,   2282,   2343,
-      2398,   2454,   2504,   2555,   2601,   2643,   2685,   2721,   2758,   2790,
-      2816,   2843,   2867,   2885,   2902,   2915,   2924,   2930,   2931,   2931,
-      2925,   2917,   2907,   2893,   2874,   2850,   2825,   2797,   2763,   2728,
-      2686,   2644,   2596,   2547,   2493,   2439,   2377,   2313,   2247,   2178,
-      2105,   2029,   1952,   1871,   1788,   1703,   1615,   1523,   1430,   1337,
-      1239,   1141,   1041,    938,    834,    731,    628,    520,    412,    304,
-       197,     86,    -21,   -132,   -243,   -352,   -462,   -570,   -680,   -788,
-      -896,  -1001,  -1107,  -1211,  -1314,  -1417,  -1515,  -1614,  -1709,  -1803,
-     -1895,  -1986,  -2072,  -2157,  -2240,  -2320,  -2398,  -2474,  -2544,  -2613,
-     -2677,  -2740,  -2800,  -2857,  -2909,  -2958,  -3005,  -3046,  -3086,  -3120,
-     -3153,  -3181,  -3205,  -3224,  -3243,  -3255,  -3265,  -3270,  -3272,  -3269,
-     -3262,  -3253,  -3239,  -3222,  -3201,  -3174,  -3146,  -3112,  -3077,  -3038,
-     -2992,  -2946,  -2894,  -2838,  -2781,  -2717,  -2652,  -2582,  -2508,  -2431,
-     -2352,  -2266,  -2179,  -2090,  -1995,  -1898,  -1796,  -1692,  -1586,  -1475,
-     -1362,  -1246,  -1124,  -1003,   -877,   -747,   -616,   -481,   -342,   -202,
-       -60,     83,    232,    384,    536,    694,    853,   1015,   1177,   1342,
-      1510,   1680,   1852,   2025,   2201,   2381,   2560,   2739,   2923,   3105,
-      3291,   3477,   3664,   3853,   4041,   4232,   4421,   4613,   4802,   4994,
-      5185,   5376,   5566,   5753,   5943,   6127,   6314,   6498,   6680,   6860,
-      7037,   7212,   7387,   7555,   7721,   7884,   8043,   8197,   8350,   8496,
-      8634,   8771,   8902,   9028,   9144,   9256,   9362,   9459,   9549,   9632,
-      9705,   9773,   9831,   9881,   9920,   9948,   9969,   9978,   9978,   9967,
-      9943,   9909,   9863,   9804,   9733,   9654,   9559,   9451,   9330,   9194,
-      9048,   8886,   8711,   8522,   8318,   8101,   7869,   7621,   7362,   7089,
-      6797,   6492,   6171,   5839,   5490,   5127,   4748,   4357,   3952,   3531,
-      3099,   2652,   2191,   1717,   1233,    731,    221,   -300,   -836,  -1381,
-     -1938,  -2508,  -3085,  -3669,  -4265,  -4870,  -5481,  -6100,  -6726,  -7359,
-     -7997,  -8641,  -9287,  -9939, -10593, -11249, -11908, -12565, -13223, -13883,
-    -14539, -15192, -15845, -16491, -17135, -17773, -18404, -19028, -19643, -20253,
-    -20850, -21439, -22016, -22581, -23131, -23672, -24197, -24708, -25200, -25679,
-    -26137, -26579, -27003, -27405, -27788, -28149, -28493, -28810, -29108, -29382,
-    -29628, -29853, -30054, -30227, -30376, -30498, -30596, -30664, -30705, -30720,
-    -30705, -30663, -30591, -30494, -30365, -30208, -30026, -29812, -29569, -29297,
-    -28997, -28672, -28315, -27931, -27519, -27080, -26613, -26121, -25600, -25057,
-    -24485, -23887, -23267, -22623, -21956, -21266, -20552, -19817, -19063, -18288,
-    -17496, -16683, -15853, -15008, -14148, -13272, -12381, -11479, -10564,  -9637,
-     -8700,  -7758,  -6803,  -5843,  -4878,  -3907,  -2934,  -1957,   -980,      0
-};
-
-
-/*
- * Waveform name: swell_diapason_007866540, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 0 | 0 | 7 | 8 | 6 | 6 | 5 | 4 | 0 |
- */
-const  int16  swell_diapason_007866540[] =
-{
-         0,   1159,   2318,   3475,   4632,   5775,   6913,   8040,   9155,  10255,
-     11345,  12414,  13466,  14501,  15512,  16501,  17468,  18409,  19321,  20211,
-     21069,  21900,  22700,  23468,  24204,  24908,  25576,  26211,  26814,  27377,
-     27906,  28400,  28859,  29279,  29663,  30008,  30321,  30598,  30834,  31036,
-     31203,  31336,  31431,  31495,  31524,  31519,  31482,  31415,  31315,  31187,
-     31030,  30845,  30632,  30397,  30133,  29845,  29538,  29208,  28856,  28487,
-     28099,  27696,  27280,  26845,  26402,  25945,  25481,  25004,  24523,  24032,
-     23539,  23042,  22540,  22038,  21536,  21037,  20535,  20040,  19546,  19059,
-     18577,  18103,  17632,  17174,  16723,  16281,  15852,  15433,  15022,  14627,
-     14246,  13874,  13519,  13174,  12845,  12529,  12229,  11941,  11671,  11413,
-     11169,  10940,  10727,  10524,  10337,  10162,  10002,   9855,   9719,   9596,
-      9485,   9387,   9296,   9217,   9147,   9087,   9034,   8992,   8955,   8928,
-      8903,   8885,   8874,   8866,   8861,   8862,   8862,   8865,   8870,   8876,
-      8883,   8888,   8892,   8895,   8896,   8898,   8892,   8885,   8876,   8861,
-      8840,   8817,   8786,   8753,   8712,   8667,   8615,   8557,   8492,   8420,
-      8342,   8259,   8166,   8068,   7966,   7855,   7738,   7613,   7487,   7349,
-      7207,   7061,   6907,   6749,   6587,   6418,   6244,   6068,   5890,   5704,
-      5517,   5326,   5134,   4936,   4741,   4542,   4343,   4142,   3940,   3740,
-      3539,   3337,   3137,   2939,   2741,   2546,   2350,   2160,   1971,   1786,
-      1604,   1424,   1249,   1073,    904,    739,    577,    421,    268,    118,
-       -24,   -165,   -301,   -429,   -557,   -679,   -796,   -908,  -1018,  -1122,
-     -1223,  -1320,  -1411,  -1500,  -1582,  -1665,  -1741,  -1815,  -1885,  -1953,
-     -2014,  -2078,  -2137,  -2192,  -2245,  -2298,  -2346,  -2394,  -2441,  -2485,
-     -2530,  -2572,  -2612,  -2653,  -2691,  -2730,  -2766,  -2801,  -2838,  -2876,
-     -2912,  -2946,  -2980,  -3018,  -3050,  -3085,  -3119,  -3152,  -3187,  -3219,
-     -3250,  -3284,  -3317,  -3347,  -3377,  -3407,  -3434,  -3463,  -3489,  -3513,
-     -3537,  -3557,  -3578,  -3593,  -3609,  -3624,  -3633,  -3643,  -3648,  -3651,
-     -3653,  -3648,  -3640,  -3633,  -3618,  -3602,  -3582,  -3556,  -3527,  -3496,
-     -3458,  -3415,  -3370,  -3318,  -3265,  -3204,  -3142,  -3074,  -3002,  -2924,
-     -2844,  -2759,  -2668,  -2572,  -2474,  -2373,  -2265,  -2156,  -2043,  -1926,
-     -1803,  -1683,  -1552,  -1424,  -1293,  -1159,  -1021,   -885,   -742,   -604,
-      -459,   -315,   -170,    -28,    117,    261,    405,    549,    691,    833,
-       972,   1113,   1245,   1381,   1512,   1642,   1766,   1889,   2006,   2126,
-      2235,   2346,   2451,   2550,   2645,   2737,   2823,   2906,   2986,   3059,
-      3126,   3189,   3249,   3302,   3351,   3393,   3436,   3468,   3500,   3524,
-      3546,   3564,   3573,   3582,   3587,   3587,   3582,   3576,   3563,   3549,
-      3533,   3511,   3489,   3464,   3434,   3404,   3372,   3337,   3303,   3265,
-      3228,   3189,   3146,   3104,   3062,   3021,   2977,   2934,   2890,   2845,
-      2801,   2759,   2718,   2675,   2632,   2591,   2549,   2511,   2469,   2432,
-      2394,   2354,   2316,   2279,   2243,   2208,   2168,   2134,   2097,   2061,
-      2022,   1984,   1947,   1907,   1868,   1829,   1785,   1743,   1698,   1651,
-      1601,   1553,   1499,   1443,   1383,   1323,   1257,   1192,   1119,   1046,
-       968,    885,    799,    709,    617,    519,    417,    309,    201,     87,
-       -32,   -155,   -283,   -416,   -551,   -692,   -836,   -984,  -1140,  -1294,
-     -1454,  -1616,  -1781,  -1952,  -2122,  -2299,  -2477,  -2657,  -2837,  -3020,
-     -3205,  -3391,  -3576,  -3763,  -3949,  -4134,  -4321,  -4504,  -4691,  -4872,
-     -5052,  -5231,  -5407,  -5577,  -5748,  -5914,  -6078,  -6236,  -6389,  -6540,
-     -6686,  -6827,  -6963,  -7090,  -7217,  -7334,  -7448,  -7555,  -7658,  -7756,
-     -7846,  -7929,  -8010,  -8083,  -8150,  -8213,  -8269,  -8321,  -8366,  -8409,
-     -8446,  -8482,  -8512,  -8536,  -8558,  -8580,  -8596,  -8612,  -8627,  -8641,
-     -8655,  -8667,  -8681,  -8694,  -8712,  -8733,  -8752,  -8778,  -8806,  -8839,
-     -8877,  -8922,  -8970,  -9029,  -9091,  -9165,  -9247,  -9337,  -9436,  -9547,
-     -9664,  -9795,  -9938, -10093, -10258, -10436, -10629, -10832, -11051, -11282,
-    -11528, -11785, -12057, -12341, -12642, -12956, -13285, -13623, -13979, -14343,
-    -14724, -15114, -15516, -15934, -16359, -16793, -17238, -17692, -18154, -18625,
-    -19100, -19581, -20068, -20562, -21053, -21551, -22048, -22545, -23041, -23536,
-    -24026, -24510, -24993, -25463, -25930, -26384, -26829, -27258, -27680, -28082,
-    -28471, -28846, -29198, -29532, -29846, -30137, -30407, -30652, -30869, -31064,
-    -31229, -31366, -31475, -31555, -31602, -31618, -31602, -31553, -31468, -31351,
-    -31198, -31010, -30787, -30530, -30232, -29899, -29534, -29129, -28688, -28211,
-    -27698, -27149, -26567, -25946, -25294, -24608, -23886, -23133, -22350, -21536,
-    -20690, -19817, -18913, -17989, -17036, -16058, -15058, -14036, -12993, -11931,
-    -10854,  -9758,  -8652,  -7531,  -6400,  -5257,  -4111,  -2954,  -1796,   -635,
-       522,   1680,   2840,   3994,   5145,   6284,   7416,   8536,   9646,  10738,
-     11818,  12879,  13920,  14945,  15945,  16921,  17876,  18804,  19700,  20576,
-     21419,  22234,  23017,  23768,  24487,  25173,  25823,  26439,  27022,  27567,
-     28077,  28550,  28988,  29388,  29752,  30077,  30367,  30624,  30839,  31021,
-     31167,  31278,  31353,  31396,  31404,  31378,  31322,  31236,  31116,  30967,
-     30793,  30590,  30358,  30105,  29824,  29520,  29195,  28849,  28483,  28101,
-     27699,  27283,  26853,  26406,  25953,  25485,  25012,  24526,  24036,  23539,
-     23038,  22535,  22028,  21524,  21018,  20514,  20012,  19517,  19023,  18536,
-     18055,  17584,  17118,  16662,  16216,  15781,  15358,  14946,  14545,  14158,
-     13787,  13425,  13080,  12747,  12432,  12129,  11843,  11568,  11312,  11071,
-     10844,  10631,  10435,  10249,  10082,   9925,   9783,   9656,   9540,   9436,
-      9345,   9267,   9196,   9139,   9090,   9050,   9019,   8997,   8981,   8974,
-      8971,   8974,   8984,   8996,   9011,   9033,   9052,   9074,   9098,   9123,
-      9147,   9170,   9192,   9213,   9230,   9247,   9256,   9265,   9270,   9269,
-      9260,   9250,   9229,   9207,   9177,   9140,   9098,   9048,   8989,   8923,
-      8851,   8772,   8685,   8589,   8487,   8378,   8262,   8135,   8008,   7870,
-      7726,   7574,   7416,   7252,   7083,   6909,   6727,   6542,   6355,   6158,
-      5961,   5759,   5554,   5344,   5135,   4921,   4707,   4492,   4275,   4058,
-      3839,   3620,   3402,   3186,   2969,   2755,   2539,   2331,   2121,   1916,
-      1713,   1512,   1317,   1119,    930,    744,    562,    384,    211,     40,
-      -124,   -285,   -441,   -589,   -736,   -878,  -1016,  -1145,  -1274,  -1396,
-     -1515,  -1628,  -1736,  -1842,  -1941,  -2037,  -2128,  -2215,  -2298,  -2380,
-     -2454,  -2527,  -2597,  -2661,  -2722,  -2785,  -2840,  -2894,  -2949,  -2996,
-     -3044,  -3091,  -3134,  -3175,  -3213,  -3253,  -3288,  -3324,  -3357,  -3391,
-     -3423,  -3453,  -3481,  -3512,  -3537,  -3563,  -3588,  -3612,  -3636,  -3658,
-     -3677,  -3698,  -3717,  -3733,  -3749,  -3766,  -3777,  -3788,  -3797,  -3805,
-     -3811,  -3812,  -3815,  -3812,  -3808,  -3803,  -3793,  -3784,  -3769,  -3751,
-     -3730,  -3706,  -3677,  -3648,  -3613,  -3576,  -3535,  -3488,  -3438,  -3387,
-     -3328,  -3265,  -3200,  -3129,  -3056,  -2976,  -2895,  -2810,  -2720,  -2624,
-     -2526,  -2425,  -2318,  -2208,  -2095,  -1979,  -1857,  -1736,  -1611,  -1482,
-     -1349,  -1218,  -1079,   -941,   -802,   -662,   -518,   -376,   -229,    -85,
-        61,    205,    351,    495,    639,    782,    926,   1068,   1204,   1342,
-      1475,   1609,   1736,   1864,   1986,   2107,   2220,   2332,   2439,   2546,
-      2643,   2740,   2830,   2915,   2994,   3071,   3141,   3207,   3268,   3324,
-      3373,   3417,   3458,   3492,   3522,   3543,   3565,   3578,   3588,   3593,
-      3593,   3590,   3579,   3567,   3550,   3530,   3504,   3477,   3443,   3408,
-      3373,   3332,   3290,   3245,   3197,   3149,   3097,   3046,   2995,   2941,
-      2886,   2830,   2774,   2718,   2662,   2608,   2550,   2494,   2441,   2385,
-      2332,   2282,   2231,   2181,   2132,   2084,   2037,   1997,   1950,   1909,
-      1871,   1831,   1793,   1756,   1721,   1690,   1654,   1623,   1590,   1560,
-      1529,   1497,   1470,   1437,   1409,   1380,   1346,   1316,   1284,   1252,
-      1215,   1181,   1140,   1100,   1058,   1014,    965,    918,    864,    808,
-       748,    686,    620,    549,    477,    399,    317,    231,    144,     50,
-       -47,   -150,   -257,   -369,   -482,   -604,   -727,   -855,   -990,  -1124,
-     -1264,  -1407,  -1553,  -1705,  -1857,  -2017,  -2177,  -2339,  -2503,  -2670,
-     -2841,  -3011,  -3182,  -3355,  -3528,  -3702,  -3878,  -4050,  -4226,  -4399,
-     -4569,  -4740,  -4910,  -5074,  -5239,  -5401,  -5560,  -5715,  -5868,  -6018,
-     -6163,  -6304,  -6442,  -6569,  -6699,  -6821,  -6939,  -7052,  -7161,  -7265,
-     -7363,  -7456,  -7544,  -7629,  -7707,  -7780,  -7849,  -7913,  -7971,  -8030,
-     -8082,  -8132,  -8177,  -8218,  -8258,  -8297,  -8331,  -8366,  -8400,  -8432,
-     -8465,  -8497,  -8531,  -8565,  -8603,  -8644,  -8683,  -8731,  -8780,  -8833,
-     -8892,  -8959,  -9027,  -9106,  -9191,  -9285,  -9387,  -9496,  -9615,  -9746,
-     -9884, -10033, -10193, -10367, -10549, -10745, -10953, -11174, -11410, -11654,
-    -11914, -12185, -12470, -12768, -13081, -13405, -13744, -14092, -14456, -14830,
-    -15217, -15614, -16024, -16445, -16873, -17311, -17760, -18214, -18677, -19147,
-    -19622, -20104, -20587, -21076, -21565, -22058, -22548, -23039, -23528, -24013,
-    -24495, -24969, -25441, -25903, -26357, -26797, -27228, -27644, -28052, -28441,
-    -28814, -29171, -29506, -29824, -30120, -30392, -30644, -30872, -31068, -31243,
-    -31389, -31506, -31595, -31655, -31680, -31675, -31639, -31568, -31463, -31325,
-    -31152, -30942, -30699, -30420, -30103, -29749, -29363, -28939, -28479, -27983,
-    -27451, -26885, -26284, -25646, -24976, -24274, -23537, -22769, -21971, -21142,
-    -20282, -19397, -18480, -17546, -16582, -15593, -14585, -13553, -12502, -11435,
-    -10350,  -9250,  -8139,  -7012,  -5879,  -4736,  -3588,  -2430,  -1274,   -114
-};
-
-
-/*
- * Waveform name: full_swell_327645222, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 3 | 2 | 7 | 6 | 4 | 5 | 2 | 2 | 2 |
- */
-const  int16  full_swell_327645222[] =
-{
-         0,   1008,   2022,   3031,   4038,   5037,   6030,   7016,   7986,   8949,
-      9901,  10833,  11753,  12657,  13540,  14405,  15249,  16075,  16877,  17658,
-     18414,  19147,  19857,  20538,  21197,  21828,  22431,  23011,  23564,  24089,
-     24586,  25061,  25506,  25925,  26316,  26683,  27026,  27342,  27631,  27899,
-     28145,  28368,  28566,  28743,  28897,  29033,  29147,  29246,  29327,  29388,
-     29431,  29461,  29472,  29472,  29457,  29430,  29386,  29336,  29274,  29198,
-     29115,  29023,  28923,  28812,  28694,  28567,  28438,  28301,  28157,  28007,
-     27852,  27689,  27524,  27355,  27181,  27001,  26819,  26632,  26441,  26248,
-     26052,  25852,  25642,  25437,  25227,  25015,  24795,  24576,  24352,  24125,
-     23898,  23668,  23434,  23198,  22962,  22723,  22482,  22240,  21997,  21755,
-     21508,  21260,  21017,  20769,  20525,  20281,  20041,  19798,  19559,  19324,
-     19091,  18861,  18636,  18414,  18199,  17988,  17778,  17584,  17390,  17205,
-     17024,  16856,  16693,  16534,  16388,  16251,  16122,  16000,  15894,  15795,
-     15703,  15622,  15552,  15493,  15441,  15400,  15372,  15347,  15334,  15331,
-     15338,  15351,  15373,  15400,  15438,  15481,  15530,  15583,  15642,  15706,
-     15773,  15845,  15918,  15992,  16073,  16149,  16224,  16298,  16376,  16449,
-     16520,  16587,  16647,  16706,  16759,  16805,  16845,  16877,  16904,  16923,
-     16933,  16935,  16925,  16912,  16885,  16850,  16805,  16749,  16685,  16610,
-     16526,  16434,  16329,  16214,  16092,  15958,  15817,  15668,  15508,  15345,
-     15169,  14989,  14802,  14608,  14405,  14198,  13988,  13771,  13550,  13323,
-     13097,  12864,  12632,  12394,  12158,  11920,  11682,  11438,  11199,  10957,
-     10718,  10476,  10236,  10001,   9763,   9525,   9293,   9060,   8826,   8600,
-      8370,   8142,   7916,   7690,   7465,   7244,   7024,   6799,   6578,   6357,
-      6137,   5915,   5695,   5470,   5247,   5023,   4797,   4570,   4340,   4109,
-      3876,   3643,   3405,   3165,   2925,   2679,   2435,   2190,   1938,   1687,
-      1433,   1179,    922,    663,    404,    147,   -109,   -369,   -624,   -878,
-     -1133,  -1380,  -1629,  -1869,  -2106,  -2343,  -2566,  -2788,  -3003,  -3211,
-     -3405,  -3596,  -3772,  -3941,  -4098,  -4241,  -4376,  -4497,  -4602,  -4695,
-     -4775,  -4835,  -4885,  -4914,  -4932,  -4929,  -4916,  -4882,  -4835,  -4767,
-     -4686,  -4587,  -4472,  -4341,  -4192,  -4030,  -3854,  -3661,  -3457,  -3235,
-     -3003,  -2758,  -2504,  -2236,  -1960,  -1672,  -1381,  -1078,   -770,   -459,
-      -143,    175,    498,    822,   1145,   1469,   1794,   2109,   2427,   2738,
-      3038,   3337,   3627,   3910,   4182,   4444,   4697,   4937,   5167,   5381,
-      5582,   5772,   5947,   6110,   6252,   6379,   6496,   6598,   6682,   6749,
-      6802,   6838,   6863,   6870,   6863,   6841,   6809,   6756,   6697,   6619,
-      6530,   6430,   6319,   6199,   6064,   5924,   5770,   5613,   5442,   5269,
-      5086,   4900,   4706,   4512,   4306,   4099,   3892,   3681,   3466,   3249,
-      3034,   2816,   2593,   2374,   2155,   1933,   1714,   1498,   1276,   1058,
-       843,    627,    413,    198,    -14,   -223,   -435,   -646,   -854,  -1065,
-     -1273,  -1484,  -1694,  -1899,  -2107,  -2321,  -2529,  -2739,  -2953,  -3168,
-     -3381,  -3597,  -3817,  -4036,  -4255,  -4479,  -4702,  -4924,  -5155,  -5382,
-     -5613,  -5843,  -6073,  -6310,  -6545,  -6775,  -7012,  -7245,  -7481,  -7711,
-     -7945,  -8176,  -8404,  -8631,  -8856,  -9075,  -9293,  -9505,  -9712,  -9913,
-    -10109, -10299, -10486, -10664, -10835, -11000, -11157, -11305, -11442, -11572,
-    -11694, -11805, -11906, -12002, -12085, -12155, -12221, -12275, -12319, -12352,
-    -12378, -12394, -12400, -12397, -12386, -12367, -12339, -12305, -12263, -12216,
-    -12160, -12104, -12037, -11967, -11897, -11821, -11744, -11663, -11580, -11502,
-    -11421, -11340, -11260, -11184, -11108, -11037, -10972, -10910, -10850, -10802,
-    -10757, -10716, -10687, -10666, -10650, -10643, -10645, -10656, -10676, -10704,
-    -10742, -10793, -10850, -10916, -10994, -11080, -11177, -11284, -11398, -11520,
-    -11656, -11798, -11948, -12106, -12275, -12448, -12628, -12816, -13008, -13210,
-    -13415, -13623, -13837, -14059, -14279, -14509, -14738, -14973, -15207, -15443,
-    -15684, -15926, -16169, -16411, -16656, -16898, -17143, -17389, -17632, -17880,
-    -18122, -18369, -18611, -18852, -19094, -19336, -19578, -19816, -20055, -20295,
-    -20535, -20769, -21007, -21247, -21481, -21717, -21950, -22186, -22419, -22649,
-    -22881, -23110, -23340, -23571, -23795, -24021, -24243, -24465, -24684, -24900,
-    -25112, -25321, -25526, -25725, -25918, -26109, -26291, -26466, -26632, -26793,
-    -26943, -27084, -27213, -27331, -27434, -27529, -27607, -27670, -27718, -27750,
-    -27762, -27757, -27733, -27688, -27620, -27535, -27423, -27293, -27136, -26953,
-    -26746, -26516, -26259, -25975, -25661, -25322, -24958, -24561, -24139, -23689,
-    -23211, -22703, -22171, -21608, -21021, -20407, -19765, -19098, -18409, -17691,
-    -16951, -16190, -15404, -14598, -13779, -12937, -12074, -11199, -10309,  -9403,
-     -8487,  -7562,  -6621,  -5678,  -4726,  -3771,  -2809,  -1851,   -888,     71,
-      1027,   1980,   2932,   3876,   4809,   5737,   6649,   7554,   8443,   9321,
-     10180,  11025,  11849,  12657,  13442,  14213,  14962,  15681,  16386,  17067,
-     17723,  18357,  18968,  19551,  20112,  20648,  21159,  21643,  22105,  22543,
-     22958,  23345,  23712,  24052,  24374,  24666,  24938,  25192,  25421,  25629,
-     25815,  25986,  26136,  26268,  26378,  26474,  26550,  26614,  26662,  26692,
-     26708,  26713,  26701,  26678,  26642,  26593,  26532,  26464,  26385,  26294,
-     26195,  26086,  25967,  25840,  25706,  25561,  25411,  25256,  25089,  24916,
-     24736,  24551,  24356,  24158,  23954,  23744,  23528,  23307,  23080,  22848,
-     22610,  22368,  22121,  21870,  21613,  21355,  21091,  20825,  20553,  20280,
-     20007,  19725,  19444,  19164,  18883,  18599,  18315,  18031,  17749,  17467,
-     17184,  16908,  16629,  16356,  16087,  15819,  15560,  15304,  15054,  14808,
-     14569,  14337,  14114,  13901,  13691,  13496,  13303,  13124,  12954,  12793,
-     12647,  12508,  12379,  12263,  12155,  12062,  11978,  11904,  11840,  11793,
-     11753,  11721,  11705,  11698,  11701,  11710,  11732,  11760,  11799,  11847,
-     11897,  11955,  12018,  12089,  12164,  12243,  12324,  12409,  12493,  12581,
-     12667,  12754,  12841,  12930,  13011,  13091,  13166,  13238,  13306,  13371,
-     13426,  13475,  13515,  13552,  13579,  13596,  13606,  13607,  13600,  13581,
-     13553,  13518,  13472,  13417,  13350,  13277,  13192,  13096,  12995,  12882,
-     12762,  12632,  12496,  12350,  12197,  12037,  11874,  11703,  11521,  11341,
-     11156,  10962,  10766,  10568,  10365,  10159,   9952,   9741,   9533,   9320,
-      9110,   8898,   8684,   8475,   8265,   8054,   7843,   7636,   7429,   7222,
-      7018,   6813,   6617,   6415,   6217,   6019,   5828,   5632,   5438,   5246,
-      5054,   4860,   4670,   4475,   4287,   4091,   3898,   3702,   3501,   3301,
-      3100,   2897,   2689,   2481,   2270,   2057,   1836,   1613,   1391,   1161,
-       926,    693,    451,    209,    -35,   -281,   -532,   -789,  -1046,  -1304,
-     -1563,  -1824,  -2083,  -2348,  -2608,  -2867,  -3127,  -3384,  -3634,  -3885,
-     -4129,  -4367,  -4605,  -4831,  -5050,  -5261,  -5465,  -5662,  -5842,  -6018,
-     -6179,  -6329,  -6465,  -6592,  -6701,  -6799,  -6879,  -6947,  -6997,  -7029,
-     -7049,  -7052,  -7037,  -7002,  -6959,  -6890,  -6807,  -6709,  -6595,  -6464,
-     -6317,  -6154,  -5979,  -5788,  -5580,  -5358,  -5128,  -4887,  -4630,  -4365,
-     -4088,  -3803,  -3515,  -3212,  -2907,  -2597,  -2283,  -1968,  -1648,  -1325,
-     -1005,   -689,   -371,    -55,    250,    561,    862,   1154,   1442,   1722,
-      1990,   2247,   2497,   2736,   2962,   3173,   3374,   3564,   3739,   3896,
-      4042,   4175,   4294,   4394,   4482,   4555,   4613,   4659,   4689,   4702,
-      4702,   4690,   4666,   4625,   4575,   4510,   4440,   4351,   4253,   4144,
-      4029,   3900,   3765,   3622,   3468,   3309,   3145,   2971,   2792,   2610,
-      2422,   2233,   2033,   1834,   1633,   1430,   1219,   1011,    803,    588,
-       374,    156,    -58,   -275,   -493,   -715,   -935,  -1160,  -1381,  -1606,
-     -1828,  -2053,  -2279,  -2506,  -2735,  -2966,  -3196,  -3426,  -3661,  -3898,
-     -4132,  -4371,  -4612,  -4855,  -5104,  -5351,  -5601,  -5851,  -6108,  -6364,
-     -6624,  -6883,  -7143,  -7410,  -7677,  -7943,  -8211,  -8481,  -8753,  -9022,
-     -9293,  -9566,  -9833, -10104, -10370, -10634, -10896, -11158, -11414, -11667,
-    -11917, -12162, -12402, -12632, -12862, -13081, -13298, -13500, -13702, -13888,
-    -14074, -14244, -14410, -14566, -14710, -14844, -14969, -15086, -15189, -15280,
-    -15362, -15435, -15495, -15549, -15589, -15623, -15646, -15657, -15662, -15657,
-    -15642, -15623, -15592, -15558, -15515, -15470, -15415, -15358, -15295, -15232,
-    -15161, -15092, -15023, -14948, -14878, -14804, -14733, -14663, -14596, -14533,
-    -14474, -14417, -14366, -14314, -14275, -14241, -14214, -14191, -14179, -14172,
-    -14175, -14187, -14205, -14235, -14272, -14317, -14371, -14432, -14506, -14587,
-    -14677, -14774, -14878, -14993, -15117, -15246, -15385, -15529, -15679, -15837,
-    -16000, -16171, -16342, -16520, -16708, -16896, -17088, -17284, -17484, -17685,
-    -17885, -18092, -18296, -18506, -18714, -18928, -19139, -19348, -19559, -19771,
-    -19984, -20193, -20406, -20617, -20827, -21036, -21245, -21455, -21666, -21873,
-    -22084, -22292, -22497, -22708, -22916, -23123, -23336, -23542, -23753, -23968,
-    -24179, -24394, -24611, -24824, -25041, -25261, -25479, -25696, -25915, -26137,
-    -26359, -26581, -26800, -27021, -27241, -27461, -27681, -27896, -28109, -28318,
-    -28526, -28728, -28924, -29119, -29301, -29477, -29647, -29807, -29960, -30100,
-    -30227, -30342, -30445, -30532, -30602, -30660, -30698, -30720, -30717, -30698,
-    -30656, -30594, -30510, -30398, -30262, -30106, -29920, -29709, -29474, -29208,
-    -28914, -28590, -28242, -27865, -27457, -27019, -26554, -26059, -25534, -24984,
-    -24401, -23794, -23157, -22493, -21801, -21087, -20347, -19584, -18797, -17987,
-    -17155, -16305, -15434, -14547, -13642, -12724, -11790, -10843,  -9888,  -8921,
-     -7946,  -6962,  -5973,  -4981,  -3984,  -2989,  -1994,   -999,    -10,    974
-};
-
-/*
- * Waveform name: bright_comping_878000456, size: 1260 samples
- * Osc. Freq. Divider:   1.000 OR 2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 8 | 7 | 8 | 0 | 0 | 0 | 4 | 5 | 6 |
- */
-const  int16  bright_comping_878000456[] =
-{
-         0,   1061,   2126,   3182,   4226,   5255,   6263,   7248,   8205,   9132,
-     10028,  10882,  11700,  12471,  13203,  13884,  14519,  15102,  15635,  16113,
-     16541,  16910,  17228,  17491,  17703,  17859,  17965,  18019,  18025,  17983,
-     17895,  17766,  17594,  17385,  17143,  16868,  16563,  16233,  15883,  15514,
-     15128,  14733,  14329,  13922,  13514,  13107,  12710,  12324,  11949,  11590,
-     11252,  10936,  10645,  10386,  10155,   9954,   9788,   9659,   9564,   9512,
-      9497,   9523,   9588,   9696,   9844,  10029,  10255,  10518,  10819,  11158,
-     11531,  11935,  12371,  12835,  13323,  13837,  14375,  14930,  15497,  16080,
-     16675,  17277,  17880,  18486,  19092,  19692,  20287,  20871,  21444,  22000,
-     22540,  23061,  23559,  24035,  24482,  24906,  25301,  25666,  26002,  26307,
-     26579,  26821,  27030,  27209,  27354,  27471,  27554,  27610,  27638,  27636,
-     27613,  27567,  27496,  27407,  27296,  27172,  27035,  26885,  26725,  26558,
-     26385,  26211,  26036,  25861,  25692,  25527,  25371,  25222,  25088,  24967,
-     24858,  24765,  24694,  24635,  24601,  24581,  24584,  24605,  24647,  24709,
-     24792,  24893,  25012,  25148,  25306,  25474,  25657,  25853,  26061,  26275,
-     26497,  26725,  26955,  27185,  27415,  27641,  27859,  28070,  28272,  28460,
-     28635,  28789,  28927,  29044,  29136,  29204,  29248,  29262,  29248,  29207,
-     29131,  29025,  28889,  28719,  28518,  28286,  28020,  27724,  27398,  27043,
-     26660,  26249,  25813,  25354,  24872,  24374,  23857,  23322,  22777,  22224,
-     21664,  21095,  20528,  19960,  19397,  18840,  18295,  17759,  17239,  16736,
-     16255,  15798,  15362,  14956,  14578,  14231,  13918,  13636,  13391,  13182,
-     13012,  12880,  12784,  12726,  12705,  12724,  12782,  12873,  12998,  13157,
-     13351,  13575,  13824,  14100,  14400,  14723,  15063,  15418,  15787,  16166,
-     16548,  16939,  17328,  17714,  18092,  18459,  18817,  19159,  19481,  19782,
-     20055,  20301,  20517,  20704,  20853,  20963,  21037,  21073,  21063,  21013,
-     20918,  20779,  20595,  20368,  20094,  19776,  19415,  19014,  18574,  18089,
-     17569,  17013,  16424,  15804,  15155,  14479,  13780,  13064,  12331,  11583,
-     10826,  10063,   9298,   8533,   7774,   7020,   6280,   5556,   4846,   4160,
-      3499,   2867,   2262,   1694,   1159,    664,    207,   -206,   -578,   -901,
-     -1182,  -1416,  -1603,  -1742,  -1834,  -1878,  -1878,  -1832,  -1741,  -1607,
-     -1433,  -1220,   -968,   -681,   -362,    -13,    360,    759,   1175,   1611,
-      2061,   2521,   2985,   3455,   3923,   4389,   4851,   5296,   5731,   6145,
-      6541,   6910,   7257,   7572,   7856,   8107,   8322,   8495,   8635,   8731,
-      8786,   8799,   8768,   8694,   8573,   8414,   8212,   7967,   7683,   7357,
-      6996,   6598,   6166,   5700,   5210,   4690,   4148,   3584,   3002,   2406,
-      1798,   1185,    567,    -55,   -674,  -1285,  -1891,  -2482,  -3058,  -3616,
-     -4151,  -4665,  -5147,  -5602,  -6024,  -6412,  -6763,  -7076,  -7347,  -7581,
-     -7772,  -7918,  -8024,  -8083,  -8100,  -8073,  -8006,  -7893,  -7742,  -7551,
-     -7319,  -7052,  -6747,  -6412,  -6046,  -5650,  -5231,  -4787,  -4324,  -3843,
-     -3346,  -2843,  -2328,  -1808,  -1285,   -766,   -249,    261,    762,   1248,
-      1719,   2173,   2605,   3017,   3402,   3760,   4089,   4394,   4660,   4898,
-      5100,   5271,   5408,   5508,   5576,   5610,   5609,   5574,   5510,   5413,
-      5284,   5129,   4950,   4745,   4516,   4271,   4002,   3722,   3427,   3122,
-      2808,   2486,   2162,   1837,   1515,   1195,    883,    579,    286,      6,
-      -256,   -501,   -727,   -936,  -1118,  -1278,  -1415,  -1528,  -1613,  -1673,
-     -1705,  -1709,  -1688,  -1641,  -1565,  -1465,  -1343,  -1196,  -1026,   -837,
-      -629,   -405,   -164,     91,    358,    633,    916,   1206,   1499,   1788,
-      2078,   2365,   2645,   2920,   3182,   3428,   3665,   3884,   4086,   4270,
-      4431,   4571,   4686,   4781,   4849,   4892,   4915,   4908,   4874,   4820,
-      4741,   4636,   4509,   4362,   4190,   4004,   3799,   3580,   3343,   3098,
-      2844,   2581,   2312,   2043,   1772,   1501,   1239,    980,    738,    501,
-       282,     79,   -104,   -268,   -409,   -525,   -613,   -675,   -707,   -709,
-      -678,   -617,   -522,   -391,   -232,    -39,    186,    443,    732,   1050,
-      1398,   1770,   2170,   2595,   3035,   3499,   3978,   4473,   4979,   5489,
-      6006,   6527,   7045,   7559,   8065,   8562,   9043,   9508,   9953,  10375,
-     10770,  11137,  11473,  11772,  12035,  12261,  12446,  12587,  12683,  12736,
-     12740,  12700,  12607,  12467,  12281,  12047,  11761,  11432,  11056,  10635,
-     10174,   9671,   9126,   8547,   7937,   7289,   6617,   5919,   5202,   4463,
-      3712,   2950,   2178,   1405,    632,   -135,   -894,  -1645,  -2375,  -3088,
-     -3779,  -4442,  -5074,  -5674,  -6235,  -6759,  -7243,  -7677,  -8069,  -8412,
-     -8704,  -8945,  -9132,  -9267,  -9349,  -9374,  -9346,  -9266,  -9133,  -8947,
-     -8708,  -8426,  -8090,  -7711,  -7290,  -6828,  -6326,  -5794,  -5230,  -4635,
-     -4016,  -3374,  -2720,  -2048,  -1369,   -682,      5,    688,   1368,   2036,
-      2693,   3331,   3946,   4540,   5103,   5636,   6138,   6600,   7027,   7406,
-      7747,   8041,   8289,   8487,   8636,   8738,   8788,   8788,   8739,   8643,
-      8491,   8297,   8056,   7768,   7436,   7064,   6656,   6208,   5726,   5214,
-      4672,   4105,   3516,   2909,   2289,   1649,   1007,    359,   -293,   -943,
-     -1588,  -2226,  -2853,  -3463,  -4059,  -4633,  -5185,  -5712,  -6210,  -6681,
-     -7119,  -7523,  -7895,  -8229,  -8527,  -8786,  -9014,  -9196,  -9344,  -9454,
-     -9525,  -9558,  -9558,  -9522,  -9451,  -9353,  -9221,  -9061,  -8876,  -8668,
-     -8434,  -8183,  -7916,  -7633,  -7337,  -7032,  -6720,  -6404,  -6086,  -5769,
-     -5455,  -5146,  -4844,  -4554,  -4274,  -4009,  -3758,  -3527,  -3314,  -3120,
-     -2946,  -2796,  -2669,  -2563,  -2481,  -2422,  -2386,  -2378,  -2387,  -2419,
-     -2475,  -2548,  -2642,  -2752,  -2879,  -3020,  -3173,  -3339,  -3509,  -3689,
-     -3874,  -4059,  -4246,  -4433,  -4615,  -4789,  -4958,  -5117,  -5263,  -5394,
-     -5511,  -5610,  -5692,  -5749,  -5792,  -5808,  -5804,  -5774,  -5719,  -5641,
-     -5537,  -5408,  -5253,  -5078,  -4876,  -4653,  -4408,  -4144,  -3860,  -3559,
-     -3243,  -2910,  -2564,  -2215,  -1855,  -1486,  -1118,   -749,   -380,    -18,
-       337,    684,   1022,   1344,   1649,   1939,   2204,   2447,   2669,   2863,
-      3030,   3165,   3269,   3346,   3389,   3398,   3372,   3314,   3223,   3098,
-      2939,   2747,   2524,   2273,   1992,   1684,   1348,    991,    611,    211,
-      -204,   -636,  -1079,  -1531,  -1990,  -2452,  -2913,  -3370,  -3825,  -4267,
-     -4697,  -5115,  -5515,  -5894,  -6251,  -6581,  -6883,  -7152,  -7390,  -7595,
-     -7762,  -7891,  -7980,  -8029,  -8034,  -8002,  -7923,  -7804,  -7643,  -7439,
-     -7194,  -6911,  -6587,  -6223,  -5826,  -5393,  -4927,  -4431,  -3910,  -3361,
-     -2790,  -2205,  -1600,   -987,   -358,    271,    904,   1535,   2163,   2780,
-      3388,   3980,   4552,   5106,   5635,   6134,   6600,   7037,   7436,   7797,
-      8115,   8396,   8630,   8818,   8962,   9058,   9105,   9105,   9057,   8962,
-      8817,   8628,   8391,   8111,   7789,   7424,   7023,   6585,   6114,   5609,
-      5079,   4522,   3941,   3345,   2732,   2106,   1471,    833,    193,   -443,
-     -1076,  -1698,  -2309,  -2903,  -3476,  -4029,  -4554,  -5053,  -5521,  -5954,
-     -6351,  -6712,  -7034,  -7315,  -7555,  -7750,  -7903,  -8010,  -8076,  -8095,
-     -8073,  -8006,  -7900,  -7750,  -7563,  -7337,  -7076,  -6784,  -6458,  -6106,
-     -5727,  -5324,  -4904,  -4463,  -4016,  -3554,  -3087,  -2617,  -2148,  -1681,
-     -1226,   -777,   -345,     71,    463,    838,   1185,   1499,   1783,   2031,
-      2244,   2419,   2555,   2647,   2698,   2706,   2672,   2591,   2465,   2297,
-      2082,   1825,   1524,   1182,    801,    380,    -75,   -567,  -1089,  -1642,
-     -2223,  -2829,  -3453,  -4100,  -4760,  -5433,  -6113,  -6803,  -7491,  -8182,
-     -8867,  -9546, -10214, -10871, -11509, -12129, -12728, -13302, -13851, -14369,
-    -14858, -15314, -15737, -16123, -16473, -16789, -17065, -17302, -17501, -17663,
-    -17786, -17871, -17924, -17937, -17917, -17866, -17784, -17675, -17536, -17373,
-    -17187, -16981, -16757, -16520, -16268, -16010, -15744, -15475, -15202, -14933,
-    -14669, -14414, -14166, -13930, -13709, -13505, -13323, -13161, -13022, -12908,
-    -12818, -12760, -12728, -12725, -12753, -12813, -12902, -13023, -13175, -13358,
-    -13568, -13806, -14075, -14370, -14692, -15034, -15399, -15786, -16190, -16611,
-    -17044, -17488, -17944, -18405, -18872, -19340, -19807, -20271, -20730, -21185,
-    -21623, -22051, -22468, -22868, -23249, -23609, -23950, -24266, -24560, -24826,
-    -25070, -25283, -25470, -25632, -25767, -25871, -25949, -26004, -26030, -26031,
-    -26011, -25966, -25901, -25814, -25710, -25594, -25459, -25313, -25158, -24994,
-    -24825, -24654, -24479, -24308, -24139, -23975, -23820, -23676, -23540, -23421,
-    -23320, -23231, -23163, -23115, -23090, -23088, -23109, -23153, -23224, -23319,
-    -23437, -23582, -23751, -23943, -24159, -24397, -24656, -24931, -25229, -25542,
-    -25868, -26207, -26557, -26915, -27277, -27641, -28007, -28366, -28726, -29071,
-    -29411, -29736, -30042, -30331, -30600, -30842, -31060, -31248, -31404, -31526,
-    -31614, -31667, -31680, -31654, -31588, -31479, -31328, -31138, -30902, -30626,
-    -30306, -29946, -29548, -29108, -28631, -28120, -27571, -26991, -26381, -25744,
-    -25081, -24397, -23692, -22973, -22242, -21499, -20751, -20003, -19252, -18508,
-    -17771, -17045, -16335, -15642, -14972, -14324, -13706, -13118, -12565, -12048,
-    -11566, -11126, -10729, -10377, -10068,  -9805,  -9592,  -9429,  -9312,  -9242,
-     -9221,  -9248,  -9321,  -9441,  -9606,  -9812, -10061, -10345, -10664, -11021,
-    -11407, -11822, -12257, -12718, -13195, -13685, -14186, -14692, -15198, -15705,
-    -16207, -16698, -17178, -17639, -18078, -18493, -18882, -19237, -19557, -19841,
-    -20082, -20283, -20436, -20539, -20595, -20598, -20549, -20445, -20287, -20076,
-    -19805, -19481, -19102, -18668, -18182, -17643, -17054, -16414, -15730, -15000,
-    -14231, -13420, -12576, -11695, -10788,  -9852,  -8896,  -7918,  -6931,  -5928,
-     -4919,  -3903,  -2890,  -1880,   -877,    112,   1088,   2046,   2982,   3892
-};
-
-/*
- * Waveform name: hammond_noname_800808, size: 1260 samples
- * Osc. Freq. Divider:   2.000
- * Hammond registration:
- * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
- * Setting | 8 | 0 | 0 | 8 | 0 | 8 | 0 | 0 | 0 |
- */
-const  int16  hammond_noname_800808[] =
-{
-         0,    744,   1490,   2234,   2976,   3714,   4449,   5178,   5901,   6618,
-      7330,   8029,   8722,   9406,  10078,  10741,  11390,  12027,  12652,  13262,
-     13859,  14440,  15005,  15556,  16087,  16603,  17101,  17579,  18040,  18482,
-     18904,  19307,  19689,  20052,  20393,  20713,  21012,  21289,  21546,  21781,
-     21995,  22184,  22354,  22502,  22628,  22731,  22814,  22877,  22916,  22935,
-     22933,  22909,  22866,  22804,  22720,  22618,  22497,  22356,  22198,  22022,
-     21829,  21619,  21392,  21150,  20892,  20620,  20335,  20037,  19725,  19400,
-     19065,  18719,  18362,  17998,  17623,  17241,  16850,  16456,  16054,  15647,
-     15236,  14822,  14404,  13985,  13563,  13142,  12719,  12300,  11880,  11463,
-     11049,  10639,  10233,   9832,   9434,   9045,   8662,   8286,   7919,   7561,
-      7212,   6872,   6542,   6224,   5914,   5619,   5335,   5062,   4802,   4558,
-      4323,   4105,   3899,   3708,   3531,   3370,   3223,   3089,   2972,   2870,
-      2781,   2710,   2652,   2610,   2583,   2570,   2572,   2590,   2621,   2666,
-      2726,   2799,   2886,   2984,   3096,   3222,   3358,   3507,   3667,   3837,
-      4018,   4209,   4407,   4618,   4835,   5060,   5293,   5531,   5775,   6025,
-      6280,   6540,   6802,   7068,   7336,   7606,   7877,   8148,   8419,   8691,
-      8958,   9225,   9488,   9749,  10004,  10257,  10502,  10743,  10975,  11201,
-     11421,  11631,  11833,  12025,  12208,  12380,  12542,  12692,  12830,  12957,
-     13071,  13171,  13259,  13333,  13393,  13439,  13471,  13487,  13490,  13478,
-     13450,  13406,  13347,  13273,  13183,  13077,  12956,  12819,  12667,  12500,
-     12318,  12121,  11909,  11681,  11440,  11184,  10916,  10634,  10336,  10028,
-      9708,   9374,   9030,   8673,   8307,   7930,   7547,   7151,   6747,   6336,
-      5918,   5493,   5060,   4624,   4184,   3737,   3290,   2839,   2386,   1931,
-      1478,   1024,    569,    118,   -331,   -775,  -1217,  -1655,  -2086,  -2511,
-     -2931,  -3342,  -3745,  -4139,  -4523,  -4896,  -5258,  -5611,  -5949,  -6274,
-     -6585,  -6883,  -7166,  -7433,  -7686,  -7920,  -8138,  -8340,  -8522,  -8686,
-     -8831,  -8960,  -9066,  -9153,  -9220,  -9268,  -9293,  -9300,  -9283,  -9246,
-     -9188,  -9109,  -9008,  -8886,  -8742,  -8577,  -8389,  -8183,  -7952,  -7701,
-     -7430,  -7139,  -6826,  -6493,  -6141,  -5768,  -5378,  -4966,  -4538,  -4092,
-     -3629,  -3148,  -2650,  -2136,  -1608,  -1064,   -505,     65,    649,   1245,
-      1853,   2472,   3101,   3740,   4387,   5042,   5704,   6373,   7046,   7726,
-      8408,   9095,   9783,  10471,  11162,  11851,  12539,  13226,  13911,  14591,
-     15269,  15939,  16605,  17263,  17916,  18559,  19193,  19817,  20430,  21033,
-     21623,  22203,  22766,  23317,  23853,  24373,  24878,  25368,  25840,  26294,
-     26730,  27149,  27547,  27928,  28288,  28630,  28950,  29250,  29527,  29787,
-     30022,  30238,  30430,  30602,  30752,  30879,  30984,  31069,  31130,  31171,
-     31189,  31187,  31162,  31117,  31049,  30960,  30851,  30724,  30576,  30408,
-     30219,  30014,  29789,  29547,  29287,  29010,  28717,  28408,  28084,  27745,
-     27391,  27027,  26645,  26254,  25851,  25437,  25011,  24578,  24135,  23685,
-     23226,  22761,  22290,  21814,  21334,  20850,  20362,  19873,  19383,  18890,
-     18398,  17906,  17417,  16929,  16443,  15962,  15485,  15012,  14543,  14081,
-     13627,  13179,  12740,  12310,  11888,  11475,  11072,  10680,  10299,   9930,
-      9571,   9227,   8892,   8573,   8266,   7974,   7693,   7428,   7175,   6941,
-      6717,   6509,   6316,   6139,   5975,   5828,   5695,   5576,   5473,   5385,
-      5311,   5251,   5206,   5174,   5157,   5154,   5162,   5184,   5219,   5267,
-      5326,   5396,   5478,   5571,   5673,   5787,   5907,   6037,   6176,   6323,
-      6477,   6636,   6801,   6971,   7148,   7328,   7512,   7696,   7887,   8075,
-      8267,   8458,   8648,   8839,   9027,   9214,   9396,   9577,   9752,   9922,
-     10088,  10248,  10399,  10545,  10683,  10812,  10933,  11043,  11145,  11236,
-     11316,  11385,  11442,  11487,  11519,  11538,  11543,  11536,  11515,  11479,
-     11428,  11365,  11284,  11189,  11080,  10955,  10814,  10658,  10486,  10298,
-     10095,   9877,   9643,   9394,   9131,   8851,   8557,   8248,   7926,   7588,
-      7237,   6873,   6496,   6105,   5703,   5290,   4863,   4426,   3978,   3521,
-      3054,   2579,   2094,   1602,   1103,    598,     86,   -431,   -952,  -1478,
-     -2007,  -2536,  -3069,  -3604,  -4138,  -4671,  -5204,  -5736,  -6263,  -6788,
-     -7308,  -7823,  -8333,  -8838,  -9335,  -9824, -10305, -10776, -11239, -11688,
-    -12129, -12557, -12972, -13374, -13763, -14136, -14495, -14838, -15166, -15475,
-    -15768, -16044, -16302, -16541, -16761, -16961, -17143, -17303, -17443, -17564,
-    -17662, -17742, -17797, -17833, -17846, -17839, -17807, -17756, -17684, -17588,
-    -17471, -17333, -17174, -16992, -16789, -16566, -16323, -16057, -15772, -15467,
-    -15144, -14799, -14438, -14056, -13660, -13244, -12812, -12363, -11899, -11418,
-    -10925, -10417,  -9896,  -9363,  -8817,  -8259,  -7693,  -7115,  -6530,  -5935,
-     -5332,  -4724,  -4110,  -3490,  -2866,  -2239,  -1609,   -977,   -346,    286,
-       919,   1550,   2180,   2803,   3425,   4042,   4653,   5258,   5856,   6446,
-      7027,   7600,   8161,   8713,   9251,   9777,  10293,  10793,  11280,  11751,
-     12206,  12646,  13070,  13477,  13867,  14237,  14590,  14923,  15239,  15534,
-     15810,  16065,  16299,  16512,  16706,  16877,  17028,  17157,  17266,  17350,
-     17416,  17459,  17481,  17481,  17459,  17419,  17355,  17272,  17166,  17041,
-     16895,  16730,  16544,  16341,  16119,  15876,  15618,  15341,  15048,  14736,
-     14410,  14068,  13712,  13340,  12956,  12558,  12148,  11725,  11293,  10848,
-     10394,   9931,   9460,   8981,   8495,   8002,   7504,   7002,   6495,   5985,
-      5472,   4958,   4441,   3926,   3408,   2893,   2380,   1869,   1360,    857,
-       358,   -136,   -625,  -1108,  -1583,  -2051,  -2510,  -2960,  -3401,  -3833,
-     -4254,  -4664,  -5063,  -5450,  -5825,  -6189,  -6536,  -6872,  -7197,  -7504,
-     -7798,  -8079,  -8345,  -8596,  -8831,  -9054,  -9260,  -9449,  -9626,  -9785,
-     -9930, -10059, -10175, -10274, -10359, -10429, -10483, -10524, -10550, -10564,
-    -10562, -10549, -10522, -10481, -10430, -10367, -10291, -10205, -10108, -10002,
-     -9886,  -9761,  -9627,  -9485,  -9336,  -9181,  -9018,  -8851,  -8678,  -8501,
-     -8319,  -8135,  -7949,  -7760,  -7569,  -7380,  -7190,  -7000,  -6811,  -6624,
-     -6441,  -6259,  -6083,  -5909,  -5743,  -5581,  -5426,  -5277,  -5136,  -5004,
-     -4879,  -4765,  -4658,  -4562,  -4477,  -4403,  -4340,  -4290,  -4250,  -4224,
-     -4212,  -4212,  -4226,  -4254,  -4296,  -4353,  -4422,  -4509,  -4609,  -4724,
-     -4855,  -5001,  -5161,  -5338,  -5530,  -5736,  -5958,  -6194,  -6445,  -6712,
-     -6992,  -7288,  -7595,  -7919,  -8254,  -8605,  -8966,  -9340,  -9726, -10126,
-    -10533, -10954, -11384, -11824, -12271, -12729, -13195, -13667, -14147, -14633,
-    -15124, -15621, -16121, -16627, -17133, -17641, -18151, -18663, -19174, -19684,
-    -20193, -20700, -21204, -21704, -22198, -22689, -23172, -23650, -24120, -24582,
-    -25036, -25480, -25913, -26336, -26745, -27145, -27530, -27903, -28260, -28604,
-    -28930, -29242, -29537, -29815, -30074, -30317, -30541, -30747, -30932, -31100,
-    -31244, -31370, -31475, -31557, -31618, -31661, -31679, -31678, -31653, -31606,
-    -31537, -31445, -31333, -31198, -31040, -30861, -30660, -30436, -30191, -29926,
-    -29639, -29331, -29001, -28652, -28284, -27895, -27488, -27061, -26617, -26156,
-    -25675, -25181, -24669, -24140, -23596, -23039, -22470, -21888, -21291, -20685,
-    -20065, -19436, -18799, -18152, -17499, -16837, -16169, -15495, -14818, -14136,
-    -13453, -12765, -12077, -11389, -10700, -10014,  -9328,  -8645,  -7966,  -7292,
-     -6621,  -5958,  -5300,  -4651,  -4009,  -3377,  -2755,  -2143,  -1542,   -954,
-      -378,    184,    734,   1268,   1787,   2292,   2779,   3250,   3704,   4140,
-      4560,   4959,   5339,   5701,   6044,   6365,   6667,   6948,   7210,   7451,
-      7669,   7867,   8045,   8200,   8333,   8449,   8539,   8611,   8660,   8690,
-      8696,   8685,   8653,   8599,   8526,   8435,   8321,   8191,   8041,   7875,
-      7688,   7487,   7268,   7032,   6781,   6514,   6232,   5936,   5627,   5305,
-      4971,   4625,   4270,   3903,   3523,   3139,   2744,   2343,   1935,   1520,
-      1100,    675,    248,   -183,   -618,  -1054,  -1490,  -1928,  -2365,  -2802,
-     -3236,  -3666,  -4094,  -4518,  -4939,  -5352,  -5762,  -6164,  -6557,  -6946,
-     -7324,  -7694,  -8054,  -8405,  -8746,  -9073,  -9392,  -9698,  -9992, -10273,
-    -10542, -10795, -11037, -11265, -11477, -11675, -11859, -12028, -12183, -12324,
-    -12447, -12556, -12649, -12727, -12790, -12838, -12872, -12889, -12891, -12879,
-    -12853, -12812, -12755, -12687, -12605, -12509, -12400, -12278, -12145, -12000,
-    -11843, -11675, -11497, -11308, -11112, -10905, -10690, -10467, -10236,  -9999,
-     -9756,  -9507,  -9253,  -8996,  -8733,  -8470,  -8200,  -7932,  -7662,  -7391,
-     -7120,  -6851,  -6582,  -6314,  -6050,  -5790,  -5533,  -5281,  -5034,  -4793,
-     -4559,  -4331,  -4110,  -3899,  -3696,  -3502,  -3318,  -3142,  -2978,  -2825,
-     -2684,  -2556,  -2439,  -2336,  -2244,  -2167,  -2104,  -2054,  -2020,  -1998,
-     -1991,  -2000,  -2024,  -2063,  -2117,  -2186,  -2271,  -2372,  -2486,  -2617,
-     -2764,  -2925,  -3101,  -3291,  -3497,  -3717,  -3951,  -4199,  -4461,  -4736,
-     -5024,  -5325,  -5635,  -5961,  -6297,  -6642,  -7000,  -7367,  -7742,  -8126,
-     -8520,  -8918,  -9326,  -9740, -10160, -10585, -11012, -11446, -11881, -12318,
-    -12757, -13198, -13638, -14078, -14515, -14952, -15385, -15816, -16240, -16661,
-    -17075, -17483, -17884, -18278, -18660, -19037, -19401, -19755, -20096, -20428,
-    -20745, -21049, -21340, -21615, -21875, -22118, -22345, -22557, -22750, -22926,
-    -23083, -23221, -23341, -23442, -23521, -23580, -23619, -23638, -23633, -23609,
-    -23564, -23496, -23408, -23297, -23162, -23006, -22830, -22631, -22410, -22167,
-    -21902, -21615, -21307, -20978, -20628, -20258, -19866, -19454, -19023, -18573,
-    -18103, -17616, -17110, -16586, -16046, -15489, -14916, -14328, -13724, -13106,
-    -12475, -11832, -11176, -10509,  -9832,  -9144,  -8447,  -7741,  -7028,  -6308,
-     -5583,  -4850,  -4114,  -3374,  -2632,  -1888,  -1143,   -397,    348,   1092
-};
-
 
 // ================================================================================================
 //
@@ -5224,214 +3747,148 @@ const  FlashWaveTable_t  g_FlashWaveTableDef[] =
         (int16 *) NULL  
     },
     
-    {   // ID# 1: "Pure sinewave" at fundamental freq.
+    {   // ID# 1: Pure sinewave at fundamental freq.
         1260,
         1.00,
         (int16 *) g_sinewave
     },
   
-    {   // ID# 2: "square wave"  (lightly anti-alias filtered)
+    {   // ID# 2: Square wave, lightly anti-alias filtered -- classic wind pipe tone
         1260,
         1.00,
         (int16 *) square_wave 
     },
     
-    {   // ID# 3: "sawtooth wave" (lightly anti-alias filtered)
+    {   // ID# 3: Sawtooth wave, lightly anti-alias filtered -- muffled, buzzy tone (cello?)
         1260,
         1.00,
         (int16 *) sawtooth_wave 
     },
 
-    {   // ID# 4: "recorder celeste" (detune osc2)
-        1260,
-        1.00,
-        (int16 *) recorder_v1
-    },
-    
-    {   // ID# 5: "jazz organ #1" (celeste)
-        1260,
-        1.00,
-        (int16 *) jazz_organ_v1
-    },
-    
-    {   // ID# 6: "clean_bright_flute"
-        1260,
-        1.00,
-        (int16 *) clean_bright_flute  
-    },
-    
-    {   // ID# 7: "blunt sawtooth wave" 
-        1260,
-        1.00,
-        (int16 *) blunt_sawtooth
-    },
-    
-    {   // ID# 8: "rounded square wave" 
+    {   // ID# 4: Rounded square wave -- clean, lower-order odd harmonics
         1260,
         1.00,
         (int16 *) rounded_square
     },
     
-    {   // ID# 9: "alto saxophone"
+    {   // ID# 5: Blunt sawtooth wave -- dull, mellow sound
         1260,
         1.00,
+        (int16 *) blunt_sawtooth
+    },
+    
+    {   // ID# 6: Clean bright flute -- flinty, metallic, rich modulated tone
+        1260,
+        1.00,
+        (int16 *) clean_bright_flute  
+    },
+    
+    {   // ID# 7: reserved -- need another reedy woodwind  **************************************
+        1260,
+        1.00,
+        (int16 *) g_sinewave
+    },
+    
+    {   // ID# 8:  reserved -- need another rich, complex, synth sound  *************************
+        1260,
+        1.00,
+        (int16 *) g_sinewave
+    },
+    
+    {   // ID# 9: Alto saxophone  -- reedy, boxy sound in low register (similar to ... ?)
+        1260,
+        2.00,  // take it down an octave!
         (int16 *) alto_saxophone
     },
     
-    {   // ID# 10: "psychedelic oboe"
+    {   // ID# 10: Psychedelic oboe -- very complex inter-modulated harmonics (nice)
         1260,
-        1.00,
+        2.00,  // take it down an octave!
         (int16 *) psychedelic_oboe
     },
     
-    {   // ID# 11: "electric clarinet"
+    {   // ID# 11: Electric clarinet -- thin squeaky or boxy, depending on pitch (nice)
         1260,
-        1.00,
+        2.00,  // take it down an octave!
         (int16 *) electric_clarinet
     },
     
-    {   // ID# 12: "mellow pipe #1"
+    {   // ID# 12: Mellow pipe #1 --  muffled mellow woodwind (OK)
         1260,
         1.00,
         (int16 *) mellow_pipe_v1
     },
     
-    {   // ID# 13: Alto (treble) Recorder 
+    {   // ID# 13: Recorder (drawbars: 00 8271 200) -- classic odd harmonic spectrum
         1260,
         2.0,
         (int16 *) recorder_alto
     },
     
-    {   // ID# 14: "Rock organ" (drawbars: 88 8800 000)
+    {   // ID# 14: Rock organ 8888 (drawbars: 88 8800 000) -- simple electric organ
         1260,
-        1.0,      // pitch offset = + 1 octave (2x fo)
+        1.0,      // pitch offset = +1 octave (2x fo)
         (int16 *) hammond_rock_8888   
     },
     
-    {   // ID# 15: "Rock organ" (drawbars: 88 8800 000)
+    {   // ID# 15: Rock organ 8080 (drawbars: 80 8000 000) -- very mellow organ
         1260,
-        2.0,      // pitch offset = 0  (1x fo)
-        (int16 *) hammond_rock_8888   
+        1.0, 
+        (int16 *) hammond_rock_8080   
     },
     
-    {   // ID# 16: "Rock organ" (drawbars: 80 8000 000)
+    {   // ID# 16: Rock organ 0808 (drawbars: 08 0800 000) -- ring modulator effect
         1260,
-        1.0,      // pitch offset = + 1 octave (2x fo)
-        (int16 *) hammond_rock_8080  
+        1.0,      // pitch offset = +1 octave (2x fo)
+        (int16 *) hammond_rock_0808  
     },
 
-    {   // ID# 17: "Rock organ" (drawbars: 80 8000 000)
+    {   // ID# 17: Jazz organ #1  (drawbars: 40 6160 040) -- used in patch "Hammond Organ #1"
         1260,
-        2.0,      // pitch offset = 0  (1x fo)
-        (int16 *) hammond_rock_8080  
+        2.0,  
+        (int16 *) jazz_organ_40616004  
     },
     
-    {   // ID# 18: "Rock organ" (drawbars: 08 0800 000)
+    {   // ID# 18: Jazz organ #2  (drawbars: 30 5060 040) -- used in patch "Hammond Organ #2"
         1260,
-        1.0,      // pitch offset = + 1 octave (2x fo)
-        (int16 *) hammond_rock_0808
+        2.0,  
+        (int16 *) jazz_organ_305060040
     },
     
-    {   // ID# 19: "Rock organ" (drawbars: 08 0800 000)
+    {   // ID# 19: Glockenspiel (drawbars: 00 8360 400) -- use vibe (percussive) envelope
         1260,
-        2.0,      // pitch offset = 0  (1x fo)
-        (int16 *) hammond_rock_0808
+        2.0, 
+        (int16 *) glockenspiel_008360400
     },
     
-    {   // ID# 20: "Pink Floyd organ" (drawbars: 85 0005 000)
+    {   // ID# 20: Pink Floyd organ (drawbars: 85 0005 000)  -- rich complex, flutey sound
         1260,
         1.00,     // pitch offset = + 1 octave (2x fo)
         (int16 *) pink_floyd_organ_850005  
     },
     
-    {   // ID# 21: "Pink Floyd organ" (drawbars: 85 0005 000)
+    {   // ID# 21: Theatre Organ (drawbars: 87 8656 463) -- very full organ (good)
         1260,
-        2.0,      // pitch offset = 0  (1x fo)
-        (int16 *) pink_floyd_organ_850005  
+        2.0, 
+        (int16 *) theatre_organ_878656463  
     },
     
-    {   // ID# 22: "BAUER organ"  (drawbars: 00 8008 432)
+    {   // ID# 22: BAUER organ (drawbars: 00 8008 432) -- rich, bright organ sound (keep)
         1260,
-        2.00,     // pitch offset = 0  (1x fo)
+        2.00,  
         (int16 *) bauer_organ_008008432
     },
     
-    {   // ID# 23: "Mellow reed"  (drawbars: 00 8042 660)
+    {   // ID# 23: Mellow reed (drawbars: 00 8042 660) -- pleasant, rounded, oboe-ish
         1260,
         2.00,
         (int16 *) mellow_reed_008042660 
     },
     
-    {   // ID# 24: "Jazz organ #406"  (drawbars: 40 6160 040)
+    {   // ID# 24: reserved
         1260,
-        2.00,
-        (int16 *) jazz_organ_40616004 
-    },
-    
-    {   // ID# 25: "Jazz organ #305"  (drawbars: 30 5060 040)
-        1260,
-        2.00,
-        (int16 *) jazz_organ_305060040  
-    },
-    
-    {   // ID# 26: "Some kind of pipe ?"  (drawbars: 00 8360 400)
-        1260,
-        2.00,
-        (int16 *) somekinda_pipe_008360400 
-    },
-    
-    {   // ID# 27: "Theatre Organ"  (drawbars: 87 8656 463)
-        1260,
-        2.00,
-        (int16 *) theatre_organ_878656463 
-    },
-    
-    {   // ID# 28: "Meditation"  (drawbars: 00 7800 453)
-        1260,
-        2.00,
-        (int16 *) meditation_007800453 
-    },
-    
-    {   // ID# 29: "Stopped Flute"  (drawbars: 00 5320 000)
-        1260,
-        1.00,
-        (int16 *) stopped_flute_00532  
-    },
-    
-    {   // ID# 30: "Dulciana"  (drawbars: 00 4432 000)
-        1260,
-        2.00,
-        (int16 *) dulciana_004432  
-    },
-    
-    {   // ID# 31: "Salicional"  (drawbars: 00 4544 222) 
-        1260,
-        2.0,
-        (int16 *) salicional_004544222  
-    },
-    
-    {   // ID# 32: "Hammond Oboe"  (drawbars: 00 4675 300)
-        1260,
-        2.00,
-        (int16 *) hammond_oboe_004675300  
-    },
-    
-    {   // ID# 33: "Swell Diapason"  (drawbars: 00 7866 540)
-        1260,
-        2.00,
-        (int16 *) swell_diapason_007866540  
-    },
-    
-    {   // ID# 34: "Full Swell church organ"  (drawbars: 32 7645 222)
-        1260,
-        1.00,
-        (int16 *) full_swell_327645222  
-    },
-    
-    {   // ID# 35: "Bright comping organ"  (drawbars: 87 8000 456)
-        1260,
-        1.00,    
-        (int16 *) bright_comping_878000456  
+        2.00,  
+        (int16 *) g_sinewave
     }
 };
 
@@ -5444,6 +3901,5 @@ int  GetHighestWaveTableID()
 {
     return  sizeof(g_FlashWaveTableDef) / sizeof(g_FlashWaveTableDef[0]) - 1;
 }
-
 
 // *** end of file ***

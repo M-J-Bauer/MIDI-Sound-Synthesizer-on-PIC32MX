@@ -82,10 +82,6 @@ const  UserSettableParameter_t  UserParam[] =
 };
 
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Note:  The "patch" command function is in source file "remi_synth2_engine.c".
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 /*
  *   CLI command function:  Cmnd_config
  *
@@ -94,7 +90,7 @@ const  UserSettableParameter_t  UserParam[] =
 void  Cmnd_config(int argCount, char * argValue[])
 {
     static char *pitchBendModeName[] = 
-            { "Disabled", "MIDI Pitch-Bend", "MIDI Exprn CC", "Analog CV" };
+            { "Disabled", "MIDI Pitch-Bend", "MIDI Exprn CC", "Analog CV (TBD!)" };
     char   textBuf[100];
     bool   updateConfig = 0;
     bool   isCmdError = 0;
@@ -283,7 +279,8 @@ void  Cmnd_config(int argCount, char * argValue[])
         putstr("* Done... config param ");
         putstr(argValue[1]);  putstr(" = ");  putDecimal(arg, 1);
         putNewLine();
-        StoreConfigData();  // commit new config setting
+        StoreConfigData();  // commit new param value
+        SynthPrepare();     // instate new setting
     }
 }
 
@@ -702,7 +699,7 @@ PRIVATE  void   DumpActivePatchParams()
             "\t%d,\t// MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)\n",
             (int) g_Patch.MixerControl);
     putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// ML: Mixer OSC2 Level in Fixed mode (0..100 %%)\n",
+    sprintf(textBuf, "\t%d,\t// ML: Mixer OSC2 [& Noise] Level in Fixed mode (%%)\n",
             (int) g_Patch.MixerOsc2Level);
     putstr(textBuf);
     sprintf(textBuf, "\t%d,\t// CS: Contour Env Start level (0..100 %%)\n",
@@ -953,7 +950,13 @@ PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal)
     else  
     {
         SynthPrepare();
-        DumpActivePatchParams();
+//      DumpActivePatchParams();
+        putstr("* Updated parameter: ");
+        putch(paramAbbr[0]);
+        putch(paramAbbr[1]);
+        putstr(" = ");
+        putDecimal(paramVal, 1);
+        putstr(" \n");
     }
 }
 
@@ -1221,7 +1224,7 @@ void  Cmnd_sound(int argCount, char * argValue[])
     static  uint32  noteEndTime;
     static  uint8   noteNumber = 69;    // default (A4-440Hz)
     static  uint16  duration = 2000;    // default (ms)
-    static  uint8   vibratoMode = 0;    // default (off))
+    static  uint8   vibratoMode = 0;    // default (off)
     
     int  arg1 = 0, arg2 = 0, arg3 = 0;
     

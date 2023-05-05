@@ -43,6 +43,7 @@ PRIVATE  void  ScreenFunc_SystemInfoPage2(bool);
 PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen);
 PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen);
 PRIVATE  void  ScreenFunc_CustomFuncMenu(bool);
+PRIVATE  void  ScreenFunc_SoundPlayer(bool);
 PRIVATE  void  ScreenFunc_DataEntry(bool);
 PRIVATE  void  ScreenFunc_DataEntryTest(bool);
 
@@ -202,7 +203,7 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
     },
     {
         SCN_SET_PITCH_BEND_MODE,
-        ScreenFunc_SetPitchBendMode,  // todo: add menu item to set PB range
+        ScreenFunc_SetPitchBendMode,
         " PITCH-BEND MODE"
     },
     {
@@ -263,7 +264,12 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
     {
         SCN_CUSTOM_FUNC_MENU,
         ScreenFunc_CustomFuncMenu,
-        " OTHER FUNCTIONS"
+        " UTILITY APP's"
+    },  
+    {
+        SCN_SOUND_PLAYER,
+        ScreenFunc_SoundPlayer,
+        " SOUND PLAYER"
     },  
     {
         SCN_DATA_ENTRY,
@@ -1148,26 +1154,20 @@ PRIVATE  void  ScreenFunc_PresetEditMenu(bool isNewScreen)
 
 PRIVATE  void  ScreenFunc_MainSettingsMenu(bool isNewScreen)
 {
-    static  editAACmode = 0;
+    static  char  *nameAACmode[] = {" Constant", " Envelope", " Pressure", " Auto-det" };
+    static  uint8  editAACmode = 0;
     char    textBuf[40];
+    bool    doRefresh = 0;
     
     if (isNewScreen)  // new screen...
     {
-        DisplayMenuOption(0, 12, 'A', "");  // key label only
-        LCD_SetFont(PROP_8_NORM);
-        LCD_PosXY(12, 12);
-        LCD_PutText("Audio Ampld Ctrl:  ");  // menu item
-        LCD_PosXY(100, 12);
-        LCD_SetFont(MONO_8_NORM);
-        LCD_PutDigit(g_Config.AudioAmpldControlMode);
-        
+        DisplayMenuOption(0, 12, 'A', "");
         DisplayMenuOption(0, 22, 'B', "");
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(12, 22);
         sprintf(textBuf, "Reverb Level:  %02d %%", g_Config.ReverbMix_pc);
         LCD_PutText(textBuf);
 
-        // This menu option may be removed, if another param needs to be added:
         DisplayMenuOption(0, 32, 'C', "");  
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(12, 32);
@@ -1186,6 +1186,7 @@ PRIVATE  void  ScreenFunc_MainSettingsMenu(bool isNewScreen)
         LCD_PosXY(56, 56);
         
         editAACmode = g_Config.AudioAmpldControlMode;
+        doRefresh = 1;
     }
     else  // check for button hit
     {
@@ -1200,10 +1201,7 @@ PRIVATE  void  ScreenFunc_MainSettingsMenu(bool isNewScreen)
                 else  editAACmode = 0;
                 g_Config.AudioAmpldControlMode = editAACmode;
                 StoreConfigData();
-                LCD_PosXY(100, 12);  // erase old setting
-                LCD_BlockClear(20, 8);
-                LCD_SetFont(MONO_8_NORM);  // refresh
-                LCD_PutDigit(g_Config.AudioAmpldControlMode);
+                doRefresh = 1;
             }
             if (ButtonCode() == 'B')
             {
@@ -1230,6 +1228,17 @@ PRIVATE  void  ScreenFunc_MainSettingsMenu(bool isNewScreen)
             if (ButtonCode() == '#') GoToNextScreen(SCN_SET_MIDI_IN_MODE);
         }
     }
+    
+    if (doRefresh)
+    {
+        LCD_PosXY(12, 12);
+        LCD_BlockClear(112, 8);  // erase to line end
+        LCD_SetFont(PROP_8_NORM);
+        LCD_PutText("AAC mode: "); 
+        LCD_PutDigit(g_Config.AudioAmpldControlMode);
+        LCD_PutText(nameAACmode[g_Config.AudioAmpldControlMode]);
+    }
+    
     if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
 }
 
@@ -1539,6 +1548,7 @@ PRIVATE  void  ScreenFunc_SetPitchBendMode(bool isNewScreen)
                 if (++ctrlMode >= 4)  ctrlMode = 0;  
                 g_Config.PitchBendCtrlMode = ctrlMode;
                 StoreConfigData();
+                SynthPrepare();  // instate new setting
                 doRefresh = 1;
             }
             if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
@@ -2316,14 +2326,10 @@ PRIVATE  void  ScreenFunc_CustomFuncMenu(bool isNewScreen)
     if (isNewScreen)  // new screen...
     {
         LCD_Mode(SET_PIXELS);
-        LCD_SetFont(PROP_8_NORM); 
-        LCD_PosXY(8, 12);
-        LCD_PutText("No custom function yet!");  // temporary
-        
-//      DisplayMenuOption(8, 12, 'A', "  ..     ..");  // todo
-//      DisplayMenuOption(8, 22, 'B', "  ..     ..");  // todo
-//      DisplayMenuOption(8, 32, 'C', "  ..     ..");  // todo
-//      DisplayMenuOption(8, 42, 'D', "  ..     ..");  // todo
+        DisplayMenuOption(0, 12, 'A', "Sound Player");
+//      DisplayMenuOption(0, 22, 'B', "  ..     ..");  // reserved
+//      DisplayMenuOption(0, 32, 'C', "  ..     ..");  // reserved
+//      DisplayMenuOption(0, 42, 'D', "  ..     ..");  // reserved (demo sequence?)
 
         LCD_PosXY(0, 53);
         LCD_DrawLineHoriz(128);
@@ -2335,7 +2341,7 @@ PRIVATE  void  ScreenFunc_CustomFuncMenu(bool isNewScreen)
         if (ButtonHit())
         {
             if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
-            if (ButtonCode() == 'A') GoToNextScreen(SCN_HOME);  // reserved 
+            if (ButtonCode() == 'A') GoToNextScreen(SCN_SOUND_PLAYER); 
             if (ButtonCode() == 'B') GoToNextScreen(SCN_HOME);  // reserved
             if (ButtonCode() == 'C') GoToNextScreen(SCN_HOME);  // reserved
             if (ButtonCode() == 'D') GoToNextScreen(SCN_HOME);  // reserved
@@ -2344,6 +2350,83 @@ PRIVATE  void  ScreenFunc_CustomFuncMenu(bool isNewScreen)
     }
 
     if (m_ElapsedTime_ms >= GUI_INACTIVE_TIMEOUT) GoToNextScreen(SCN_HOME);
+}
+
+
+PRIVATE  void  ScreenFunc_SoundPlayer(bool isNewScreen)
+{
+    static uint8 AACsettingOnEntry;  // AAC setting to be restored on exit
+    static uint8 notePlaying;   // MIDI note number;  0 => no note playing
+    static short octaveShift;
+    
+    if (isNewScreen)  // new screen...
+    {
+        LCD_Mode(SET_PIXELS);
+        LCD_SetFont(PROP_8_NORM); 
+        LCD_PosXY(0, 12);
+        LCD_PutText("Press A, B, C or D");
+        LCD_PosXY(0, 22);
+        LCD_PutText("  to play a note"); 
+        
+        LCD_PosXY(0, 53);
+        LCD_DrawLineHoriz(128);
+        DisplayMenuOption(0,  56, '*', "Exit");
+        DisplayMenuOption(72, 56, '#', "Octave");
+        
+        AACsettingOnEntry = g_Config.AudioAmpldControlMode;  // save AAC mode
+        g_Config.AudioAmpldControlMode = AMPLD_CTRL_ENV_VELO;
+    }
+    else  // check for button hit, or release if playing a note
+    {
+        if (ButtonHit())
+        {
+            if (ButtonCode() == '*')  // exit
+            {
+                g_Config.AudioAmpldControlMode = AACsettingOnEntry;  // restore AAC mode
+                SynthPrepare();  // reset synth engine
+                GoToNextScreen(SCN_HOME);
+            }
+            if (ButtonCode() == 'A')  // play note C'
+            {
+                notePlaying = 60 + octaveShift * 12;
+                SynthNoteOn(notePlaying, 90);
+            }
+            if (ButtonCode() == 'B')  // play note E'
+            {
+                notePlaying = 64 + octaveShift * 12;
+                SynthNoteOn(notePlaying, 90);
+            }
+            if (ButtonCode() == 'C')  // play note G'
+            {
+                notePlaying = 67 + octaveShift * 12;
+                SynthNoteOn(notePlaying, 90);
+            }
+            if (ButtonCode() == 'D')  // play note C"
+            {
+                notePlaying = 72 + octaveShift * 12;
+                SynthNoteOn(notePlaying, 90);
+            }
+            if (ButtonCode() == '#')  // change octave
+            {
+                if (octaveShift == 0) octaveShift = 1;
+                else if (octaveShift == 1) octaveShift = -1;  
+                else  octaveShift = 0;
+                LCD_SetFont(PROP_8_NORM); 
+                LCD_PosXY(0, 42);
+                LCD_PutText("Octave shift: "); 
+                LCD_BlockClear(16, 10);
+                LCD_SetFont(MONO_8_NORM); 
+                if (octaveShift == 1) LCD_PutText("+1"); 
+                else if (octaveShift == -1) LCD_PutText("-1"); 
+                else  LCD_PutText(" 0"); 
+            }
+        }
+        if (notePlaying && m_ButtonStates == 0)  // All buttons released
+        {
+            SynthNoteOff(notePlaying);
+            notePlaying = 0;
+        }
+    }
 }
 
 

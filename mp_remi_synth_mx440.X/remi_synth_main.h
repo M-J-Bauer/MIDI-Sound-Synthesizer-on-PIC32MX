@@ -14,12 +14,12 @@
 //
 #define BUILD_VER_MAJOR   3
 #define BUILD_VER_MINOR   0
-#define BUILD_VER_DEBUG   16
+#define BUILD_VER_DEBUG   25
 //
 // =======================================================================================
 
 #include "../Common/system_def.h"
-#include "../Drivers/HardwareProfile.h" 
+#include "../Drivers/HardwareProfile.h"
 #include "../Drivers/EEPROM_drv.h"
 #include "../Drivers/UART_drv.h"
 #include "../Drivers/SPI_drv.h"

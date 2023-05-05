@@ -94,7 +94,7 @@ typedef  struct  synth_patch_param_table
     uint16  LFO_RampTime;           // 1..10k ms (delay & ramp-up time)
     // Wave Mixer & Contour Envelope
     uint8   MixerControl;           // 0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn
-    uint8   MixerOsc2Level;         // 0..100 % 
+    uint8   MixerOsc2Level;         // 0..100 %  (also sets fixed noise level %)
     uint8   ContourStartLevel;      // 0..100 %
     uint16  ContourDelay_ms;        // 1..10k ms
     uint16  ContourRamp_ms;         // 1..10k ms

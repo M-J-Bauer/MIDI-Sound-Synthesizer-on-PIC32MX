@@ -52,10 +52,11 @@ static fixed_t  m_Osc1StepMedian;         // Median value of v_Osc1Step (as at N
 static fixed_t  m_Osc2StepMedian;         // Median value of v_Osc2Step (as at Note-On)
 static int32    m_LFO_Step;               // LFO "phase step" (fixed-point 24:8 bit format)
 static fixed_t  m_LFO_output;             // LFO output signal, normalized, bipolar (+/-1.0)
-static fixed_t  m_ExpressionLevel;        // Expression (breath pressure) level (0..+1.0))
+static fixed_t  m_PressureLevel;          // Breath pressure, linear response (0..+1.0)
+static fixed_t  m_ExpressionLevel;        // Expression (pressure) square-law (0..+1.0)
 static fixed_t  m_ModulationLevel;        // Modulation level, normalized
 static fixed_t  m_PitchBendFactor;        // Pitch-Bend factor, normalized
-static uint8    m_PitchBendControl;       // Pitch-Bend control mode (Off, PBmsg, CC01, CC02)
+static uint8    m_PitchBendControl;       // Pitch-Bend control mode (Off, PBmsg, Exprn, CV)
 static uint8    m_VibratoControl;         // 0:None, 1:FX.Sw, 2:CC(Mod.Lvr), 3:Auto
 static fixed_t  m_RampOutput;             // Vibrato Ramp output level, normalized (0..1)
 static fixed_t  m_AmpldEnvOutput;         // Amplitude envelope output (0 ~ 0.9995)
@@ -64,8 +65,7 @@ static fixed_t  m_ContourEnvOutput;       // Mixer contour output, normalized (0
 static fixed_t  m_AttackVelocity;         // Attack Velocity, normalized (0 ~ 0.999)
 static bool     m_TriggerAttack;          // Signal to put ampld envelope into attack
 static bool     m_TriggerRelease;         // Signal to put ampld envelope into release
-static bool     m_ContourEnvTrigger;      // Signal to start mixer transient/contour
-static bool     m_ContourEnvFinish;       // Signal to end mixer transient/contour
+static bool     m_TriggerContour;         // Signal to start contour envelope gen
 static bool     m_LegatoNoteChange;       // Signal Legato note change to Vibrato func.
 static uint8    m_Note_ON;                // TRUE if Note ON, ie. "gated", else FALSE
 static uint8    m_NotePlaying;            // MIDI note number of note playing
@@ -344,7 +344,7 @@ void  SynthNoteOn(uint8 noteNum, uint8 velocity)
 
         m_LegatoNoteChange = 0;    // Not a Legato event
         m_TriggerAttack = 1;       // Let 'er rip, Boris
-        m_ContourEnvTrigger = 1;
+        m_TriggerContour = 1;
         v_SynthEnable = 1; 
     }
     else  // Note already playing -- do legato note change
@@ -439,6 +439,9 @@ void  SynthNoteChange(uint8 noteNum)
  * Function:     End the note playing, if it matches the given note number.
  *
  * Entry args:   noteNum = MIDI standard note number of note to be ended.
+ * 
+ * If noteNum == 0, the note will be terminated regardless of m_NotePlaying.  
+ * This deviation from the MIDI standard is provided to support the REMI 2 handset.
  *
  * The function puts envelope shapers into the 'Release' phase. The note will be
  * terminated by the synth process (B/G task) when the release time expires, or if
@@ -457,12 +460,9 @@ void  SynthNoteOff(uint8 noteNum)
     if (noteTransposed > 120)  noteTransposed -= 12;   // too high
     if (noteTransposed < 12)   noteTransposed += 12;   // too low
 
-    noteNum = noteTransposed;
-
-    if (noteNum == m_NotePlaying)
+    if (noteNum == 0 || noteTransposed == m_NotePlaying)
     {
         m_TriggerRelease = 1;
-        m_ContourEnvFinish = 1;
         m_Note_ON = FALSE;
     }
 }
@@ -474,9 +474,12 @@ void  SynthNoteOff(uint8 noteNum)
  *
  * Entry args:   data14 = MIDI expression/pressure value (14 bits, unsigned).
  *
- * Output:       (fixed_t) m_ExpressionLevel = normalized pressure level (0..+1.0)
- *                         capped at full-scale = 0.99999
- *
+ * Outputs:      (fixed_t) m_PressureLevel = normalized pressure level (0..+1.0)
+ *                             capped at 0.99 FS, linear response
+ *                                                ```````````````
+ *               (fixed_t) m_ExpressionLevel = normalized pressure level (0..+1.0)
+ *                             capped at 0.99 FS, square-law response
+ *                                                ```````````````````
  * Note:         A square-law is applied to the data value to approximate an exponential
  *               response curve. The output pressure level is fixed point, normalized.
  */
@@ -485,14 +488,19 @@ void   SynthExpression(unsigned data14)
     uint32  ulval;
     fixed_t level;
     fixed_t levelMax = (IntToFixedPt(1) * 99) / 100;
+    
+    ulval = data14 << 6;  // scale to 20 bits (fractional part)
+    level = (fixed_t) ulval;  
+    level = (level * MIDI_EXPRN_ADJUST_PC) / 100;  // adjust level
+    if (level > levelMax) level = levelMax;  // cap at 0.99
+    m_PressureLevel = level;
 
     ulval = ((uint32) data14 * data14) / 16384;  // apply square law
     ulval = ulval << 6;   // scale to 20 bits (fractional part)
-    level = (fixed_t) ulval;  // convert to fixed-point fraction
-    level = (level * MIDI_EXPRN_ADJUST_PC) / 100;  // Compensate MIDI input level
-    if (level > levelMax) level = levelMax;  // limit at 0.99
+    level = (fixed_t) ulval; 
+    level = (level * MIDI_EXPRN_ADJUST_PC) / 100;  // adjust level
+    if (level > levelMax) level = levelMax;  // cap at 0.99
     if (level > g_ExpressionPeak)  g_ExpressionPeak = level;  // diagnostic
-    
     m_ExpressionLevel = level;  
 }
 
@@ -759,10 +767,9 @@ PRIVATE  void   ContourEnvelopeShaper()
     static  fixed_t  outputDelta;     // Step change in output level per 5ms
     static  fixed_t  holdLevel;       // Output level held at finish of ramp
 
-    if (m_ContourEnvTrigger)  // Note-On event
+    if (m_TriggerContour)  // Note-On event
     {
-        m_ContourEnvTrigger = 0;
-        m_ContourEnvFinish = 0;
+        m_TriggerContour = 0;
         m_ContourEnvOutput = IntToFixedPt(g_Patch.ContourStartLevel) / 100;
         holdLevel = IntToFixedPt(g_Patch.ContourHoldLevel) / 100;
         contourTimer = 0;
@@ -913,7 +920,7 @@ PRIVATE  void   OscFreqModulation()
     }
     else if (m_PitchBendControl == PITCH_BEND_BY_EXPRN_CC) 
     {
-        modnLevel = (m_ExpressionLevel * g_Config.PitchBendRange) / 1200;
+        modnLevel = (m_PressureLevel * g_Config.PitchBendRange) / 1200;
         freqMult = Base2Exp(modnLevel);
     }
     else if (m_PitchBendControl == PITCH_BEND_BY_ANALOG_CV) 
@@ -967,7 +974,7 @@ PRIVATE  void  OscMixRatioModulation()
     }
     else if (g_Patch.MixerControl == MIXER_CTRL_EXPRESS)
     {
-        mixRatio_pK = IntegerPart(m_ExpressionLevel * 1000);
+        mixRatio_pK = IntegerPart(m_PressureLevel * 1000);
     }
     else if (g_Patch.MixerControl == MIXER_CTRL_MODULN)
     {
@@ -995,8 +1002,12 @@ PRIVATE  void   NoiseLevelControl()
 {
     int  noiseCtrlSource = g_Patch.NoiseLevelCtrl & 7;  
     
-    if (noiseCtrlSource == NOISE_LVL_FIXED)           // option 0 (Fixed max.)
-        v_NoiseLevel = FIXED_MAX_LEVEL;
+    if (noiseCtrlSource == NOISE_LVL_FIXED)           // option 0 (Fixed %)
+    {
+        if ((g_Patch.NoiseMode & 3) == NOISE_WAVE_ADDED
+        ||  (g_Patch.NoiseMode & 3) == NOISE_WAVE_MIXED )
+            v_NoiseLevel = (IntToFixedPt( 1 ) * g_Patch.MixerOsc2Level) / 100;
+    }
     else if (noiseCtrlSource == NOISE_LVL_AMPLD_ENV)  // option 1
         v_NoiseLevel = m_AmpldEnvOutput;
     else if (noiseCtrlSource == NOISE_LVL_LFO)        // option 2
