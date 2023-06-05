@@ -14,7 +14,7 @@
  * `````````    
  * Author:      M.J.Bauer, Copyright 2016-2022, All rights reserved
  * ```````
- * Reference:   www.mjbauer.biz/Build_the_REMI_by_MJB.htm
+ * Reference:   www.mjbauer.biz/Build_the_REMI_synth.htm
  * ``````````  
  * ================================================================================================
  */

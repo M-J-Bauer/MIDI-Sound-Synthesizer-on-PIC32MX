@@ -7,7 +7,7 @@
  *
  * Author:       M.J.Bauer, Copyright 2016..2023++  All rights reserved
  *
- * Reference:    www.mjbauer.biz/Build_the_REMI_by_MJB.htm
+ * Reference:    www.mjbauer.biz/Build_the_REMI_synth.htm
  *
  * ================================================================================================
  */
@@ -415,7 +415,7 @@ void  SynthNoteChange(uint8 noteNum)
         if (filterIdx > 108)  filterIdx = 108;  // Max at C9 (~8kHz)
         m_FilterIndex = filterIdx;
     }
-    else  // case 2: Note Tracking disabled .. Fc = MIDI note # - 12
+    else  // case 2: Note Tracking disabled
     {
         m_FilterIndex = g_Patch.FilterFrequency;
     }
@@ -491,14 +491,14 @@ void   SynthExpression(unsigned data14)
     
     ulval = data14 << 6;  // scale to 20 bits (fractional part)
     level = (fixed_t) ulval;  
-    level = (level * MIDI_EXPRN_ADJUST_PC) / 100;  // adjust level
+    level = (level * g_Config.ExpressionGainAdjust) / 100;  // adjust level
     if (level > levelMax) level = levelMax;  // cap at 0.99
     m_PressureLevel = level;
 
     ulval = ((uint32) data14 * data14) / 16384;  // apply square law
     ulval = ulval << 6;   // scale to 20 bits (fractional part)
     level = (fixed_t) ulval; 
-    level = (level * MIDI_EXPRN_ADJUST_PC) / 100;  // adjust level
+    level = (level * g_Config.ExpressionGainAdjust) / 100;  // adjust level
     if (level > levelMax) level = levelMax;  // cap at 0.99
     if (level > g_ExpressionPeak)  g_ExpressionPeak = level;  // diagnostic
     m_ExpressionLevel = level;  

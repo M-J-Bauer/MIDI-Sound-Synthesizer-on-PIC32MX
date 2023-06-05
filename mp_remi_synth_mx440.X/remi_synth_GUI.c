@@ -6,7 +6,7 @@
  *
  * Author:      M.J.Bauer, Copyright 2016..2023++  All rights reserved
  *
- * Reference:   www.mjbauer.biz/Build_the_REMI_by_MJB.htm
+ * Reference:   www.mjbauer.biz/Build_the_REMI_synth.htm
  *
  * ================================================================================================
  */
@@ -27,7 +27,7 @@ PRIVATE  void  ScreenFunc_EditPresetMidiProgram(bool);
 PRIVATE  void  ScreenFunc_EditPresetVibratoMode(bool);
 PRIVATE  void  ScreenFunc_EditPresetTranspose(bool);
 
-PRIVATE  void  ScreenFunc_MainSettingsMenu(bool isNewScreen);
+PRIVATE  void  ScreenFunc_MainSettingsMenu(bool);
 PRIVATE  void  ScreenFunc_SetMidiInMode(bool);
 PRIVATE  void  ScreenFunc_SetMidiInChannel(bool);
 PRIVATE  void  ScreenFunc_SetMidiInExpression(bool);
@@ -35,13 +35,15 @@ PRIVATE  void  ScreenFunc_SetMidiOutEnable(bool);
 
 PRIVATE  void  ScreenFunc_ValidateReverbAtten(bool);
 PRIVATE  void  ScreenFunc_ValidateReverbMix(bool);
-PRIVATE  void  ScreenFunc_SetPitchBendMode(bool isNewScreen);
-PRIVATE  void  ScreenFunc_ValidatePitchBendRange(bool isNewScreen);
+PRIVATE  void  ScreenFunc_SetPitchBendMode(bool);
+PRIVATE  void  ScreenFunc_ValidatePitchBendRange(bool);
 PRIVATE  void  ScreenFunc_SystemInfoPage1(bool);
 PRIVATE  void  ScreenFunc_SystemInfoPage2(bool);
 
-PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen);
-PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen);
+PRIVATE  void  ScreenFunc_ControlPanel1(bool);
+PRIVATE  void  ScreenFunc_ControlPanel2(bool);
+PRIVATE  void  ScreenFunc_ControlPanel3(bool);
+PRIVATE  void  ScreenFunc_ControlPanel4(bool);
 PRIVATE  void  ScreenFunc_CustomFuncMenu(bool);
 PRIVATE  void  ScreenFunc_SoundPlayer(bool);
 PRIVATE  void  ScreenFunc_DataEntry(bool);
@@ -254,12 +256,22 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
     {
         SCN_CONTROL_PANEL_1,
         ScreenFunc_ControlPanel1,
-        " CONTROL PANEL 1"
+        " OSCILLATORS"
     },  
     {
         SCN_CONTROL_PANEL_2,
         ScreenFunc_ControlPanel2,
-        " CONTROL PANEL 2"
+        " MIXER & CONTOUR ENV"
+    },  
+    {
+        SCN_CONTROL_PANEL_3,
+        ScreenFunc_ControlPanel3,
+        " NOISE & FILTER"
+    },  
+    {
+        SCN_CONTROL_PANEL_4,
+        ScreenFunc_ControlPanel4,
+        " AMPLD ENVELOPE"
     },  
     {
         SCN_CUSTOM_FUNC_MENU,
@@ -1975,8 +1987,8 @@ PRIVATE  void  ScreenFunc_SystemInfoPage1(bool isNewScreen)
         
         LCD_SetFont(PROP_8_NORM);
         LCD_PosXY(0, 32);
-        if (POT_MODULE_CONNECTED)  LCD_PutText("Pot. module connected");
-        else  LCD_PutText("Pot. module not found");
+        if (POT_MODULE_CONNECTED)  LCD_PutText("Pot panel connected");
+        else  LCD_PutText("Pot panel not found");
         
         LCD_SetFont(MONO_8_NORM);  // line 4 of 4
         LCD_PosXY(0, 44);
@@ -2052,12 +2064,15 @@ PRIVATE  void  ScreenFunc_SystemInfoPage2(bool isNewScreen)
 }
 
 
+/*
+ * Pot Control Panel #1 : Oscillators and Vibrato (LFO) parameters
+ */
 PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
 {
-    static char *potLabel[] = { "Detune", "Osc2mix", "Filt Fc", "Contour", "Time ms", "Filt Res" };
+    static char *potLabel[] = { "Wave 1", "Wave 2", "Detune", "LFO Hz", "Vibr %", "Ramp ms" };
     static bool  doRefresh[6];
     char   textBuf[40];
-    int    pot, setting;
+    int    pot, setting, numSteps;
     uint16 xpos, ypos;  // display coords 
     
     if (isNewScreen)  // new screen...
@@ -2092,80 +2107,53 @@ PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
                 SynthPrepare();  
                 memset(doRefresh, TRUE, 6);
                 LCD_PosXY(44, 55);  // Erase 'Assert' menu option
-                LCD_Mode(CLEAR_PIXELS);
-                LCD_BlockFill(46, 9);
+                LCD_BlockClear(46, 9);
             }
         }
         
-        if (PotMoved(0))  // OSC2 Detune
+        if (PotMoved(0))  // OSC1 wave-table select
         {
-            setting = (int) PotReading(0) - 128;  // bipolar setting -128..+127
-            setting = (setting * setting * 100) / (127 * 127);  // square-law curve
-            if (PotReading(0) < 128)  setting = 0 - setting;  // negate
-            g_Patch.Osc2Detune = (int16) setting;  // range 0..+/-100 (cents))
+            numSteps = GetHighestWaveTableID() + 1;  // number of wave-tables defined
+            setting = ((int) PotReading(0) * numSteps) / 256;
+            g_Patch.Osc1WaveTable = setting;
+            DisplayMenuOption(44, 56, 'A', "Assert");  // Assert required
             doRefresh[0] = TRUE;
         }
-        if (PotMoved(1))  // OSC2 Mix Level (0..100 %)
+        if (PotMoved(1))  // OSC2 wave-table select
         {
-            if (g_Patch.MixerControl == MIXER_CTRL_FIXED)
-            {
-                setting = (int) PotReading(1); 
-                setting = (setting * 100) / 255;    // range 0..100
-                g_Patch.MixerOsc2Level = (uint8) setting;
-                doRefresh[1] = TRUE;
-            }
+            numSteps = GetHighestWaveTableID() + 1;  // number of wave-tables defined
+            setting = ((int) PotReading(1) * numSteps) / 256;
+            g_Patch.Osc2WaveTable = setting;
+            DisplayMenuOption(44, 56, 'A', "Assert");  // Assert required
+            doRefresh[1] = TRUE;
         }
-        if (PotMoved(2))  // Filter Frequency (offset), semitones
+        if (PotMoved(2))  // OSC2 Detune
         {
-            if (g_Patch.FilterResonance != 0 
-            || (g_Patch.NoiseMode && !(g_Patch.NoiseMode & NOISE_PITCHED)))
-            {
-                setting = (int) PotReading(2);  
-                setting = (setting * 108) / 255;  // range 0..108
-                g_Patch.FilterFrequency = (uint8) setting;
-                doRefresh[2] = TRUE;
-                doRefresh[5] = TRUE;
-            }
+            setting = (int) PotReading(2) - 128;  // bipolar setting -128..+127
+            setting = (setting * setting * 100) / (127 * 127);  // square-law curve
+            if (PotReading(2) < 128)  setting = 0 - setting;  // negate
+            g_Patch.Osc2Detune = (int16) setting;  // range 0..+/-100 (cents))
+            doRefresh[2] = TRUE;
         }
-        if (PotMoved(3))  // Contour profile -- ramp slope (+ or -), bias +50
+        if (PotMoved(3))  // LFO freq. in steps of 0.1 Hz
         {
-            setting = (int) PotReading(3) - 128;  // bipolar setting -128..+127
-            setting = (setting * 50) / 127;  // range 0..+/-50
-            setting = (setting / 5) * 5;   // nearest multiple of 5
-            g_Patch.ContourStartLevel = 50 - setting;  // setting is 0..+/-50 units
-            g_Patch.ContourHoldLevel = 50 + setting;
+            setting = ((int) PotReading(3) * 250) / 255;  // range 0..250
+            g_Patch.LFO_Freq_x10 = setting;
             doRefresh[3] = TRUE;
         }
-        if (PotMoved(4))  // Contour Ramp Time (ms)
+        if (PotMoved(4))  // LFO/Vibrato Depth (cents | % FS)
         {
-            setting = (int) PotReading(4);  // unipolar setting 0..255
-            setting = (setting * setting * 2000) / (255 * 255);  // square-law curve
-            setting = QuantizeValuePerDecade(setting);  // range 0..2000
-            if (setting < 10)  setting = 0;  // floor at 10, but allow 0
-            g_Patch.ContourRamp_ms = setting;
+            setting = ((int) PotReading(4) * 200) / 255;  // range 0..200
+            g_Patch.LFO_FM_Depth = setting;
             doRefresh[4] = TRUE;
         }
-        if (PotMoved(5))  // Filter Resonance (Q), display normalised value
+        if (PotMoved(5))  // Vibrato Delay/Ramp time (ms)
         {
-            setting = (int) PotReading(5);  // unipolar setting 0..255
-            if (setting != 0) 
-            {
-                if (PotReading(5) < 128)  // Below half-way mark
-                {
-                    setting = (setting * 8000) / 127 + 1000;  // range 1000..9000
-                    setting = (setting / 100) * 100;  // quantize into 100's
-                }
-                else  // Above half-way mark
-                {
-                    setting = ((setting - 128) * 1000) / 127 + 9000;  // range 9000..10K
-                    setting = (setting / 10) * 10;  // quantize into 10's
-                }
-                if (setting > 9990)  setting = 9990;  // cap at 9990
-            }
-            g_Patch.FilterResonance = (uint16) setting;  // range 0 | 1000..9990
-            
-            DisplayMenuOption(44, 56, 'A', "Assert");  // Assert required
-            doRefresh[2] = TRUE;
+            setting = (int) PotReading(5);
+            setting = (setting * setting * 2000) / (255 * 255);  // square-law
+            setting = QuantizeValuePerDecade(setting);  // range 0..2000
+            if (setting < 10)  setting = 0;  // reject values 1..9, allow 0
+            g_Patch.LFO_RampTime = setting;
             doRefresh[5] = TRUE;
         }
     }
@@ -2175,33 +2163,13 @@ PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
     {
         if (doRefresh[pot])
         {
-            if (pot == 0)  sprintf(textBuf, "%+3d", (int)g_Patch.Osc2Detune);
-            if (pot == 1)  
-            {
-                if (g_Patch.MixerControl == MIXER_CTRL_FIXED)
-                    sprintf(textBuf, "%3d%c", (int)g_Patch.MixerOsc2Level, '%');
-                else  strcpy(textBuf, "-");
-            }
-            if (pot == 2)  
-            {
-                if (g_Patch.FilterResonance != 0 
-                || (g_Patch.NoiseMode && !(g_Patch.NoiseMode & NOISE_PITCHED)))
-                    sprintf(textBuf, "%3d", (int)g_Patch.FilterFrequency);
-                else  strcpy(textBuf, "-");
-            }
-            if (pot == 3)  
-            {
-                // Contour ramp is symmetrical about 50%
-                setting = (int) g_Patch.ContourHoldLevel - (int) g_Patch.ContourStartLevel;
-                sprintf(textBuf, "%+3d%c", setting, '%');  // show slope as %FS
-            }
-            if (pot == 4)  sprintf(textBuf, "%4d", (int) g_Patch.ContourRamp_ms);
-            if (pot == 5)  
-            {
-                if (g_Patch.FilterResonance)
-                    sprintf(textBuf, ".%03d", (int)g_Patch.FilterResonance/10);
-                else  strcpy(textBuf, "Off");
-            }
+            if (pot == 0) sprintf(textBuf, "%d", (int)g_Patch.Osc1WaveTable);
+            if (pot == 1) sprintf(textBuf, "%d", (int)g_Patch.Osc2WaveTable);
+            if (pot == 2) sprintf(textBuf, "%+d", (int)g_Patch.Osc2Detune);
+            if (pot == 3) sprintf(textBuf, "%2d.%1d", (int)g_Patch.LFO_Freq_x10 / 10,
+                                  (int)g_Patch.LFO_Freq_x10 % 10);
+            if (pot == 4) sprintf(textBuf, "%d", (int)g_Patch.LFO_FM_Depth);
+            if (pot == 5) sprintf(textBuf, "%d", (int)g_Patch.LFO_RampTime);
 
             xpos = (pot % 3) * 43 + 3;
             ypos = (pot < 3) ? 22 : 44;
@@ -2215,12 +2183,13 @@ PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
     }
 }
 
-
+/*
+ * Pot Control Panel #2 : Mixer and Contour Env parameters
+ */
 PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
 {
-    static char  *potLabel[] = { "Filt mod", "Pot 2", "Pot 3", "Noise G", "Flt Atn", "Filt G" };
-    static float optionAtten[] = { 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
-    static float optionGain[] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0, 5.0, 10.0, 20.0, 25.0 };
+    static char *potLabel[] = { "MixCtrl", "Osc2 %", "Start %", "Delay ms", "Ramp ms", "Hold %" };
+    static char *mixerCtrlMode[] = { "Fixed", "Contur", "LFO", "Exprn", "Modn" };
     static bool  doRefresh[6];
     char   textBuf[40];
     int    pot, setting;
@@ -2244,54 +2213,57 @@ PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
             doRefresh[pot] = TRUE;
         }
         DisplayMenuOption(4,  56, '*', "Exit");
-//      DisplayMenuOption(44, 56, 'A', "Assert");  // Nothing to assert (yet)
-        DisplayMenuOption(92, 56, '#', "Back");
+        DisplayMenuOption(92, 56, '#', "Next");
         PotFlagsClear();
     }
     else  // check for button hit or any pot position changed
     {
         if (ButtonHit())
         {
-            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
-            if (ButtonCode() == '#') GoToNextScreen(SCN_CONTROL_PANEL_1);
-//          if (ButtonCode() == 'A') SynthPrepare();  // Activate new setting(s)
+            if (ButtonCode() == '*')  GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#')  GoToNextScreen(SCN_CONTROL_PANEL_3);
         }
         
-        if (PotMoved(0))  // Modify filter freq. while note in progress
+        if (PotMoved(0))  // Mixer Control Mode
         {
-            setting = (int) PotReading(0);  
-            setting = (setting * 108) / 255;  // range 0..108
-            SetFilterFreqIndex(setting);  
+            setting = ((int) PotReading(0) * 5) / 256;  // 5 steps 
+            g_Patch.MixerControl = (uint8) setting;  // range 0..4
             doRefresh[0] = TRUE;
         }
-        if (PotMoved(1))  //  TBD
+        if (PotMoved(1))  // OSC2 Mix Level (0..100 %)
         {
-            //
+            setting = ((int) PotReading(1) * 100) / 255;
+            g_Patch.MixerOsc2Level = (uint8) setting;  // range 0..100
             doRefresh[1] = TRUE;
         }
-        if (PotMoved(2))  //  TBD
+        if (PotMoved(2))  // Contour Env Start Level (0..100 %)
         {
-            //
+            setting = ((int) PotReading(1) * 100) / 255;
+            g_Patch.ContourStartLevel = (uint8) setting;  // range 0..100
             doRefresh[2] = TRUE;
         }
-        if (PotMoved(3))  // Noise Filter output Gain
+        if (PotMoved(3))  // Contour Delay Time (ms)
         {
-            setting = ((int) PotReading(3) * 3) / 64;  // one of 12 options
-            if (setting > 11)  setting = 11;
-            g_NoiseFilterGain = optionGain[setting];
+            setting = (int) PotReading(3);  // unipolar setting 0..255
+            setting = (setting * setting * 2000) / (255 * 255);  // square-law
+            setting = QuantizeValuePerDecade(setting);  // range 0..2000
+            if (setting < 10)  setting = 0;  // reject 1..9, but allow 0
+            g_Patch.ContourDelay_ms = setting;
             doRefresh[3] = TRUE;
         }
-        if (PotMoved(4))  // Filter input Attenuation (gain)
+        if (PotMoved(4))  // Contour Ramp Time (ms)
         {
-            setting = ((int) PotReading(4) * 3) / 64;  // one of 12 options
-            if (setting > 11)  setting = 11;
-            g_FilterInputAtten = optionAtten[setting];
+            setting = (int) PotReading(4);  // unipolar setting 0..255
+            setting = (setting * setting * 2000) / (255 * 255);  // square-law
+            setting = QuantizeValuePerDecade(setting);  // range 0..2000
+            if (setting < 10)  setting = 0;  // reject 1..9, but allow 0
+            g_Patch.ContourRamp_ms = setting;
             doRefresh[4] = TRUE;
         }
-        if (PotMoved(5))  // Wave Filter output Gain
+        if (PotMoved(5))  // Contour Env Hold (End) Level (0..100 %)
         {
-            setting = ((int) PotReading(5) * 3) / 64;  // one of 12 options
-            g_FilterOutputGain = optionGain[setting];
+            setting = ((int) PotReading(5) * 100) / 255;
+            g_Patch.ContourHoldLevel = (uint8) setting;  // range 0..100
             doRefresh[5] = TRUE;
         }
     }
@@ -2301,12 +2273,265 @@ PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
     {
         if (doRefresh[pot])
         {
-            if (pot == 0)  sprintf(textBuf, "%3d", (int) GetFilterFreqIndex());
-            if (pot == 1)  sprintf(textBuf, "%3d", PotReading(1));  // temp
-            if (pot == 2)  sprintf(textBuf, "%3d", PotReading(2));  // temp
-            if (pot == 3)  sprintf(textBuf, "%4.1f", g_NoiseFilterGain);
-            if (pot == 4)  sprintf(textBuf, "%4.2f", g_FilterInputAtten);
-            if (pot == 5)  sprintf(textBuf, "%4.1f", g_FilterOutputGain);
+            if (pot == 0) strcpy(textBuf, mixerCtrlMode[g_Patch.MixerControl]);
+            if (pot == 1) sprintf(textBuf, "%d", (int)g_Patch.MixerOsc2Level);
+            if (pot == 2) sprintf(textBuf, "%d", (int)g_Patch.ContourStartLevel);
+            if (pot == 3) sprintf(textBuf, "%d", (int)g_Patch.ContourDelay_ms);
+            if (pot == 4) sprintf(textBuf, "%d", (int)g_Patch.ContourRamp_ms);
+            if (pot == 5) sprintf(textBuf, "%d", (int)g_Patch.ContourHoldLevel);
+
+            xpos = (pot % 3) * 43 + 3;
+            ypos = (pot < 3) ? 22 : 44;
+            LCD_PosXY(xpos, ypos);
+            LCD_Mode(SET_PIXELS);  // Erase existing data
+            LCD_BlockFill(36, 8);
+            LCD_Mode(CLEAR_PIXELS);  // Write new data
+            DisplayTextCenteredInField(xpos, ypos, textBuf, 6);
+            doRefresh[pot] = FALSE;
+        }
+    }
+}
+
+/*
+ * Pot Control Panel #3 : Noise Generator and Filter parameters
+ */
+PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
+{
+    static char  *potLabel[] = { "N Mode", "N Ctrl", "F Ctrl", "F Res", "FF (st)", "Note trk" };
+    static char  *noiseModeName[] = { "OFF", "0 wave", "+ wave", "% wave" };
+    static char  *noiseCtrlName[] = { "Fixed", "ENV", "LFO", "Exprn", "Modn" };
+    static char  *filtrCtrlName[] = { "Fixed", "Contur", "LFO", "Exprn", "Modn" };
+    static bool  doRefresh[6];
+    char   textBuf[40], numBuf[20];
+    int    pot, setting;
+    uint16 xpos, ypos;  // display coords 
+    
+    if (isNewScreen)  // new screen...
+    {
+        LCD_Mode(SET_PIXELS);
+        LCD_SetFont(PROP_8_NORM); 
+        
+        for (pot = 0; pot < 6; pot++)  
+        {
+            xpos = (pot % 3) * 43 + 2;
+            ypos = (pot < 3) ? 12 : 34;
+            LCD_PosXY(xpos, ypos);
+            LCD_PutText(potLabel[pot]);
+            xpos = (pot % 3) * 43 + 1;
+            ypos = (pot < 3) ? 20 : 42;
+            LCD_PosXY(xpos, ypos);
+            LCD_BlockFill(40, 11);
+            doRefresh[pot] = TRUE;
+        }
+        DisplayMenuOption(4,  56, '*', "Exit");
+        DisplayMenuOption(92, 56, '#', "Next");
+        PotFlagsClear();
+    }
+    else  // check for button hit or any pot position changed
+    {
+        if (ButtonHit())
+        {
+            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#') GoToNextScreen(SCN_CONTROL_PANEL_4);
+            if (ButtonCode() == 'A')  // Activate new setting(s) and refresh display
+            {
+                SynthPrepare();  
+                memset(doRefresh, TRUE, 6);
+                LCD_PosXY(44, 55);  // Erase 'Assert' menu option
+                LCD_BlockClear(46, 9);
+            }
+        }
+        
+        if (PotMoved(0))  // Noise Mode
+        {
+            setting = ((int) PotReading(0) * 8) / 256;  // 8 steps 
+            g_Patch.NoiseMode = (uint8) setting;  // range 0..7
+            doRefresh[0] = TRUE;
+        }
+        if (PotMoved(1))  // Noise (level) Control
+        {
+            setting = ((int) PotReading(1) * 5) / 256;  // 5 steps 
+            g_Patch.NoiseLevelCtrl = (uint8) setting;  // range 0..4
+            doRefresh[1] = TRUE;
+        }
+        if (PotMoved(2))  // Filter Control (mode)
+        {
+            setting = ((int) PotReading(2) * 5) / 256;  // 5 steps 
+            g_Patch.FilterControl = (uint8) setting;  // range 0..4
+            doRefresh[2] = TRUE;
+        }
+        if (PotMoved(3))  // Filter Resonance (Q)
+        {
+            setting = (int) PotReading(3);  // unipolar setting 0..255
+            if (setting != 0) 
+            {
+                if (setting < 128)  // Below half-way mark (coarse adjust)
+                {
+                    setting = (setting * 8000) / 127 + 1000;  // range 1000..9000
+                    setting = (setting / 100) * 100;  // quantize into 100's
+                }
+                else  // Above half-way mark (fine adjust)
+                {
+                    setting = ((setting - 128) * 1000) / 127 + 9000;  // range 9000..10K
+                    setting = (setting / 10) * 10;  // quantize into 10's
+                }
+                if (setting > 9990)  setting = 9990;  // cap at 9990
+            }
+            g_Patch.FilterResonance = (uint16) setting;  // range 0 | 1000..9990
+            
+            DisplayMenuOption(44, 56, 'A', "Assert");  // Assert required
+            doRefresh[3] = TRUE;
+        }
+        if (PotMoved(4))  // Filter Frequency (offset), semitones
+        {
+            setting = (int) PotReading(4);  
+            setting = (setting * 108) / 255;  // range 0..108
+            g_Patch.FilterFrequency = (uint8) setting;
+            doRefresh[4] = TRUE;
+        }
+        if (PotMoved(5))  // Filter Note Tracking (on/off)
+        {
+            setting = (int) PotReading(5);  
+            if (setting < 128) g_Patch.FilterNoteTrack = 0;
+            else  g_Patch.FilterNoteTrack = 1;
+            doRefresh[5] = TRUE;
+        }
+    }
+    
+    // Update variable data displayed, if changed or isNewScreen
+    for (pot = 0; pot < 6; pot++)  
+    {
+        if (doRefresh[pot])
+        {
+            if (pot == 0) // show Noise Mode as a string
+            {
+                strcpy(textBuf, "RM ");  // assume Ring Modulator enabled
+                if (g_Patch.NoiseMode < 4) strcpy(textBuf, noiseModeName[g_Patch.NoiseMode]);
+                else  strcat(textBuf, itoa(numBuf, (int)g_Patch.NoiseMode, 10)); 
+            }
+            if (pot == 1) strcpy(textBuf, noiseCtrlName[g_Patch.NoiseLevelCtrl]);
+            if (pot == 2) strcpy(textBuf, filtrCtrlName[g_Patch.NoiseLevelCtrl]);
+            if (pot == 3) sprintf(textBuf, "%d", (int)g_Patch.FilterResonance);
+            if (pot == 4) sprintf(textBuf, "%d", (int)g_Patch.FilterFrequency);
+            if (pot == 5)
+            {
+                if (g_Patch.FilterNoteTrack) strcpy(textBuf, "On");
+                else  strcpy(textBuf, "Off");
+            }
+
+            xpos = (pot % 3) * 43 + 3;
+            ypos = (pot < 3) ? 22 : 44;
+            LCD_PosXY(xpos, ypos);
+            LCD_Mode(SET_PIXELS);  // Erase existing data
+            LCD_BlockFill(36, 8);
+            LCD_Mode(CLEAR_PIXELS);  // Write new data
+            DisplayTextCenteredInField(xpos, ypos, textBuf, 6);
+            doRefresh[pot] = FALSE;
+        }
+    }
+}
+
+/*
+ * Pot Control Panel #4 : Amplitude Envelope parameters
+ */
+PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
+{
+    static char  *potLabel[] = { "Attk ms", "Hold ms", "Decay ms", "Sust %", "Release", "" };
+    static bool  doRefresh[6];
+    static int   dummyParam;  // temp.
+    char   textBuf[40];
+    int    pot, setting;
+    uint16 xpos, ypos;  // display coords 
+    
+    if (isNewScreen)  // new screen...
+    {
+        LCD_Mode(SET_PIXELS);
+        LCD_SetFont(PROP_8_NORM); 
+        
+        for (pot = 0; pot < 6; pot++)  
+        {
+            xpos = (pot % 3) * 43 + 2;
+            ypos = (pot < 3) ? 12 : 34;
+            LCD_PosXY(xpos, ypos);
+            LCD_PutText(potLabel[pot]);
+            xpos = (pot % 3) * 43 + 1;
+            ypos = (pot < 3) ? 20 : 42;
+            LCD_PosXY(xpos, ypos);
+            LCD_BlockFill(40, 11);
+            doRefresh[pot] = TRUE;
+        }
+        DisplayMenuOption(4,  56, '*', "Exit");
+        DisplayMenuOption(92, 56, '#', "Back");
+        PotFlagsClear();
+    }
+    else  // check for button hit or any pot position changed
+    {
+        if (ButtonHit())
+        {
+            if (ButtonCode() == '*') GoToNextScreen(SCN_HOME);
+            if (ButtonCode() == '#') GoToNextScreen(SCN_CONTROL_PANEL_1);
+        }
+        
+        if (PotMoved(0))  // Env Attack time (10..2000 ms)
+        {
+            setting = (int) PotReading(0);  // unipolar setting 0..255
+            setting = (setting * setting * 2000) / (255 * 255);  // square-law
+            setting = QuantizeValuePerDecade(setting);  // range 10..2000
+            if (setting < 10)  setting = 10;  // reject values 0..9
+            g_Patch.AmpldEnvAttack_ms = (uint16) setting;
+            doRefresh[0] = TRUE;
+        }
+        if (PotMoved(1))  // Env Peak-Hold time (0..1000 ms)
+        {
+            setting = (int) PotReading(1);  // unipolar setting 0..255
+            setting = (setting * setting * 1000) / (255 * 255);  // square-law
+            setting = QuantizeValuePerDecade(setting);  // range 0..1000
+            if (setting < 10)  setting = 0;  // reject 1..9, allow 0
+            g_Patch.AmpldEnvPeak_ms = (uint16) setting;
+            doRefresh[1] = TRUE;
+        }
+        if (PotMoved(2))  // Env Decay time (10..5000 ms)
+        {
+            setting = (int) PotReading(2);  // unipolar setting 0..255
+            setting = (setting * setting * 5000) / (255 * 255);  // square-law
+            setting = QuantizeValuePerDecade(setting);  // range 10..5000
+            if (setting < 10)  setting = 0;  // reject 1..9, allow 0
+            g_Patch.AmpldEnvDecay_ms = (uint16) setting;
+            doRefresh[2] = TRUE;
+        }
+        if (PotMoved(3))  // Env Sustain Level (0..100%)
+        {
+            setting = ((int) PotReading(3) * 100) / 255;
+            g_Patch.AmpldEnvSustain = (uint8) setting;  // range 0..100
+            doRefresh[3] = TRUE;
+        }
+        if (PotMoved(4))  // Env Release time (10..2000 ms)
+        {
+            setting = (int) PotReading(4);  // unipolar setting 0..255
+            setting = (setting * setting * 2000) / (255 * 255);  // square-law
+            setting = QuantizeValuePerDecade(setting);  // range 10..2000
+            if (setting < 10)  setting = 0;  // reject 1..9, allow 0
+            g_Patch.AmpldEnvRelease_ms = (uint16) setting;
+            doRefresh[4] = TRUE;
+        }
+        if (PotMoved(5))  // Reserved param, TBA (maybe)
+        {
+            dummyParam = ((int) PotReading(5) * 100) / 255;  // range 0..100
+            doRefresh[5] = TRUE;
+        }
+    }
+    
+    // Update variable data displayed, if changed or isNewScreen
+    for (pot = 0; pot < 6; pot++)  
+    {
+        if (doRefresh[pot])
+        {
+            if (pot == 0) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvAttack_ms);
+            if (pot == 1) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvPeak_ms);
+            if (pot == 2) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvDecay_ms);
+            if (pot == 3) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvSustain);
+            if (pot == 4) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvRelease_ms);
+            if (pot == 5) sprintf(textBuf, "%d", dummyParam);  // temp.
 
             xpos = (pot % 3) * 43 + 3;
             ypos = (pot < 3) ? 22 : 44;

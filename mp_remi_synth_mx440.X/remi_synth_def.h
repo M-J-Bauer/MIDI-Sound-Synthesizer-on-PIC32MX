@@ -11,7 +11,6 @@
 
 #define SAMPLE_RATE_HZ        (40000)    // For wave-table Oscillators
 #define PARTIAL_ORDER_MAX          16    // Highest partial order for waveform generator
-#define MIDI_EXPRN_ADJUST_PC      130    // Factor to adjust MIDI CC expression level (%)
 
 #define REVERB_DELAY_MAX_SIZE    2000    // samples 
 #define REVERB_LOOP_TIME_SEC     0.04    // seconds (max. 0.05 sec.)
@@ -104,8 +103,8 @@ typedef  struct  synth_patch_param_table
     uint8   NoiseLevelCtrl;         // 0:Fixed, 1:Amp.Env, 2:LFO, 3:Exprn, 4:Modn
     uint8   FilterControl;          // 0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn
     uint16  FilterResonance;        // 0..9999  (0: bypass filter)
-    uint8   FilterFrequency;        // 0..108 (MIDI note # - 12)
-    uint8   FilterNoteTrack;        // 0:Off, 1:On (FF is offset from Fo)
+    uint8   FilterFrequency;        // 0..108 (MIDI note number)
+    uint8   FilterNoteTrack;        // 0:Off, 1:On
     // Amplitude Envelope 
     uint16  AmpldEnvAttack_ms;      // 1..10k ms
     uint16  AmpldEnvPeak_ms;        // 0..10k ms

@@ -37,8 +37,9 @@ void  DefaultConfigData(void)
     
     g_Config.PitchBendCtrlMode = 0;         // 0 = disabled, 1:MIDI PB msg, 2:Exprn
     g_Config.PitchBendRange = 200;          // 0..1200 cents
-    g_Config.ReverbAtten_pc = 50;
-    g_Config.ReverbMix_pc = 10;
+    g_Config.ExpressionGainAdjust = 150;    // range 25..250 percent
+    g_Config.ReverbAtten_pc = 75;
+    g_Config.ReverbMix_pc = 15;
     g_Config.AudioAmpldControlMode = 3;     // 0:Const, 1:ENV*Vel, 2:Exprn, 3:Auto
     g_Config.PresetLastSelected = 1;
     
@@ -77,7 +78,7 @@ void  DefaultPresetData(void)
 {
     //                             PRESET:   8   1   2   3   4   5   6   7
     static  uint8   defaultMidiProgram[] = { 67, 75, 72, 69, 74, 17, 20, 23 };
-    static  uint8   defaultSynthPatch[]  = { 46, 10, 11, 21, 26, 51, 45, 43 }; 
+    static  uint8   defaultSynthPatch[]  = { 41, 10, 11, 21, 26, 42, 45, 43 }; 
     int  i;
 
     g_Preset.checkDword = 0xDEADBEEF;

@@ -7,9 +7,9 @@
  *               Wave-table data is output in C source code format as an array definition
  *               to be included in source file "remi_synth_data.c".
  *
- * Originated:   M.J.Bauer, 2016   [www.mjbauer.biz/mjb_resources.htm]
+ * Originated:   M.J.Bauer, 2016
  * ```````````
- * Reference:    "Wave-table Oscillator Notes" (text file in ../doc folder)
+ * Reference:    www.mjbauer.biz/Build_the_REMI_synth.htm
  * ``````````
  *=================================================================================================
  */

@@ -91,6 +91,8 @@ void  Cmnd_config(int argCount, char * argValue[])
 {
     static char *pitchBendModeName[] = 
             { "Disabled", "MIDI Pitch-Bend", "MIDI Exprn CC", "Analog CV (TBD!)" };
+    static char *audioCtrlModeName[] = 
+            { "Fixed Level", "ENV & Velocity", "Expression", "Auto-detect" };
     char   textBuf[100];
     bool   updateConfig = 0;
     bool   isCmdError = 0;
@@ -110,49 +112,55 @@ void  Cmnd_config(int argCount, char * argValue[])
     {
         sprintf(textBuf, "mib | MIDI IN Baudrate: %d \n", g_Config.MidiInBaudrate);
         putstr("\t");  putstr(textBuf);
+        
         sprintf(textBuf, "mim | MIDI IN Mode: %d ", g_Config.MidiInMode);
         putstr("\t");  putstr(textBuf);
         if (g_Config.MidiInMode == 2) putstr("= Omni-On-Mono \n");
         else if (g_Config.MidiInMode == 4) putstr("= Omni-Off-Mono \n");  
         else  putstr("(invalid) \n");
+        
         sprintf(textBuf, "mic | MIDI IN Channel: %d \n", g_Config.MidiInChannel);
         putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "mix | MIDI IN Expression CC #: %d \n", g_Config.MidiInExpressionCCnum);
         putstr("\t");  putstr(textBuf);
         
-        sprintf(textBuf, "moe | MIDI OUT Enabled:  %d ", g_Config.MidiOutEnabled);
+        sprintf(textBuf, "moe | MIDI OUT Messages: %d ", g_Config.MidiOutEnabled);
         putstr("\t");  putstr(textBuf);
-        if (g_Config.MidiOutEnabled == 0) putstr("= Disabled \n");
-        sprintf(textBuf, "moc | MIDI OUT Channel:  %d \n", g_Config.MidiOutChannel);
+        if (g_Config.MidiOutEnabled) putstr("(Enabled)\n");
+        else  putstr("(Disabled)\n");
+        
+        sprintf(textBuf, "moc | MIDI OUT Channel: %d \n", g_Config.MidiOutChannel);
         putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "mox | MIDI OUT Expression CC #: %d \n", g_Config.MidiOutExpressionCCnum);
         putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "mom | MIDI OUT Modulation Enab: %d \n", g_Config.MidiOutModnEnabled);
         putstr("\t");  putstr(textBuf);
     
-        sprintf(textBuf, "pbc | Pitch Bend Control: %d = ", g_Config.PitchBendCtrlMode);
-        putstr("\t");  putstr(textBuf);
-        putstr(pitchBendModeName[g_Config.PitchBendCtrlMode]);  
-        putNewLine();
-        sprintf(textBuf, "pbr | Pitch Bend Range (cents): %d \n", g_Config.PitchBendRange);
+        sprintf(textBuf, "pbc | Pitch Bend Control: %d = %s\n", g_Config.PitchBendCtrlMode,
+                pitchBendModeName[g_Config.PitchBendCtrlMode] );
         putstr("\t");  putstr(textBuf);
         
-        sprintf(textBuf, "aac | Audio Ampld Control: %d = ", g_Config.AudioAmpldControlMode);
+        sprintf(textBuf, "pbr | Pitch Bend Range: %d cents\n", g_Config.PitchBendRange);
         putstr("\t");  putstr(textBuf);
-        if (g_Config.AudioAmpldControlMode == 1) putstr("ENV & Velocity \n");
-        else if (g_Config.AudioAmpldControlMode == 2) putstr("Expression CC \n");  
-        else if (g_Config.AudioAmpldControlMode == 3) putstr("Auto-detect \n"); 
-        else  putstr("Fixed level (max)\n");  // Ctrl.Mode == 0
         
+        sprintf(textBuf, "aac | Audio Ampld Control: %d = %s\n", g_Config.AudioAmpldControlMode,
+                audioCtrlModeName[g_Config.AudioAmpldControlMode]);
+        putstr("\t");  putstr(textBuf);
+        
+        sprintf(textBuf, "ega | Expression Gain Adjust: %d %%\n", g_Config.ExpressionGainAdjust);
+        putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "rva | Reverb Attenuator gain: %d %%\n", g_Config.ReverbAtten_pc);
         putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "rvm | Reverb Mix (wet/dry ratio): %d %%\n", g_Config.ReverbMix_pc);
         putstr("\t");  putstr(textBuf);
+
         return;
     }
     
     if (argCount >= 3)  arg = atoi(argValue[2]);
     else  return;
+    
+    // argCount >= 3 ... parse command line for valid input...
 
     if (strmatch(argValue[1], "mib"))  // MIDI IN Baudrate
     {
@@ -249,6 +257,15 @@ void  Cmnd_config(int argCount, char * argValue[])
         if (argCount >= 3 && (arg >= 0 && arg <= 3))
         {
             g_Config.AudioAmpldControlMode = arg;
+            updateConfig = 1;
+        }
+        else  isCmdError = 1;
+    }
+    else if (strmatch(argValue[1], "ega"))  // Expression gain adjust (25..250 %)
+    {
+        if (argCount >= 3 && (arg >= 25 && arg <= 250))
+        {
+            g_Config.ExpressionGainAdjust = arg;
             updateConfig = 1;
         }
         else  isCmdError = 1;
@@ -719,7 +736,7 @@ PRIVATE  void   DumpActivePatchParams()
     //-------------  Noise Mixer & Bi-quad resonant Filter ------------------------------
 
     sprintf(textBuf,
-            "\t%d,\t// NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)\n",
+            "\t%d,\t// NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:R.Mod)\n",
             (int) g_Patch.NoiseMode);
     putstr(textBuf);
     sprintf(textBuf,
@@ -730,13 +747,13 @@ PRIVATE  void   DumpActivePatchParams()
             "\t%d,\t// FC: Filter Ctrl (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)\n",
             (int) g_Patch.FilterControl);
     putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FR: Filter Resonance x10000  (0..9999, 0:Bypass)\n",
+    sprintf(textBuf, "\t%d,\t// FR: Filter Resonance x10000 (0..9999, 0:Off/Bypass)\n",
             (int) g_Patch.FilterResonance);
     putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FF: Filter Cutoff Freq (MIDI note - 12, 0..108)\n",
+    sprintf(textBuf, "\t%d,\t// FF: Filter Freq/Offset (MIDI note #, 0..108)\n",
             (int) g_Patch.FilterFrequency);
     putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FT: Filter Note Tracking (0:Off, 1:ON) \n",
+    sprintf(textBuf, "\t%d,\t// FT: Filter Note Tracking (0:Off, 1:On) \n",
             (int) g_Patch.FilterNoteTrack);
     putstr(textBuf);
     putstr("\n");
@@ -1374,19 +1391,19 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
     {
         char  key = 0;  short n;
         
-		if (!isLCDModulePresent())
+	if (!isLCDModulePresent())
         {
-            putstr("! LCD module not detected. \n");
+            putstr("! LCD panel not detected. \n");
             break;  // bail
         }
         
-        if (POT_MODULE_CONNECTED == FALSE)
+        if (!POT_MODULE_CONNECTED)
         {
-            putstr("! Pot Control Panel not detected. \n");
+            putstr("! Pot panel not detected. \n");
             break;  // bail
         }
 		
-		putstr("  Hit [Esc] to exit ... \n");
+	putstr("  Hit [Esc] to exit ... \n");
         
         intervalStart = milliseconds();
         while (key != ASCII_ESC)

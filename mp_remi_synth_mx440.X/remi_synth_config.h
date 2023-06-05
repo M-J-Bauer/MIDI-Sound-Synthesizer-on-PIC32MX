@@ -55,6 +55,7 @@ typedef struct Eeprom_block0_structure
     uint8   MidiOutExpressionCCnum;   // MIDI OUT breath/pressure CC number, dflt: 2
     uint8   MidiOutModnEnabled;       // MIDI OUT modulation messages enabled (dflt 1)
     
+    uint8   ExpressionGainAdjust;     // MIDI Expression gain adjustment (25..250 %)
     uint8   PitchBendCtrlMode;        // Pitch-Bend control mode (MIDI, analog CV, etc)
     uint16  PitchBendRange;           // Pitch-Bend range, cents (0..1200)
     uint8   ReverbAtten_pc;           // Reverberation attenuator gain (1..100 %)
@@ -62,7 +63,7 @@ typedef struct Eeprom_block0_structure
     uint8   AudioAmpldControlMode;    // Ampld ctrl = 0:Fixed, 1:Env*Vel, 2:Exprn, 3:Auto
     uint8   PresetLastSelected;       // Preset last selected (0..7)
     
-    // Calibration param's (not settable via "config" cmd; use "set" cmd or control pots.)
+    // Calibration param's (not settable via "config" cmd; use "set" cmd)
     float   FilterInputAtten;         // 
     float   FilterOutputGain;         //
     float   NoiseFilterGain;          //
@@ -70,7 +71,7 @@ typedef struct Eeprom_block0_structure
     PatchParamTable_t  UserPatch;     // User-programmable patch parameters
     WaveformDesc_t     UserWaveform;  // User Wave-table descriptor
     //
-    uint32  EndOfDataBlockCode;       // Last entry, used to test if format has changed
+    uint32  EndOfDataBlockCode;       // Last entry, to test if block format has changed
 
 } EepromBlock0_t;
 

@@ -36,20 +36,20 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:FilterBypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
     {
         11,     // Patch ID Number
-        "Recorder Celeste",
+        "Recorder, celeste",
         2,      // W1: OSC1 Wave-table ID (0..250) = square_wave
         13,     // W2: OSC2 Wave-table ID (0..250) = recorder_alto
         -7,     // OD: OSC2 Detune, cents (+/-1200)
@@ -68,8 +68,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -100,8 +100,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -113,7 +113,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         13,     // Patch ID Number
-        "Mellow Pipe #1",
+        "Mellow Pipe",
         12,     // W1: OSC1 Wave-table ID (0..250)
         12,     // W2: OSC2 Wave-table ID (0..250)
         -3,     // OD: OSC2 Detune, cents (+/-1200)
@@ -132,8 +132,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -142,10 +142,10 @@ const  PatchParamTable_t  g_PatchProgram[] =
         99,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-
+/*
     {
         14,     // Patch ID Number
-        "Electric Horn",  // awful sound !!  *********** to be replaced **********************
+        "Electric Horn",  // Sounds awful !!  *********** to be replaced **************************
         3,      // W1: OSC1 Wave-table ID (0..250)
         14,     // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
@@ -164,8 +164,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         1,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -174,45 +174,13 @@ const  PatchParamTable_t  g_PatchProgram[] =
         99,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-
-    {
-        15,     // Patch ID Number
-        "Pitched Noise",  // Wave mixed with pitched noise
-        2,      // W1: OSC1 Wave-table ID (0..250)
-        4,      // W2: OSC2 Wave-table ID (0..250)
-        0,      // OD: OSC2 Detune, cents (+/-1200)
-        50,     // LF: LFO Freq x10 Hz (1..250)
-        50,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        10,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        5,      // CD: Contour Env Delay time (5..5000+ ms)
-        500,    // CR: Contour Env Ramp time (5..5000+ ms)
-        100,    // CH: Contour Env Hold level (0..100 %)
-        
-        2,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9800,   // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        24,     // FF: Filter Freq. (MIDI note number, 0..108)
-        1,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
-                
-        10,     // EA: Envelope Attack time (5..5000+ ms)
-        0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        50,     // ER: Envelope Release time (5..5000+ ms)
-        90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-    
+*/
     //---------------  R E E D E D   W O O D W I N D S  --------------------
     {
         21,     // Patch ID Number
-        "Reed Woodwind 1",  // Breath-controlled wave morph  *** wave-tables OK ? ****************
-        4,      // W1: OSC1 Wave-table ID (0..250)
-        23,     // W2: OSC2 Wave-table ID (0..250)
+        "Reeded Woodwind",  // Breath-controlled wave morph... sax-like
+        2,      // W1: OSC1 Wave-table ID (0..250)
+        9,      // W2: OSC2 Wave-table ID (0..250)
        -3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -229,8 +197,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Env, 3:Exprn, 4:Modn)
         0,      // FC: Filter Ctrl (0:Fixed, 1:Contour, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
         9800,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        15,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        1,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        15,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        1,      // FT: Filter Note Tracking (0:Off, 1:On)
 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -242,7 +210,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         23,     // Patch ID Number
-        "Alto Saxophone",
+        "Saxophoney",  // Sounds too simple... Needs work !!!  ***********************************
         9,      // W1: OSC1 Wave-table ID (0..250)
         9,      // W2: OSC2 Wave-table ID (0..250)
         0,      // OD: OSC2 Detune, cents (+/-1200)
@@ -261,8 +229,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -271,10 +239,10 @@ const  PatchParamTable_t  g_PatchProgram[] =
         99,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-    
+/*    
     {
         24,     // Patch ID Number
-        "to be replaced!",  // Was another oboe (w1 = w2 = 32) ***** to be replaced *************
+        "to be replaced!",  // Was an oboe (w1 = w2 = 32) ***** to be replaced *************
         9,      // W1: OSC1 Wave-table ID (0..250)
         9,      // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
@@ -293,8 +261,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -303,7 +271,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         99,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-
+*/
     {
         25,     // Patch ID Number   
         "Psychedelic Oboe",
@@ -325,8 +293,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -338,27 +306,27 @@ const  PatchParamTable_t  g_PatchProgram[] =
 
     {
         26,     // Patch ID Number  
-        "Electric Clarinet",
-        11,     // W1: OSC1 Wave-table ID (0..250)
+        "Electric Clarinet",  
+        12,     // W1: OSC1 Wave-table ID (0..250)
         11,     // W2: OSC2 Wave-table ID (0..250)
         3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        3,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
         0,      // CS: Contour Env Start level (0..100 %)
         0,      // CD: Contour Env Delay time (5..5000+ ms)
         200,    // CR: Contour Env Ramp time (5..5000+ ms)
-        80,     // CH: Contour Env Hold level (0..100 %)
+        100,    // CH: Contour Env Hold level (0..100 %)
         
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        9500,   // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
+        9,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        1,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -390,14 +358,14 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         30,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
 
@@ -423,14 +391,14 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        80,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
@@ -455,8 +423,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
@@ -487,8 +455,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
@@ -500,7 +468,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         43,     // Patch ID Number
-        "Rock organ #1",  // Classic Hammond organ tone.  Slightly percussive.
+        "Rock Organ",  // Classic Hammond rock organ tone.  Slightly percussive.
         14,     // W1: OSC1 Wave-table ID (0..250)   
         14,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
@@ -519,8 +487,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
@@ -532,71 +500,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         44,     // Patch ID Number
-        "to be replaced!",  // Wave-table duplicate of patch #42  *** to be replaced *********
-        18,     // W1: OSC1 Wave-table ID (0..250)   
-        18,     // W2: OSC2 Wave-table ID (0..250)   
-        0,      // OD: OSC2 Detune, cents (+/-1200)
-        70,     // LF: LFO Freq x10 Hz (1..250)
-        30,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        25,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        200,    // CR: Contour Env Ramp time (5..5000+ ms)
-        80,     // CH: Contour Env Hold level (0..100 %)
-        
-        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
-                
-        10,     // EA: Envelope Attack time (5..5000+ ms)
-        50,     // EP: Envelope Peak time (0..5000+ ms)
-        100,    // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-    
-    {
-        45,     // Patch ID Number
-        "Pink Floyd organ",  // Essential complex flutey tone -- use reverb!
-        20,     // W1: OSC1 Wave-table ID (0..250)   
-        20,     // W2: OSC2 Wave-table ID (0..250)   
-        -5,     // OD: OSC2 Detune, cents (+/-1200)
-        70,     // LF: LFO Freq x10 Hz (1..250)
-        30,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        200,    // CR: Contour Env Ramp time (5..5000+ ms)
-        80,     // CH: Contour Env Hold level (0..100 %)
-        
-        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
-                
-        10,     // EA: Envelope Attack time (5..5000+ ms)
-        50,     // EP: Envelope Peak time (0..5000+ ms)
-        100,    // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-    
-    {
-        46,     // Patch ID Number
-        "Theatre Organ",  // "All stops out" -- rich harmonic content
+        "Theatre Organ",  // "All stops out" -- rich & deep harmonic content
         21,     // W1: OSC1 Wave-table ID (0..250)   
         21,     // W2: OSC2 Wave-table ID (0..250)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
@@ -615,19 +519,51 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
     {
-        47,     // Patch ID Number
+        45,     // Patch ID Number
+        "Pink Floyd organ",  // Essential Preset! -- complex flutey tone
+        20,     // W1: OSC1 Wave-table ID (0..250)   
+        20,     // W2: OSC2 Wave-table ID (0..250)   
+        -5,     // OD: OSC2 Detune, cents (+/-1200)
+        70,     // LF: LFO Freq x10 Hz (1..250)
+        30,     // VD: Vibrato Depth, cents (0..200)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        80,     // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        10,     // EA: Envelope Attack time (5..5000+ ms)
+        50,     // EP: Envelope Peak time (0..5000+ ms)
+        100,    // ED: Envelope Decay time (5..5000+ ms)
+        10,     // ER: Envelope Release time (5..5000+ ms)
+        70,     // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+    
+    {
+        46,     // Patch ID Number
         "Bauer Organ",  // Bright, rich tone  (experiment with detune, contour, etc)
         22,     // W1: OSC1 Wave-table ID (0..250)   
         25,     // W2: OSC2 Wave-table ID (0..250) -- experiment with morph  *************
@@ -647,8 +583,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
@@ -658,42 +594,10 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // ??: (reserved)
     },
    
-    {
-        48,     // Patch ID Number
-        "to be replaced!",  //  ********* duplicate *****8*** to be replaced *********
-        22,     // W1: OSC1 Wave-table ID (0..250)   
-        22,     // W2: OSC2 Wave-table ID (0..250)   
-        0,      // OD: OSC2 Detune, cents (+/-1200)
-        70,     // LF: LFO Freq x10 Hz (1..250)
-        30,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        200,    // CR: Contour Env Ramp time (5..5000+ ms)
-        80,     // CH: Contour Env Hold level (0..100 %)
-        
-        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
-                
-        10,     // EA: Envelope Attack time (5..5000+ ms)
-        50,     // EP: Envelope Peak time (0..5000+ ms)
-        200,    // ED: Envelope Decay time (5..5000+ ms)
-        100,    // ER: Envelope Release time (5..5000+ ms)
-        70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-    
     //----------------  P E R C U S S I V E    I N S T R U M E N T S  ------------
     {
         50,     // Patch ID Number
-        "Plucked String",
+        "Plucked String",  // Produces a good piano-like timbre
         3,      // W1: OSC1 Wave-table ID (0..250) 
         5,      // W2: OSC2 Wave-table ID (0..250)   
         3,      // OD: OSC2 Detune, cents (+/-1200)
@@ -712,8 +616,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,     // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
@@ -725,7 +629,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         51,     // Patch ID Number
-        "Glockenspiel",
+        "Glockenspiel",  // (Sound resembles recorder when using breath control)
         19,     // W1: OSC1 Wave-table ID (0..250) 
         19,     // W2: OSC2 Wave-table ID (0..250)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
@@ -744,8 +648,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
@@ -757,38 +661,6 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         52,     // Patch ID Number
-        "Wave Morph",
-        4,      // W1: OSC1 Wave-table ID (0..250)
-        10,     // W2: OSC2 Wave-table ID (0..250)
-        0,      // OD: OSC2 Detune, cents (+/-1200)
-        70,     // LF: LFO Freq x10 Hz (1..250)
-        30,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        1,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        50,     // CD: Contour Env Delay time (5..5000+ ms)
-        2000,   // CR: Contour Env Ramp time (5..5000+ ms)
-        100,    // CH: Contour Env Hold level (0..100 %)
-        
-        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
-                
-        50,     // EA: Envelope Attack time (5..5000+ ms)
-        0,      // EP: Envelope Peak time (0..5000+ ms)
-        10,     // ED: Envelope Decay time (5..5000+ ms)
-        500,    // ER: Envelope Release time (5..5000+ ms)
-        95,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-    
-    {
-        53,     // Patch ID Number
         "Ding", 
         12,     // W1: OSC1 Wave-table ID (0..250) 
         12,     // W2: OSC2 Wave-table ID (0..250)   
@@ -808,8 +680,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
@@ -818,11 +690,11 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-
+    
     //---------------  T E S T   &   D E M O   P A T C H E S  ------------------------
     {
         90,     // Patch ID Number
-        "Test Patch", 
+        "Test Patch (ID: 90)",  // NB: Do not edit -- patch is used by diagnostics
         1,      // W1: OSC1 Wave-table ID (0..250)  <------ sinewave
         3,      // W2: OSC2 Wave-table ID (0..250)  <------ sawtooth
         0,      // OD: OSC2 Detune, cents (+/-1200)
@@ -841,8 +713,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Off/bypass)
-        0,      // FF: Filter Freq. (Fc = MIDI note # - 12;  0..108)
-        0,      // FT: Filter Tracking (0:Off, 1:ON, Fc is offset from Fo)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         50,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
@@ -851,8 +723,70 @@ const  PatchParamTable_t  g_PatchProgram[] =
         80,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
+    
+    {
+        91,     // Patch ID Number
+        "Wave Morph contour",
+        4,      // W1: OSC1 Wave-table ID (0..250)
+        10,     // W2: OSC2 Wave-table ID (0..250)
+        0,      // OD: OSC2 Detune, cents (+/-1200)
+        70,     // LF: LFO Freq x10 Hz (1..250)
+        30,     // VD: Vibrato Depth, cents (0..200)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
-    // Add more patch definitions here ...
+        1,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        50,     // CD: Contour Env Delay time (5..5000+ ms)
+        2000,   // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        50,     // EA: Envelope Attack time (5..5000+ ms)
+        0,      // EP: Envelope Peak time (0..5000+ ms)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        500,    // ER: Envelope Release time (5..5000+ ms)
+        95,     // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+    
+    {
+        92,     // Patch ID Number
+        "Pitched Noise",  // Wave mixed with pitched noise
+        2,      // W1: OSC1 Wave-table ID (0..250)
+        4,      // W2: OSC2 Wave-table ID (0..250)
+        0,      // OD: OSC2 Detune, cents (+/-1200)
+        50,     // LF: LFO Freq x10 Hz (1..250)
+        50,     // VD: Vibrato Depth, cents (0..200)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        10,     // ML: Mixer OSC2/Noise Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        5,      // CD: Contour Env Delay time (5..5000+ ms)
+        500,    // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        2,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        9800,   // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
+        24,     // FF: Filter Freq/Offset (MIDI note number, 0..108)
+        1,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        10,     // EA: Envelope Attack time (5..5000+ ms)
+        0,      // EP: Envelope Peak time (0..5000+ ms)
+        5,      // ED: Envelope Decay time (5..5000+ ms)
+        50,     // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },    
 };
 
 

@@ -14,7 +14,7 @@
 //
 #define BUILD_VER_MAJOR   3
 #define BUILD_VER_MINOR   0
-#define BUILD_VER_DEBUG   25
+#define BUILD_VER_DEBUG   33
 //
 // =======================================================================================
 

@@ -7,6 +7,7 @@
 #ifndef REMI_SYNTH_GUI_H
 #define REMI_SYNTH_GUI_H
 
+#include <stdlib.h>
 #include "../Common/system_def.h"
 #include "pic32_low_level.h"
 
@@ -15,17 +16,8 @@
 #define SELF_TEST_WAIT_TIME_MS     2000     // Duration of self-test message display (ms)
 
 #define GUI_EraseScreen()   LCD_ClearScreen()
-
-extern  bitmap_t  big_right_arrow[];         // width: 21, height: 18 pixels
-extern  bitmap_t  treble_clef_16x40[];
-extern  bitmap_t  flat_up_arrow_8x4[];
-extern  bitmap_t  flat_down_arrow_8x4[];
-extern  bitmap_t  patch_icon_7x7[];
-extern  bitmap_t  midi_conn_icon_9x9[];      // DIN5 skt icon
-extern  bitmap_t  Bauer_remi_logo_85x45[];
-
-#define Bauer_logo_85x15  Bauer_remi_logo_85x45  // first 15 rows only
-#define Remi_logo_85x30   ((bitmap_t *) &Bauer_remi_logo_85x45[165])  // last 30 rows
+#define Bauer_logo_85x15    Bauer_remi_logo_85x45  // first 15 rows
+#define Remi_logo_85x30     ((bitmap_t *) &Bauer_remi_logo_85x45[165])  // last 30 rows
 
 // An object of this type is needed for each GUI screen.
 // An array of structures of this type is held in flash memory (const data area).
@@ -65,6 +57,8 @@ enum  Set_of_Screen_ID_numbers   // Any arbitrary order
     SCN_SYSTEM_INFO_PAGE2,
     SCN_CONTROL_PANEL_1,
     SCN_CONTROL_PANEL_2,
+    SCN_CONTROL_PANEL_3,
+    SCN_CONTROL_PANEL_4,
     SCN_CUSTOM_FUNC_MENU,
     SCN_SOUND_PLAYER,
     SCN_DATA_ENTRY,
