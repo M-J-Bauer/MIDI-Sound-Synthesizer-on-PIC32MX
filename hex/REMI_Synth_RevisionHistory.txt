@@ -1,5 +1,5 @@
 
-REMI Synth Module mk3 -- PIC32MX440 variant -- Firmware Revision History
+                 REMI Synth Module Firmware Revision History
 
 ================================================================================
 
@@ -105,30 +105,63 @@ Reduced time-lag (IIR filter K = 0.25) in function OscFreqModulation() to
 improve pitch bend operation.
 
 v3.0.20  2023-04-30
-````````````````````````````
+```````````````````
 Added GUI function "Sound Player" to test synth sounds.
 Access from Home screen:  Press [D] for "Utility App's" menu.
 Buttons A, B, C, D play notes C, E, G, C (resp.).
 
 v3.0.22  2023-05-01
-````````````````````````````
+```````````````````
 Added "REMI system exclusive" legato mode.  Supports REMI 2 handset v1.4.55++.
-Note-off function terminates the note playing regardless of its note number,
+Note-off function terminates the note playing regardless of its note number
 if the function argument value is zero.  Otherwise, the note playing will not
 be terminated unless the note number matches the Note-off function argument.
 
 v3.0.25  2023-05-02
-````````````````````````````
+```````````````````
 Removed redundant and uninteresting wave-tables.
 Removed/replaced some patch definitions, added some more.
+
+v3.0.33  2023-05-31
+```````````````````
+Added more 'Control Panel' functions in GUI.  There are now 4 Control Panel 
+screens, allowing adjustment of all (23) patch parameters using 6 pots.  
+
+Added 'set' param: "exprnCal" = Expression Gain Adjust,
+allowing compensation for EWI MIDI controllers with poor CC02 data range,
+i.e. increase or decrease sensitivity to MIDI breath pressure level.
+
+Modified some patch definitions, eg. "Reeded Woodwind", "Electric Clarinet".
+
+v3.0.50  2023-06-12
+```````````````````
+Fixed some bugs in GUI 'Control Panel' screens.
+
+Renamed patches:  "Vinyl-cello" (30), "Jazz-Rock Organ 1" (41), 
+    "Jazz-Rock Organ 2" (42), "Jazz-Rock Organ 3" (43), "Xylophoney" (52).
+
+Added patches: "Hammond Organ 1" (47), "Hammond Organ 2" (48),
+    "Mellow Reed" (24), "Noise" (80), "Bell" (81), "Clang" (82).
+
+Fixed bugs in Wave-table Creator -- CLI command "wav"... was crashing.
+
+Modified "wav -h ..." command... removed automatic peak ampld scaling.
+
+Added more "experimental" wave-tables:
+    "ring_modulation_347" (7),  "ring_modulation_469" (8).
+
+Made minor (cosmetic) changes to some CLI commands and GUI screens.
 
 
 --------------------------------------------------------------------------------
 To do:
 ``````
-* Debug 'Pot Control Panel' functions in GUI.
+> When v3.0.xx is fully tested, release as v3.1.00.
 
+> Implement IIR real-time anti-alias filters in oscillators, with settable 
+  time-constant (K).  (Cascade 2 stages to make 2nd-order filter.)
+  If this works, replace square and sawtooth wave-tables with pure waveforms.
 
 
 ================================================================================
-REMI_Synth_mk3_RevisionHistory.txt                               www.mjbauer.biz  
+REMI_Synth_RevisionHistory.txt                                   www.mjbauer.biz  
