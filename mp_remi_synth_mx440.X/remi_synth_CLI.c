@@ -74,8 +74,9 @@ const  UserSettableParameter_t  UserParam[] =
 {
     // nickname      disp   (float *) &g_VarName      min,  max
     //----------------------------------------------------------------
+    { "exprnCal",    'r',  &g_ExpressionCalibr,       0.1,  2.5   }, 
     { "noiseGain",   'r',  &g_NoiseFilterGain,        0.1,  25    }, 
-    { "filtAtten",   'r',  &g_FilterInputAtten,       0.01, 2.5   },
+    { "filtAtten",   'r',  &g_FilterInputAtten,       0.1,  2.5   },
     { "filtGain",    'r',  &g_FilterOutputGain,       0.1,  25    },
     //----------------------------------------------------------------
     { "$",           'r',  NULL,                      0,    0     }  // end of table
@@ -124,10 +125,10 @@ void  Cmnd_config(int argCount, char * argValue[])
         sprintf(textBuf, "mix | MIDI IN Expression CC #: %d \n", g_Config.MidiInExpressionCCnum);
         putstr("\t");  putstr(textBuf);
         
-        sprintf(textBuf, "moe | MIDI OUT Messages: %d ", g_Config.MidiOutEnabled);
+        sprintf(textBuf, "mop | MIDI OUT Process: %d ", g_Config.MidiOutEnabled);
         putstr("\t");  putstr(textBuf);
-        if (g_Config.MidiOutEnabled) putstr("(Enabled)\n");
-        else  putstr("(Disabled)\n");
+        if (g_Config.MidiOutEnabled) putstr("= Enabled \n");
+        else  putstr("= Disabled \n");
         
         sprintf(textBuf, "moc | MIDI OUT Channel: %d \n", g_Config.MidiOutChannel);
         putstr("\t");  putstr(textBuf);
@@ -147,8 +148,6 @@ void  Cmnd_config(int argCount, char * argValue[])
                 audioCtrlModeName[g_Config.AudioAmpldControlMode]);
         putstr("\t");  putstr(textBuf);
         
-        sprintf(textBuf, "ega | Expression Gain Adjust: %d %%\n", g_Config.ExpressionGainAdjust);
-        putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "rva | Reverb Attenuator gain: %d %%\n", g_Config.ReverbAtten_pc);
         putstr("\t");  putstr(textBuf);
         sprintf(textBuf, "rvm | Reverb Mix (wet/dry ratio): %d %%\n", g_Config.ReverbMix_pc);
@@ -198,9 +197,9 @@ void  Cmnd_config(int argCount, char * argValue[])
         }
         else  isCmdError = 1;
     }
-    else if (strmatch(argValue[1], "moe"))  // MIDI OUT Enabled
+    else if (strmatch(argValue[1], "mop"))  // MIDI OUT Process (mode)
     {
-        if (argCount >= 3 && (arg == 0 || arg == 1))
+        if (argCount >= 3 && (arg >= 0 && arg <= 3))
         {
             g_Config.MidiOutEnabled = arg;
             updateConfig = 1;
@@ -261,15 +260,6 @@ void  Cmnd_config(int argCount, char * argValue[])
         }
         else  isCmdError = 1;
     }
-    else if (strmatch(argValue[1], "ega"))  // Expression gain adjust (25..250 %)
-    {
-        if (argCount >= 3 && (arg >= 25 && arg <= 250))
-        {
-            g_Config.ExpressionGainAdjust = arg;
-            updateConfig = 1;
-        }
-        else  isCmdError = 1;
-    }
     else if (strmatch(argValue[1], "rva"))  // Reverb. loop attenuation (1..100 %)
     {
         if (argCount >= 3 && (arg >= 1 && arg <= 100))
@@ -323,10 +313,10 @@ void  Cmnd_preset(int argCount, char * argValue[])
         putstr( "Usage (2):  preset  <opt>  [arg]   | Configure Preset...  \n" );
         putstr( "  where <opt> = \n" );
         putstr( " -l  : List all Preset configurations \n");
-        putstr( " -p  : Set Patch ID (0..99) for active Preset \n");
-        putstr( " -n  : Set MIDI OUT program/voice Number (0..127) \n");
-        putstr( " -v  : Set Vibrato mode (O:off, M:mod'n, A:auto-ramp)\n");
-        putstr( " -t  : Set pitch Transpose, semitones (-24..+24) \n");
+        putstr( " -p  : Set Patch ID (arg = 0..99) for active Preset \n");
+        putstr( " -n  : Set MIDI OUT program/voice Number (arg = 0..127) \n");
+        putstr( " -v  : Set Vibrato mode (arg = O:off, M:mod'n, A:auto) \n");
+        putstr( " -t  : Set pitch Transpose, semitones (arg = -24..+24) \n");
         ////
         return;
     }
@@ -518,14 +508,13 @@ void  Cmnd_patch(int argCount, char *argValue[])
         {
             int   spaces;
 
-            putstr("      ID#  Patch Name              WT1  WT2  \n");
-            putstr("```````````````````````````````````````````` \n");
+            putstr("  ID#  Patch Name               W1   W2  \n");
+            putstr("````````````````````````````````````````` \n");
 
             for (i = 0;  i < GetNumberOfPatchesDefined();  i++)
             {
-                putDecimal(i, 3);
                 putstr("  ");
-                putDecimal(g_PatchProgram[i].PatchNumber, 4);
+                putDecimal(g_PatchProgram[i].PatchNumber, 3);
                 putstr("  ");
                 putstr((char *) g_PatchProgram[i].PatchName);
                 spaces = 24 - strlen(g_PatchProgram[i].PatchName);
@@ -537,7 +526,7 @@ void  Cmnd_patch(int argCount, char *argValue[])
                 putstr("\n");
             }
 
-            putstr("____________________________________________ \n");
+            putstr("_________________________________________ \n");
             break;
         }
         case 'd':  // Dump active patch param's in C source format
@@ -690,10 +679,10 @@ PRIVATE  void   DumpActivePatchParams()
 
     //-------------  Oscillators, Detune and Vibrato ------------------------------------
 
-    sprintf(textBuf, "\t%d,\t// W1: OSC1 Wave-table ID (0..250)\n",
+    sprintf(textBuf, "\t%d,\t// W1: OSC1 Wave-table ID (0..99)\n",
             (int) g_Patch.Osc1WaveTable);
     putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// W2: OSC2 Wave-table ID (0..250)\n",
+    sprintf(textBuf, "\t%d,\t// W2: OSC2 Wave-table ID (0..99)\n",
             (int) g_Patch.Osc2WaveTable);
     putstr(textBuf);
     sprintf(textBuf, "\t%d,\t// OD: OSC2 Detune, cents (+/-1200)\n",
@@ -750,7 +739,7 @@ PRIVATE  void   DumpActivePatchParams()
     sprintf(textBuf, "\t%d,\t// FR: Filter Resonance x10000 (0..9999, 0:Off/Bypass)\n",
             (int) g_Patch.FilterResonance);
     putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FF: Filter Freq/Offset (MIDI note #, 0..108)\n",
+    sprintf(textBuf, "\t%d,\t// FF: Filter Freq/Offset (semitone#, 0..108)\n",
             (int) g_Patch.FilterFrequency);
     putstr(textBuf);
     sprintf(textBuf, "\t%d,\t// FT: Filter Note Tracking (0:Off, 1:On) \n",
@@ -903,13 +892,13 @@ PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal)
         }
         case PARAM_HASH_VALUE('F', 'R'):
         {
-            if (paramVal <= 9999)  g_Patch.FilterResonance = paramVal;
+            if (paramVal <= 9990)  g_Patch.FilterResonance = paramVal;
             else  isBadValue = 1;
             break;
         }
         case PARAM_HASH_VALUE('F', 'F'):
         {
-            if (paramVal <= 108)  g_Patch.FilterFrequency = paramVal;
+            if (paramVal <= 120)  g_Patch.FilterFrequency = paramVal;
             else  isBadValue = 1;
             break;
         }
@@ -1021,12 +1010,12 @@ void  Cmnd_info(int argCount, char * argValue[])
         putstr("OLED display controller: SH1106 \n");
 #endif        
     }
-    else   putstr("LCD module not detected. Local UI disabled.\n");
+    else   putstr("LCD module not detected... GUI disabled.\n");
     
     if (POT_MODULE_CONNECTED)
-        putstr("Control Panel (detachable pot module) connected.\n");
+        putstr("Pot Control Panel connected.\n");
     else
-        putstr("Control Panel (detachable pot module) not detected.\n");
+        putstr("Pot Control Panel not detected.\n");
     
     if (isHandsetConnected())
     {
@@ -1391,12 +1380,6 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
     {
         char  key = 0;  short n;
         
-	if (!isLCDModulePresent())
-        {
-            putstr("! LCD panel not detected. \n");
-            break;  // bail
-        }
-        
         if (!POT_MODULE_CONNECTED)
         {
             putstr("! Pot panel not detected. \n");
@@ -1408,6 +1391,7 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
         intervalStart = milliseconds();
         while (key != ASCII_ESC)
         {
+            BackgroundTaskExec();  // Read analog inputs
             GUI_NavigationExec();  // Service pots, buttons & LCD panel
             
             if ((milliseconds() - intervalStart) >= 200)
@@ -1616,17 +1600,19 @@ void  Cmnd_util(int argCount, char *argValue[])
 {
     char   textbuf[120];
     char   option;
-    short  wavetableFreq[64];
     short  ipat, iwav;
+    short  numberWaveTables = GetHighestWaveTableID() + 1;
+    short  numberPatchDefs = GetNumberOfPatchesDefined();
     
     if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted
     {
         putstr( "Run a specified Utility...   \n" );
         putstr( "Usage:  util  <opt>  [args] \n" );
         putstr( "<opt> \n" );
-        putstr( "  -a : Test fixed-pt (arg1) x integer (arg2) / 1024 \n");
+        
         putstr( "  -b : Test Base2exp() function (no arg's) \n");
-        putstr( "  -c : Count wavetable instances in patch def's \n");
+        putstr( "  -f : Test Fixed-point mult. ((norm)arg1 x (int)arg2) / 1000 \n");
+        putstr( "  -w : Show Wavetable instances in patch def's \n");
             ;
             ;
             ;
@@ -1638,9 +1624,14 @@ void  Cmnd_util(int argCount, char *argValue[])
 
     switch (option)
     {
-    case 'a':
+    case 'b':
     {
-        float    arg1;
+        TestFixedPtBase2Exp();
+        break;
+    }
+    case 'f':
+    {
+        float    arg1, outValue;
         fixed_t  multiplicand, product;
         int      multiplier;
         
@@ -1648,45 +1639,38 @@ void  Cmnd_util(int argCount, char *argValue[])
         {
             arg1 = atof(argValue[2]);  // float
             multiplicand = FloatToFixed(arg1);  // fixed-point
-            multiplier = atoi(argValue[3]);     // integer
-            product = (multiplicand * multiplier) >> 10;  // fixed-point
+            multiplier = abs(atoi(argValue[3]));     // integer >= 0
+            product = (multiplicand * multiplier) / 1000;  // fixed-point
+            outValue = FixedToFloat(product) + 0.0000005f;  // rounded
             
-            sprintf(textbuf, "  Scalar multiply: (%f x %d) / 1024 = %f \n", 
-                    FixedToFloat(multiplicand),  multiplier,  FixedToFloat(product));
+            sprintf(textbuf, "  Scalar multiply: (%8.5f x %d) / 1000 = %8.5f ", 
+                    FixedToFloat(multiplicand),  multiplier, outValue );
             putstr(textbuf);
+            if (multiplicand >= 0 && outValue < 0.0)  putstr("! overflow error");
+            putNewLine();
         }
         break;
     }
-    case 'b':
+    case 'w':
     {
-        TestFixedPtBase2Exp();
-        break;
-    }
-    case 'c':
-    {
-        for (iwav = 0;  iwav <= GetHighestWaveTableID();  iwav++ )
-        {
-            wavetableFreq[iwav] = 0;
-        }
+        putstr("Wavetable # | Found in Patch ID(s) ...\n");
         
-        for (ipat = 0;  ipat < GetNumberOfPatchesDefined();  ipat++)
+        for (iwav = 1;  iwav < numberWaveTables;  iwav++ )
         {
-            iwav = g_PatchProgram[ipat].Osc1WaveTable & 0x3F;  // W1
-            wavetableFreq[iwav] += 1;
-            iwav = g_PatchProgram[ipat].Osc2WaveTable & 0x3F;  // W2
-            wavetableFreq[iwav] += 1;
-        }
-        
-        putstr("Wavetable # | Occurrences in patch definitions \n");
-        for (iwav = 0;  iwav <= GetHighestWaveTableID();  iwav++ )
-        {
-            sprintf(textbuf, "     %3d    |   %3d \n", iwav, wavetableFreq[iwav]);
-            putstr(textbuf);
+            putstr("      ");  putDecimal(iwav, 2);  putstr("    |  ");
+            for (ipat = 0;  ipat < numberPatchDefs;  ipat++)
+            {
+                if (g_PatchProgram[ipat].Osc1WaveTable == iwav    // W1 found
+                ||  g_PatchProgram[ipat].Osc2WaveTable == iwav )  // W2 found
+                {
+                    putDecimal(g_PatchProgram[ipat].PatchNumber, 4);
+                }
+            }
+            putNewLine();
         }
         break;
     }
-    default:  break;
-    }
+    } // end switch
 }
 
 
@@ -1741,10 +1725,12 @@ void  DefaultPersistentData(void)
  *   Function called by "commit" command...
  * 
  *   Where global param's are stored in NV memory, stored values are updated
- *   so that the new values become power-on/reset defaults.
+ *   so that the new values will be restored on subsequent power-on/reset.
+ *   Applies only to parameters which can be modified by the 'set' command.
  */
 void  CommitPersistentParams()
 {
+    g_Config.ExpressionCalibr = g_ExpressionCalibr;
     g_Config.FilterInputAtten = g_FilterInputAtten;
     g_Config.FilterOutputGain = g_FilterOutputGain;
     g_Config.NoiseFilterGain = g_NoiseFilterGain;

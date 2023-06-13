@@ -451,7 +451,7 @@ uint8  ReadButtonInputs()
  */
 void  ReadAnalogInputs()
 {
-    static uint8   channelList[] = { 1, 2, 3, 4, 8, 9, 10, 11, 12, 14 };
+    static uint8   channelList[] = ADC_CHANNEL_LIST;  // defined in pic32-low-level.h
     static bool    prep_done;
     static short   chanIdx;  // index into array channelList[]
     static uint8   state;

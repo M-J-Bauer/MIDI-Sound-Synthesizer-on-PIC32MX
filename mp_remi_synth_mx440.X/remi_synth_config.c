@@ -26,7 +26,7 @@ void  DefaultConfigData(void)
 
     // Assign defaults to application-specific param's...
     g_Config.MidiInBaudrate = 31250;
-    g_Config.MidiInMode = 2;                // 2:omni-on-mono, 4:omni-off-mono
+    g_Config.MidiInMode = 4;                // 2:omni-on-mono, 4:omni-off-mono
     g_Config.MidiInChannel = 1;
     g_Config.MidiInExpressionCCnum = 2;     // 0:none, 2:breath, 7:chan-vol, 11:expr'n
     
@@ -37,13 +37,14 @@ void  DefaultConfigData(void)
     
     g_Config.PitchBendCtrlMode = 0;         // 0 = disabled, 1:MIDI PB msg, 2:Exprn
     g_Config.PitchBendRange = 200;          // 0..1200 cents
-    g_Config.ExpressionGainAdjust = 150;    // range 25..250 percent
+    
     g_Config.ReverbAtten_pc = 75;
     g_Config.ReverbMix_pc = 15;
     g_Config.AudioAmpldControlMode = 3;     // 0:Const, 1:ENV*Vel, 2:Exprn, 3:Auto
     g_Config.PresetLastSelected = 1;
     
     // Calibration constants (default settings)
+    g_Config.ExpressionCalibr = 1.0;       // range 0.25 ~ 2.5
     g_Config.FilterInputAtten = 0.25; 
     g_Config.FilterOutputGain = 4.0;   
     g_Config.NoiseFilterGain = 4.0; 
@@ -78,7 +79,7 @@ void  DefaultPresetData(void)
 {
     //                             PRESET:   8   1   2   3   4   5   6   7
     static  uint8   defaultMidiProgram[] = { 67, 75, 72, 69, 74, 17, 20, 23 };
-    static  uint8   defaultSynthPatch[]  = { 41, 10, 11, 21, 26, 42, 45, 43 }; 
+    static  uint8   defaultSynthPatch[]  = { 43, 10, 11, 21, 26, 45, 41, 42 }; 
     int  i;
 
     g_Preset.checkDword = 0xDEADBEEF;

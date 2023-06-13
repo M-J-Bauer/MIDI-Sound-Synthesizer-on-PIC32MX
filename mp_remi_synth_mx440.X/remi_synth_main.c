@@ -89,10 +89,10 @@ void  Init_Application(void)
         putstr("! PIC32 device type is incompatible with firmware build.\n");
 
     if (!m_LCD_ModuleDetected)
-        putstr("! LCD module not detected - GUI and Control Panel disabled.\n");
+        putstr("! LCD module not detected.\n");
     
     if (!POT_MODULE_CONNECTED)
-        putstr("! Control Panel (detachable pot module) not detected.\n");
+        putstr("! Pot Control Panel not detected.\n");
 
     if (CheckConfigData() == FALSE)    // Read Config data from EEPROM
     {
@@ -107,6 +107,11 @@ void  Init_Application(void)
         putstr("! Error reading EEPROM Preset data - Loading defaults.\n");
         DefaultPresetData();
     }     
+
+    g_ExpressionCalibr = g_Config.ExpressionCalibr;  // Init settable parameters
+    g_FilterInputAtten = g_Config.FilterInputAtten;
+    g_FilterOutputGain = g_Config.FilterOutputGain;
+    g_NoiseFilterGain = g_Config.NoiseFilterGain;
     
     UART1_init(g_Config.MidiInBaudrate);    
     PWM_audioDAC_init();

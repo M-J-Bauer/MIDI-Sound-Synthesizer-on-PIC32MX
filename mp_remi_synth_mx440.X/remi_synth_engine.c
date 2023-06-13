@@ -40,8 +40,9 @@ uint16   g_Osc2WaveTableSize;      // Number of samples in OSC2 wave-table
 float    g_Osc1FreqDiv;            // OSC1 frequency divider
 float    g_Osc2FreqDiv;            // OSC2 frequency divider
 
-// These global variables may be modified by the CLI 'set' command or by Control Panel pots;
+// These global variables may be modified only by the CLI 'set' command;
 // initialized at power-on/reset to values strored in EEPROM (with config param's)...
+float  g_ExpressionCalibr;      // Expression gain adjust (0.25 ~ 2.5)
 float  g_FilterInputAtten;      // Filter input atten/gain (.01 ~ 2.5)
 float  g_FilterOutputGain;      // Filter output atten/gain (0.1 ~ 25)
 float  g_NoiseFilterGain;       // Noise gen. gain adjustment (0.1 ~ 25)
@@ -69,13 +70,14 @@ static bool     m_TriggerContour;         // Signal to start contour envelope ge
 static bool     m_LegatoNoteChange;       // Signal Legato note change to Vibrato func.
 static uint8    m_Note_ON;                // TRUE if Note ON, ie. "gated", else FALSE
 static uint8    m_NotePlaying;            // MIDI note number of note playing
+static uint8    m_ExprnCalibr_pc;         // Expression calibration factor (25..250)
 static uint8    m_FilterAtten_pc;         // Filter input atten/gain (%)
 static uint8    m_FilterGain_x10;         // Filter output gain x10 (1..250)
 static uint8    m_NoiseGain_x10;          // Noise filter gain x10 (1..250)
 static fixed_t  m_FiltCoeff_c[110];       // Bi-quad filter coeff. c  (a1 = -c)
 static fixed_t  m_FiltCoeff_a2;           // Bi-quad filter coeff. a2
 static fixed_t  m_FiltCoeff_b0;           // Bi-quad filter coeff. b0  (b2 = -b0)
-static int      m_FilterIndex;            // Index into LUT: m_FiltCoeff_c[]
+static int      m_FilterIndex;            // Index into LUT: m_FiltCoeff_c[]  (0..108)
 static int      m_RvbDelayLen;            // Reverb. delay line length (samples)
 static fixed_t  m_RvbDecay;               // Reverb. decay factor
 static uint16   m_RvbAtten;               // Reverb. attenuation factor (0..127)
@@ -98,9 +100,9 @@ volatile uint32   v_ISRexecTime;      // ISR execution time (core cycle count)
 
 
 // Look-up table giving frequencies of notes on the chromatic scale.
-// The array covers a 9-octave range beginning with C0 (MIDI note number 12),
+// The array covers a 9-octave range beginning with C0 (MIDI note = 12),
 // up to C9 (120).  Subtract 12 from MIDI note number to get table index.
-// Table index range:  [0]..[108]
+// Table index range 0..108 corresponds to note number range 12..120.
 //
 const  float  m_NoteFrequency[] =
 {
@@ -157,9 +159,6 @@ void  SynthPrepare()
     
     if (!prepDone)  // One-time initialisation at power-on/reset
     {
-        g_FilterInputAtten = g_Config.FilterInputAtten;  // persistent param
-        g_FilterOutputGain = g_Config.FilterOutputGain;  // persistent param
-        g_NoiseFilterGain = g_Config.NoiseFilterGain;    // persistent param
         // Calculate reverb delay-line constants...
         m_RvbDelayLen = (int) (REVERB_LOOP_TIME_SEC * SAMPLE_RATE_HZ);  // samples
         rvbDecayFactor = (float) REVERB_LOOP_TIME_SEC / REVERB_DECAY_TIME_SEC;
@@ -330,6 +329,7 @@ void  SynthNoteOn(uint8 noteNum, uint8 velocity)
         m_AttackVelocity = MultiplyFixed(m_AttackVelocity, m_AttackVelocity);  // squared
         
         // Refresh synth working variables from global (non-patch) settable params.
+        m_ExprnCalibr_pc = (uint8) (g_ExpressionCalibr * 100);
         m_NoiseGain_x10 = (uint8) (g_NoiseFilterGain * 10);
         m_FilterAtten_pc = (uint8) (g_FilterInputAtten * 100); 
         m_FilterGain_x10 = (uint8) (g_FilterOutputGain * 10); 
@@ -408,17 +408,15 @@ void  SynthNoteChange(uint8 noteNum)
     m_Osc2StepMedian = osc2Step;
     
     // Calculate filter corner freq (pitch offset) for new note...
-    if (g_Patch.FilterNoteTrack)  // case 1: Note Tracking enabled
+    if (g_Patch.FilterNoteTrack)  // Note Tracking enabled
     {
-        filterIdx = (noteNum - 12) + g_Patch.FilterFrequency;  // MIDI note #, variable
-        if (filterIdx < 0)  filterIdx = 0;      // Min at C0 (~16Hz)
-        if (filterIdx > 108)  filterIdx = 108;  // Max at C9 (~8kHz)
+        filterIdx = (noteNum - 12) + g_Patch.FilterFrequency;  // 0..108
         m_FilterIndex = filterIdx;
     }
-    else  // case 2: Note Tracking disabled
-    {
-        m_FilterIndex = g_Patch.FilterFrequency;
-    }
+    else  m_FilterIndex = (int) g_Patch.FilterFrequency;  // 0..108
+    
+    if (m_FilterIndex < 0)  m_FilterIndex = 0;      // Min at C0 (~16Hz)
+    if (m_FilterIndex > 108)  m_FilterIndex = 108;  // Max at C9 (~8kHz)
     
     // Use Fc = 16 Hz (minimum) for pitched noise option
     if (g_Patch.NoiseMode & NOISE_PITCHED)  m_FilterIndex = 0;  
@@ -491,14 +489,14 @@ void   SynthExpression(unsigned data14)
     
     ulval = data14 << 6;  // scale to 20 bits (fractional part)
     level = (fixed_t) ulval;  
-    level = (level * g_Config.ExpressionGainAdjust) / 100;  // adjust level
+    level = (level * m_ExprnCalibr_pc) / 100;  // adjust level
     if (level > levelMax) level = levelMax;  // cap at 0.99
     m_PressureLevel = level;
 
     ulval = ((uint32) data14 * data14) / 16384;  // apply square law
     ulval = ulval << 6;   // scale to 20 bits (fractional part)
     level = (fixed_t) ulval; 
-    level = (level * g_Config.ExpressionGainAdjust) / 100;  // adjust level
+    level = (level * m_ExprnCalibr_pc) / 100;  // adjust level
     if (level > levelMax) level = levelMax;  // cap at 0.99
     if (level > g_ExpressionPeak)  g_ExpressionPeak = level;  // diagnostic
     m_ExpressionLevel = level;  
@@ -1011,12 +1009,12 @@ PRIVATE  void   NoiseLevelControl()
     else if (noiseCtrlSource == NOISE_LVL_AMPLD_ENV)  // option 1
         v_NoiseLevel = m_AmpldEnvOutput;
     else if (noiseCtrlSource == NOISE_LVL_LFO)        // option 2
-        v_NoiseLevel = (m_LFO_output * g_Patch.LFO_FM_Depth) / 100;
+        v_NoiseLevel = ((m_LFO_output + IntToFixedPt(1)) * g_Patch.LFO_FM_Depth) / 200;
     else if (noiseCtrlSource == NOISE_LVL_EXPRESS)    // option 3
-        v_NoiseLevel = (m_ExpressionLevel / 2);
+        v_NoiseLevel = (m_ExpressionLevel >> 2);
     else if (noiseCtrlSource == NOISE_LVL_MODULN)     // option 4
-        v_NoiseLevel = (m_ModulationLevel * 70) / 100;
-    else  v_NoiseLevel = 0;  // ..................... // default (Noise OFF)
+        v_NoiseLevel = (m_ModulationLevel >> 1);
+    else  v_NoiseLevel = 0;  // invalid option (Noise OFF)
         
 }
 
@@ -1146,24 +1144,27 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
 
         if (g_Patch.NoiseMode)  // Noise enabled in patch
         {
-            // Adjust noiseSample to a level which avoids overdriving the filter
-            filterIn = (noiseSample * m_FilterAtten_pc) / 100;  
-            // Apply filter algorithm
-            filterOut =  MultiplyFixed(v_coeff_b0, filterIn);
-            filterOut += MultiplyFixed(v_coeff_b2, filter_in_2);
-            filterOut -= MultiplyFixed(v_coeff_a1, filter_out_1);
-            filterOut -= MultiplyFixed(v_coeff_a2, filter_out_2);
-            filter_in_2 = filter_in_1;  // update delayed samples
-            filter_in_1 = filterIn;
-            filter_out_2 = filter_out_1;
-            filter_out_1 = filterOut;
-            // Adjust noise filter output level to compensate for spectral loss
-            filterOut = (filterOut * m_NoiseGain_x10) / 10;  
-
-            // If enabled, Ring Modulate OSC2 output with filtered noise...
-            if (g_Patch.NoiseMode & NOISE_PITCHED)   
-                noiseGenOut = MultiplyFixed(filterOut, osc2Sample);  // Ring Mod.
-            else  noiseGenOut = filterOut;   // unmodulated filtered noise
+            if (g_Patch.FilterResonance)   // Filter enabled (res != 0)
+            {
+                // Adjust noiseSample to a level which avoids overdriving the filter
+                filterIn = (noiseSample * m_FilterAtten_pc) / 100;  
+                // Apply filter algorithm
+                filterOut =  MultiplyFixed(v_coeff_b0, filterIn);
+                filterOut += MultiplyFixed(v_coeff_b2, filter_in_2);
+                filterOut -= MultiplyFixed(v_coeff_a1, filter_out_1);
+                filterOut -= MultiplyFixed(v_coeff_a2, filter_out_2);
+                filter_in_2 = filter_in_1;  // update delayed samples
+                filter_in_1 = filterIn;
+                filter_out_2 = filter_out_1;
+                filter_out_1 = filterOut;
+                // Adjust noise filter output level to compensate for spectral loss
+                filterOut = (filterOut * m_NoiseGain_x10) / 10;  
+                // If enabled, Ring Modulate OSC2 output with filtered noise...
+                if (g_Patch.NoiseMode & NOISE_PITCHED)   
+                    noiseGenOut = MultiplyFixed(filterOut, osc2Sample);  // Ring Mod.
+                else  noiseGenOut = filterOut;   // unmodulated filtered noise
+            }
+            else  noiseGenOut = noiseSample;  // unfiltered, unmodulated noise
             
             // Add or mix noise with wave mixer output according to patch mode
             if ((g_Patch.NoiseMode & 3) == NOISE_WAVE_ADDED)  // Add noise to total mix
@@ -1265,7 +1266,6 @@ bool  isNoteOn()
     return  (m_Note_ON != 0);
 }
 
-
 /*
  * Function:     Get pointer to active patch table.
  */
@@ -1274,7 +1274,6 @@ PatchParamTable_t *GetActivePatchTable()
     return  &g_Patch;
 }
 
-
 /*
  * Function:     Get ID number of active patch.
  */
@@ -1282,7 +1281,6 @@ int  GetActivePatchID()
 {
     return  g_Patch.PatchNumber;
 }
-
 
 /*
  * Function:     Get table index of patch definition for a given patch ID number
@@ -1299,22 +1297,6 @@ int  GetTableIndexOfPatchID(uint16 patchID)
     
     return  patch_idx;
 }
-
-
-/*
- * Function:     Activate the User Wave-table (id = 0) and effectively disable OSC2
- *               in the active patch.
- *
- * Note:         Function intended for use by wave-table creator utility.
- */
-void  SelectUserWaveTableOsc1()
-{
-    m_WaveTable1 = (int16 *) WaveTableBuffer; 
-    g_Patch.Osc1WaveTable = 0;
-    g_Patch.MixerOsc2Level = 0;
-    g_Patch.MixerControl = MIXER_CTRL_FIXED;
-}
-
 
 /*
  * Function:     Get ID number of wave-table assigned to OSC1 in the active patch.
@@ -1340,30 +1322,35 @@ void  WaveTableSizeSet(uint16 size)
     g_Osc1WaveTableSize = size;
 }
 
-
 /*
- * Function:     Set OSC1 Frequency Divider value.
- *               The given value over-rides the value selected by a prior call to
- *               SynthPatchSetup() or WaveTableSelect().
+ * Function:     Set OSC# Frequency Divider value for respective wave-table.
+ *               The given value overrides the value selected by a prior call to
+ *               SynthPatchSetup(), WaveTableSelect(), etc.
  *
- * Entry arg:    (float) freqDiv = Frequency Divider value
+ * Entry args:   (short) oscNum = Oscillator number (1 or 2)
+ *               (float) freqDiv = Frequency Divider value
  */
-void  Osc1FreqDividerSet(float freqDiv)
+void  OscFreqDividerSet(short oscNum, float freqDiv)
 {
-    g_Osc1FreqDiv = freqDiv;
+    if (oscNum == 1)  g_Osc1FreqDiv = freqDiv;
+    if (oscNum == 2)  g_Osc2FreqDiv = freqDiv;
 }
 
-
 /*
- * Function:     Get current Frequency Divider value used in OSC1 wave-table.
+ * Function:     Get current OSC# Frequency Divider value used in wave-table.
+ * 
+ * Entry arg:    (short) oscNum = Oscillator number (1 or 2)
  *
  * Return val:   (float) freqDiv = Frequency Divider value
  */
-float  Osc1FreqDividerGet()
+float  OscFreqDividerGet(short oscNum)
 {
-    return  g_Osc1FreqDiv;
-}
+    float  retVal = g_Osc1FreqDiv;
+    
+    if (oscNum == 2)  retVal = g_Osc2FreqDiv;
 
+    return  retVal;
+}
 
 /*
  * Function:  Return TRUE if the Remi synth is enabled, i.e. if a note is in progress.
@@ -1371,19 +1358,6 @@ float  Osc1FreqDividerGet()
 bool  isSynthActive(void)
 {
     return  (v_SynthEnable != 0);
-}
-
-/*
- * Function:     Set Audio Output Level.
- *
- * Entry args:   level = (fixed_t) audio output level, per unit (0 ~ 0.9999).
- *               Wave samples from the synth tone-generator are scaled by this quantity.
- *
- * Note:         Diagnostic mode must be active for this function to be effective.
- */
-void  SetAudioOutputLevel(fixed_t level_pu)
-{
-    v_OutputLevel = level_pu;
 }
 
 /*

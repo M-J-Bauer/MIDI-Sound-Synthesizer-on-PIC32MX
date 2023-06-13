@@ -18,8 +18,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         10,     // Patch ID Number
         "Recorder, simple",
-        13,     // W1: OSC1 Wave-table ID (0..250) = recorder_alto
-        13,     // W2: OSC2 Wave-table ID (0..250) = recorder_alto
+        13,     // W1: OSC1 Wave-table ID (0..99) = recorder_alto
+        13,     // W2: OSC2 Wave-table ID (0..99) = recorder_alto
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
@@ -35,13 +35,13 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:FilterBypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
@@ -50,8 +50,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         11,     // Patch ID Number
         "Recorder, celeste",
-        2,      // W1: OSC1 Wave-table ID (0..250) = square_wave
-        13,     // W2: OSC2 Wave-table ID (0..250) = recorder_alto
+        2,      // W1: OSC1 Wave-table ID (0..99) = square_wave
+        13,     // W2: OSC2 Wave-table ID (0..99) = recorder_alto
         -7,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
@@ -67,23 +67,23 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },    
 
     {
         12,     // Patch ID Number
         "Clean Bright Flute",
-        6,      // W1: OSC1 Wave-table ID (0..250)
-        6,      // W2: OSC2 Wave-table ID (0..250)
+        6,      // W1: OSC1 Wave-table ID (0..99)
+        6,      // W2: OSC2 Wave-table ID (0..99)
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
@@ -99,23 +99,23 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
     {
         13,     // Patch ID Number
         "Mellow Pipe",
-        12,     // W1: OSC1 Wave-table ID (0..250)
-        12,     // W2: OSC2 Wave-table ID (0..250)
+        12,     // W1: OSC1 Wave-table ID (0..99)
+        12,     // W2: OSC2 Wave-table ID (0..99)
         -3,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -131,56 +131,24 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-/*
-    {
-        14,     // Patch ID Number
-        "Electric Horn",  // Sounds awful !!  *********** to be replaced **************************
-        3,      // W1: OSC1 Wave-table ID (0..250)
-        14,     // W2: OSC2 Wave-table ID (0..250)
-        0,      // OD: OSC2 Detune, cents (+/-1200)
-        50,     // LF: LFO Freq x10 Hz (1..250)
-        50,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
-        1,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        75,     // CS: Contour Env Start level (0..100 %)
-        10,     // CD: Contour Env Delay time (5..5000+ ms)
-        80,     // CR: Contour Env Ramp time (5..5000+ ms)
-        0,      // CH: Contour Env Hold level (0..100 %)
-        
-        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        1,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
-        0,      // FT: Filter Note Tracking (0:Off, 1:On)
-                
-        5,      // EA: Envelope Attack time (5..5000+ ms)
-        0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },
-*/
     //---------------  R E E D E D   W O O D W I N D S  --------------------
     {
         21,     // Patch ID Number
         "Reeded Woodwind",  // Breath-controlled wave morph... sax-like
-        2,      // W1: OSC1 Wave-table ID (0..250)
-        9,      // W2: OSC2 Wave-table ID (0..250)
+        2,      // W1: OSC1 Wave-table ID (0..99)
+        9,      // W2: OSC2 Wave-table ID (0..99)
        -3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -196,23 +164,23 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Env, 3:Exprn, 4:Modn)
         0,      // FC: Filter Ctrl (0:Fixed, 1:Contour, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
-        9800,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        15,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        9800,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        15,     // FF: Filter Freq/Offset (semitone#, 0..108)
         1,      // FT: Filter Note Tracking (0:Off, 1:On)
 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        20,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
     {
         23,     // Patch ID Number
         "Saxophoney",  // Sounds too simple... Needs work !!!  ***********************************
-        9,      // W1: OSC1 Wave-table ID (0..250)
-        9,      // W2: OSC2 Wave-table ID (0..250)
+        9,      // W1: OSC1 Wave-table ID (0..99)
+        9,      // W2: OSC2 Wave-table ID (0..99)
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -228,30 +196,30 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        20,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-/*    
+
     {
         24,     // Patch ID Number
-        "to be replaced!",  // Was an oboe (w1 = w2 = 32) ***** to be replaced *************
-        9,      // W1: OSC1 Wave-table ID (0..250)
-        9,      // W2: OSC2 Wave-table ID (0..250)   
-        0,      // OD: OSC2 Detune, cents (+/-1200)
+        "Mellow Reed",
+        23,     // W1: OSC1 Wave-table ID (0..99)
+        23,     // W2: OSC2 Wave-table ID (0..99)
+        -3,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
         0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        20,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
         0,      // CS: Contour Env Start level (0..100 %)
         0,      // CD: Contour Env Delay time (5..5000+ ms)
         200,    // CR: Contour Env Ramp time (5..5000+ ms)
@@ -260,23 +228,23 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
-*/
+
     {
         25,     // Patch ID Number   
         "Psychedelic Oboe",
-        10,     // W1: OSC1 Wave-table ID (0..250)
-        9,      // W2: OSC2 Wave-table ID (0..250)
+        10,     // W1: OSC1 Wave-table ID (0..99)
+        9,      // W2: OSC2 Wave-table ID (0..99)
         -7,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -292,23 +260,23 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        20,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
 
     {
         26,     // Patch ID Number  
         "Electric Clarinet",  
-        12,     // W1: OSC1 Wave-table ID (0..250)
-        11,     // W2: OSC2 Wave-table ID (0..250)
+        12,     // W1: OSC1 Wave-table ID (0..99)
+        11,     // W2: OSC2 Wave-table ID (0..99)
         3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -324,24 +292,24 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9500,   // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        9,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        9500,   // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        9,      // FF: Filter Freq/Offset (semitone#, 0..108)
         1,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
-        5,      // EA: Envelope Attack time (5..5000+ ms)
+        20,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        10,     // ER: Envelope Release time (5..5000+ ms)
-        99,     // ES: Envelope Sustain level (0..100 %)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        100,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
     //----------------  B O W E D   S T R I N G   I N S T R U M E N T S  ------------
     {
         30,     // Patch ID Number
-        "Violin #1",
-        3,      // W1: OSC1 Wave-table ID (0..250) 
-        3,      // W2: OSC2 Wave-table ID (0..250)   
+        "Vinyl-cello",
+        3,      // W1: OSC1 Wave-table ID (0..99) 
+        3,      // W2: OSC2 Wave-table ID (0..99)   
         3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -357,13 +325,13 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        9500,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        60,     // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         30,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
@@ -372,9 +340,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     //------------------  O R G A N S   &  A C C O R D I O N  -----------------
     {
         40,     // Patch ID Number
-        "Jazz Organ Celeste",  // Experiment with wave-tables  **************************
-        14,     // W1: OSC1 Wave-table ID (0..250) = jazz_organ_v1
-        14,     // W2: OSC2 Wave-table ID (0..250) = jazz_organ_v1
+        "Jazz Organ, celeste",  // Experiment with wave-tables  **************************
+        14,     // W1: OSC1 Wave-table ID (0..99) = jazz_organ_v1
+        14,     // W2: OSC2 Wave-table ID (0..99) = jazz_organ_v1
         -6,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -390,8 +358,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
@@ -404,9 +372,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         41,     // Patch ID Number
-        "Hammond Organ 1",  // Hammond-ish jazz-rock organ #1
-        17,     // W1: OSC1 Wave-table ID (0..250)   
-        17,     // W2: OSC2 Wave-table ID (0..250) 
+        "Jazz-Rock Organ 1",  // Classic Hammond rock organ tone.  Slightly percussive.
+        17,     // W1: OSC1 Wave-table ID (0..99)   
+        17,     // W2: OSC2 Wave-table ID (0..99) 
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -422,8 +390,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
@@ -436,9 +404,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
 
     {
         42,     // Patch ID Number
-        "Hammond Organ 2",  // Hammond-ish jazz-rock organ #2 (sounds much the same as patch 41)
-        18,     // W1: OSC1 Wave-table ID (0..250)   
-        18,     // W2: OSC2 Wave-table ID (0..250)   
+        "Jazz-Rock Organ 2",  // Classic Hammond rock organ tone.  Slightly percussive.
+        18,     // W1: OSC1 Wave-table ID (0..99)   
+        18,     // W2: OSC2 Wave-table ID (0..99)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -454,8 +422,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
@@ -468,9 +436,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         43,     // Patch ID Number
-        "Rock Organ",  // Classic Hammond rock organ tone.  Slightly percussive.
-        14,     // W1: OSC1 Wave-table ID (0..250)   
-        14,     // W2: OSC2 Wave-table ID (0..250)   
+        "Jazz-Rock Organ 3",  // Classic Hammond rock organ tone.  Slightly percussive.
+        14,     // W1: OSC1 Wave-table ID (0..99)   
+        14,     // W2: OSC2 Wave-table ID (0..99)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -486,8 +454,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
@@ -501,8 +469,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         44,     // Patch ID Number
         "Theatre Organ",  // "All stops out" -- rich & deep harmonic content
-        21,     // W1: OSC1 Wave-table ID (0..250)   
-        21,     // W2: OSC2 Wave-table ID (0..250)   
+        21,     // W1: OSC1 Wave-table ID (0..99)   
+        21,     // W2: OSC2 Wave-table ID (0..99)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -518,8 +486,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
@@ -532,9 +500,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         45,     // Patch ID Number
-        "Pink Floyd organ",  // Essential Preset! -- complex flutey tone
-        20,     // W1: OSC1 Wave-table ID (0..250)   
-        20,     // W2: OSC2 Wave-table ID (0..250)   
+        "Pink Floyd Organ",  // Essential Preset Patch! -- complex etherial flutey tone
+        20,     // W1: OSC1 Wave-table ID (0..99)   
+        20,     // W2: OSC2 Wave-table ID (0..99)   
         -5,     // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -550,8 +518,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
@@ -565,15 +533,15 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         46,     // Patch ID Number
         "Bauer Organ",  // Bright, rich tone  (experiment with detune, contour, etc)
-        22,     // W1: OSC1 Wave-table ID (0..250)   
-        25,     // W2: OSC2 Wave-table ID (0..250) -- experiment with morph  *************
+        22,     // W1: OSC1 Wave-table ID (0..99)   
+        23,     // W2: OSC2 Wave-table ID (0..99) -- experiment with morph  *************
         7,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
         0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        20,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
         0,      // CS: Contour Env Start level (0..100 %)
         0,      // CD: Contour Env Delay time (5..5000+ ms)
         200,    // CR: Contour Env Ramp time (5..5000+ ms)
@@ -582,8 +550,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
@@ -593,13 +561,77 @@ const  PatchParamTable_t  g_PatchProgram[] =
         70,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
+    
+    {
+        47,     // Patch ID Number
+        "Hammond Organ 1",  // Classic Hammond organ tone.  Slightly percussive.
+        15,     // W1: OSC1 Wave-table ID (0..99)   
+        15,     // W2: OSC2 Wave-table ID (0..99)   
+        -5,     // OD: OSC2 Detune, cents (+/-1200)
+        70,     // LF: LFO Freq x10 Hz (1..250)
+        30,     // VD: Vibrato Depth, cents (0..200)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        25,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        80,     // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        5,      // EA: Envelope Attack time (5..5000+ ms)
+        50,     // EP: Envelope Peak time (0..5000+ ms)
+        100,    // ED: Envelope Decay time (5..5000+ ms)
+        50,     // ER: Envelope Release time (5..5000+ ms)
+        70,     // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+    
+    {
+        48,     // Patch ID Number
+        "Hammond Organ 2",  // Classic Hammond organ tone.  Slightly percussive.
+        16,     // W1: OSC1 Wave-table ID (0..99)   
+        16,     // W2: OSC2 Wave-table ID (0..99)   
+        -5,     // OD: OSC2 Detune, cents (+/-1200)
+        70,     // LF: LFO Freq x10 Hz (1..250)
+        30,     // VD: Vibrato Depth, cents (0..200)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        25,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        80,     // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        5,      // EA: Envelope Attack time (5..5000+ ms)
+        50,     // EP: Envelope Peak time (0..5000+ ms)
+        100,    // ED: Envelope Decay time (5..5000+ ms)
+        50,     // ER: Envelope Release time (5..5000+ ms)
+        70,     // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
    
     //----------------  P E R C U S S I V E    I N S T R U M E N T S  ------------
     {
         50,     // Patch ID Number
         "Plucked String",  // Produces a good piano-like timbre
-        3,      // W1: OSC1 Wave-table ID (0..250) 
-        5,      // W2: OSC2 Wave-table ID (0..250)   
+        3,      // W1: OSC1 Wave-table ID (0..99) 
+        5,      // W2: OSC2 Wave-table ID (0..99)   
         3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         0,      // VD: Vibrato Depth, cents (0..200)
@@ -615,11 +647,11 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        9500,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        60,     // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
-        5,     // EA: Envelope Attack time (5..5000+ ms)
+        10,     // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
         500,    // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
@@ -630,8 +662,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         51,     // Patch ID Number
         "Glockenspiel",  // (Sound resembles recorder when using breath control)
-        19,     // W1: OSC1 Wave-table ID (0..250) 
-        19,     // W2: OSC2 Wave-table ID (0..250)   
+        19,     // W1: OSC1 Wave-table ID (0..99) 
+        19,     // W2: OSC2 Wave-table ID (0..99)   
         0,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -647,8 +679,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        9500,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        60,     // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         10,     // EA: Envelope Attack time (5..5000+ ms)
@@ -661,9 +693,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     
     {
         52,     // Patch ID Number
-        "Ding", 
-        12,     // W1: OSC1 Wave-table ID (0..250) 
-        12,     // W2: OSC2 Wave-table ID (0..250)   
+        "Xylophoney", 
+        12,     // W1: OSC1 Wave-table ID (0..99) 
+        12,     // W2: OSC2 Wave-table ID (0..99)   
         3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         0,      // VD: Vibrato Depth, cents (0..200)
@@ -679,14 +711,111 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9500,   // FR: Filter Resonance x10000  (0..9999, 0:Bypass)
-        60,     // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        9500,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        60,     // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         5,      // EA: Envelope Attack time (5..5000+ ms)
         50,     // EP: Envelope Peak time (0..5000+ ms)
         1000,   // ED: Envelope Decay time (5..5000+ ms)
+        1000,   // ER: Envelope Release time (5..5000+ ms)
+        0,      // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+    
+    //----------  E X P E R I M E N T A L   S O U N D   E F F E C T S  ------------
+    {
+        80,     // Patch ID Number
+        "Noise",  // Wave mixed with pitched noise
+        2,      // W1: OSC1 Wave-table ID (0..99)
+        4,      // W2: OSC2 Wave-table ID (0..99)
+        0,      // OD: OSC2 Detune, cents (+/-1200)
+        50,     // LF: LFO Freq x10 Hz (1..250)
+        50,     // VD: Vibrato Depth, cents (0..200)
+        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        10,     // ML: Mixer OSC2/Noise Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        5,      // CD: Contour Env Delay time (5..5000+ ms)
+        500,    // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        2,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        9800,   // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        24,     // FF: Filter Freq/Offset (MIDI note number, 0..108)
+        1,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        10,     // EA: Envelope Attack time (5..5000+ ms)
+        0,      // EP: Envelope Peak time (0..5000+ ms)
+        5,      // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },    
+    
+    {
+        81,     // Patch ID Number
+        "Bell", 
+        7,      // W1: OSC1 Wave-table ID (0..99) 
+        7,      // W2: OSC2 Wave-table ID (0..99)   
+        3,      // OD: OSC2 Detune, cents (+/-1200)
+        50,     // LF: LFO Freq x10 Hz (1..250)
+        0,      // VD: Vibrato Depth, cents (0..200)
+        300,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        9500,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        60,     // FF: Filter Freq/Offset (semitone#, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        20,     // EA: Envelope Attack time (5..5000+ ms)
+        50,     // EP: Envelope Peak time (0..5000+ ms)
+        1000,   // ED: Envelope Decay time (5..5000+ ms)
+        1000,   // ER: Envelope Release time (5..5000+ ms)
+        0,      // ES: Envelope Sustain level (0..100 %)
+        0,      // ??: (reserved)
+    },
+    
+    {
+        82,     // Patch ID Number
+        "Clang", 
+        8,      // W1: OSC1 Wave-table ID (0..99) 
+        8,      // W2: OSC2 Wave-table ID (0..99)   
+        20,     // OD: OSC2 Detune, cents (+/-1200)
+        50,     // LF: LFO Freq x10 Hz (1..250)
+        0,      // VD: Vibrato Depth, cents (0..200)
+        300,    // VR: Vibrato Ramp time, (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        0,      // CS: Contour Env Start level (0..100 %)
+        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        100,    // CH: Contour Env Hold level (0..100 %)
+        
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        9500,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        60,     // FF: Filter Freq/Offset (semitone#, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
+                
+        20,     // EA: Envelope Attack time (5..5000+ ms)
+        50,     // EP: Envelope Peak time (0..5000+ ms)
+        1000,   // ED: Envelope Decay time (5..5000+ ms)
+        1000,   // ER: Envelope Release time (5..5000+ ms)
         0,      // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
@@ -694,9 +823,9 @@ const  PatchParamTable_t  g_PatchProgram[] =
     //---------------  T E S T   &   D E M O   P A T C H E S  ------------------------
     {
         90,     // Patch ID Number
-        "Test Patch (ID: 90)",  // NB: Do not edit -- patch is used by diagnostics
-        1,      // W1: OSC1 Wave-table ID (0..250)  <------ sinewave
-        3,      // W2: OSC2 Wave-table ID (0..250)  <------ sawtooth
+        "Test Patch (ID 90)",  // NB: Do not edit -- patch is used by diagnostics
+        1,      // W1: OSC1 Wave-table ID (0..99)  <------ sinewave
+        3,      // W2: OSC2 Wave-table ID (0..99)  <------ sawtooth
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         0,      // VD: Vibrato Depth, cents (0..200)
@@ -713,7 +842,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FR: Filter Resonance x10000 (0..9999, 0:Off/bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         50,     // EA: Envelope Attack time (5..5000+ ms)
@@ -727,8 +856,8 @@ const  PatchParamTable_t  g_PatchProgram[] =
     {
         91,     // Patch ID Number
         "Wave Morph contour",
-        4,      // W1: OSC1 Wave-table ID (0..250)
-        10,     // W2: OSC2 Wave-table ID (0..250)
+        4,      // W1: OSC1 Wave-table ID (0..99)
+        10,     // W2: OSC2 Wave-table ID (0..99)
         0,      // OD: OSC2 Detune, cents (+/-1200)
         70,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
@@ -744,49 +873,18 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        0,      // FF: Filter Freq/Offset (MIDI note #, 0..108)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
         0,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
         50,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         10,     // ED: Envelope Decay time (5..5000+ ms)
         500,    // ER: Envelope Release time (5..5000+ ms)
-        95,     // ES: Envelope Sustain level (0..100 %)
+        90,     // ES: Envelope Sustain level (0..100 %)
         0,      // ??: (reserved)
     },
     
-    {
-        92,     // Patch ID Number
-        "Pitched Noise",  // Wave mixed with pitched noise
-        2,      // W1: OSC1 Wave-table ID (0..250)
-        4,      // W2: OSC2 Wave-table ID (0..250)
-        0,      // OD: OSC2 Detune, cents (+/-1200)
-        50,     // LF: LFO Freq x10 Hz (1..250)
-        50,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
-
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        10,     // ML: Mixer OSC2/Noise Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        5,      // CD: Contour Env Delay time (5..5000+ ms)
-        500,    // CR: Contour Env Ramp time (5..5000+ ms)
-        100,    // CH: Contour Env Hold level (0..100 %)
-        
-        2,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9800,   // FR: Filter Resonance x10000 (0..9999, 0:Bypass)
-        24,     // FF: Filter Freq/Offset (MIDI note number, 0..108)
-        1,      // FT: Filter Note Tracking (0:Off, 1:On)
-                
-        10,     // EA: Envelope Attack time (5..5000+ ms)
-        0,      // EP: Envelope Peak time (0..5000+ ms)
-        5,      // ED: Envelope Decay time (5..5000+ ms)
-        50,     // ER: Envelope Release time (5..5000+ ms)
-        90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
-    },    
 };
 
 
@@ -2160,14 +2258,293 @@ const  int16  clean_bright_flute[] =
      -6080,  -5496,  -4905,  -4306,  -3701,  -3092,  -2478,  -1861,  -1242,   -621
 };
 
+
 /*
- * Waveform name: recorder_alto, size: 1260 samples
+ * Waveform name: ring_modulation_347, size: 1260 samples
+ * Osc. Freq. Divider:   3.0000
+ * Partial Distribution:
+ * Order # |  1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+ * Ampld % |    |    | 36 | 36 |    |    | 36 |    |    |    |    |    |    |    |    |    |
+ * Peak ampld:  30400 (95 %FS)
+ */
+const  int16  ring_modulation_347[] =
+{
+         0,    668,   1338,   2006,   2673,   3338,   4001,   4660,   5317,   5967,
+      6615,   7257,   7892,   8524,   9147,   9765,  10374,  10976,  11567,  12152,
+     12727,  13293,  13848,  14394,  14928,  15451,  15962,  16461,  16949,  17424,
+     17885,  18335,  18769,  19189,  19596,  19991,  20368,  20733,  21081,  21415,
+     21732,  22035,  22323,  22594,  22850,  23090,  23313,  23521,  23713,  23887,
+     24046,  24190,  24316,  24427,  24520,  24600,  24662,  24708,  24740,  24755,
+     24754,  24739,  24708,  24661,  24601,  24524,  24436,  24332,  24214,  24082,
+     23936,  23779,  23608,  23424,  23229,  23022,  22801,  22571,  22329,  22077,
+     21816,  21543,  21262,  20971,  20671,  20364,  20048,  19726,  19396,  19059,
+     18718,  18370,  18015,  17656,  17294,  16925,  16555,  16179,  15801,  15422,
+     15040,  14655,  14272,  13885,  13499,  13113,  12727,  12342,  11959,  11576,
+     11197,  10819,  10443,  10071,   9702,   9336,   8975,   8617,   8264,   7917,
+      7575,   7237,   6906,   6580,   6261,   5948,   5642,   5342,   5051,   4765,
+      4488,   4217,   3954,   3699,   3452,   3214,   2983,   2760,   2546,   2340,
+      2143,   1953,   1772,   1599,   1435,   1278,   1132,    992,    861,    737,
+       622,    515,    415,    323,    239,    162,     91,     28,    -26,    -76,
+      -119,   -156,   -186,   -211,   -232,   -245,   -253,   -258,   -257,   -253,
+      -244,   -231,   -215,   -196,   -174,   -149,   -123,    -95,    -63,    -31,
+         0,     33,     67,    101,    134,    168,    199,    232,    262,    290,
+       316,    340,    361,    380,    394,    407,    414,    419,    417,    413,
+       403,    388,    369,    344,    313,    276,    233,    185,    130,     68,
+         0,    -74,   -157,   -247,   -342,   -446,   -558,   -675,   -802,   -935,
+     -1076,  -1225,  -1380,  -1545,  -1715,  -1895,  -2080,  -2275,  -2476,  -2684,
+     -2901,  -3123,  -3353,  -3589,  -3833,  -4083,  -4339,  -4601,  -4870,  -5144,
+     -5425,  -5709,  -6000,  -6295,  -6595,  -6900,  -7207,  -7521,  -7837,  -8156,
+     -8477,  -8802,  -9129,  -9459,  -9789, -10121, -10454, -10788, -11122, -11455,
+    -11788, -12121, -12452, -12781, -13109, -13435, -13757, -14076, -14392, -14704,
+    -15010, -15312, -15610, -15903, -16189, -16469, -16743, -17011, -17271, -17523,
+    -17766, -18002, -18229, -18447, -18657, -18856, -19045, -19224, -19392, -19550,
+    -19697, -19832, -19956, -20067, -20167, -20254, -20329, -20391, -20442, -20479,
+    -20501, -20512, -20507, -20489, -20459, -20415, -20355, -20284, -20196, -20097,
+    -19981, -19853, -19710, -19553, -19383, -19200, -19001, -18789, -18564, -18323,
+    -18071, -17805, -17526, -17234, -16929, -16611, -16281, -15939, -15585, -15220,
+    -14843, -14455, -14056, -13647, -13227, -12798, -12359, -11911, -11454, -10988,
+    -10515, -10034,  -9546,  -9050,  -8549,  -8042,  -7527,  -7009,  -6485,  -5958,
+     -5426,  -4891,  -4353,  -3813,  -3269,  -2725,  -2181,  -1635,  -1090,   -544,
+         0,    542,   1084,   1624,   2159,   2693,   3223,   3749,   4270,   4785,
+      5296,   5801,   6298,   6790,   7274,   7751,   8219,   8679,   9129,   9572,
+     10003,  10426,  10837,  11239,  11629,  12006,  12375,  12731,  13072,  13403,
+     13721,  14026,  14318,  14595,  14859,  15111,  15347,  15569,  15777,  15971,
+     16149,  16314,  16464,  16597,  16718,  16823,  16913,  16987,  17048,  17093,
+     17122,  17139,  17138,  17125,  17096,  17054,  16996,  16925,  16839,  16740,
+     16626,  16500,  16360,  16207,  16041,  15864,  15675,  15472,  15259,  15034,
+     14797,  14551,  14293,  14027,  13750,  13465,  13168,  12866,  12553,  12234,
+     11908,  11574,  11234,  10888,  10535,  10178,   9816,   9449,   9079,   8705,
+      8330,   7951,   7569,   7185,   6801,   6417,   6030,   5644,   5259,   4875,
+      4492,   4111,   3733,   3358,   2985,   2615,   2250,   1889,   1534,   1182,
+       837,    498,    164,   -162,   -483,   -794,  -1099,  -1397,  -1685,  -1967,
+     -2238,  -2501,  -2755,  -2998,  -3232,  -3458,  -3671,  -3875,  -4068,  -4251,
+     -4423,  -4584,  -4734,  -4872,  -4999,  -5116,  -5220,  -5313,  -5394,  -5465,
+     -5522,  -5571,  -5605,  -5630,  -5642,  -5644,  -5633,  -5612,  -5580,  -5537,
+     -5483,  -5419,  -5344,  -5259,  -5163,  -5058,  -4944,  -4819,  -4685,  -4543,
+     -4391,  -4232,  -4063,  -3888,  -3705,  -3513,  -3315,  -3111,  -2900,  -2683,
+     -2460,  -2232,  -1999,  -1761,  -1519,  -1273,  -1024,   -772,   -517,   -258,
+         0,    261,    524,    786,   1050,   1314,   1577,   1841,   2104,   2363,
+      2622,   2879,   3133,   3383,   3631,   3876,   4117,   4352,   4582,   4809,
+      5030,   5246,   5454,   5658,   5854,   6044,   6227,   6403,   6570,   6731,
+      6882,   7027,   7162,   7288,   7406,   7516,   7614,   7705,   7786,   7858,
+      7918,   7971,   8013,   8045,   8067,   8080,   8082,   8074,   8055,   8027,
+      7988,   7941,   7883,   7815,   7736,   7651,   7552,   7445,   7331,   7205,
+      7071,   6928,   6775,   6615,   6446,   6269,   6084,   5892,   5692,   5485,
+      5271,   5050,   4823,   4590,   4350,   4107,   3855,   3602,   3342,   3079,
+      2811,   2541,   2267,   1990,   1709,   1428,   1143,    860,    574,    286,
+         0,   -286,   -574,   -860,  -1143,  -1428,  -1709,  -1990,  -2267,  -2541,
+     -2811,  -3079,  -3342,  -3602,  -3855,  -4107,  -4350,  -4590,  -4823,  -5050,
+     -5271,  -5485,  -5692,  -5892,  -6084,  -6269,  -6446,  -6615,  -6775,  -6928,
+     -7071,  -7205,  -7331,  -7445,  -7552,  -7651,  -7736,  -7815,  -7883,  -7941,
+     -7988,  -8027,  -8055,  -8074,  -8082,  -8080,  -8067,  -8045,  -8013,  -7971,
+     -7918,  -7858,  -7786,  -7705,  -7614,  -7516,  -7406,  -7288,  -7162,  -7027,
+     -6882,  -6731,  -6570,  -6403,  -6227,  -6044,  -5854,  -5658,  -5454,  -5246,
+     -5030,  -4809,  -4582,  -4352,  -4117,  -3876,  -3631,  -3383,  -3133,  -2879,
+     -2622,  -2363,  -2104,  -1841,  -1577,  -1314,  -1050,   -786,   -524,   -261,
+         0,    258,    517,    772,   1024,   1273,   1519,   1761,   1999,   2232,
+      2460,   2683,   2900,   3111,   3315,   3513,   3705,   3888,   4063,   4232,
+      4391,   4543,   4685,   4819,   4944,   5058,   5163,   5259,   5344,   5419,
+      5483,   5537,   5580,   5612,   5633,   5644,   5642,   5630,   5605,   5571,
+      5522,   5465,   5394,   5313,   5220,   5116,   4999,   4872,   4734,   4584,
+      4423,   4251,   4068,   3875,   3671,   3458,   3232,   2998,   2755,   2501,
+      2238,   1967,   1685,   1397,   1099,    794,    483,    162,   -164,   -498,
+      -837,  -1182,  -1534,  -1889,  -2250,  -2615,  -2985,  -3358,  -3733,  -4111,
+     -4492,  -4875,  -5259,  -5644,  -6030,  -6417,  -6801,  -7185,  -7569,  -7951,
+     -8330,  -8705,  -9079,  -9449,  -9816, -10178, -10535, -10888, -11234, -11574,
+    -11908, -12234, -12553, -12866, -13168, -13465, -13750, -14027, -14293, -14551,
+    -14797, -15034, -15259, -15472, -15675, -15864, -16041, -16207, -16360, -16500,
+    -16626, -16740, -16839, -16925, -16996, -17054, -17096, -17125, -17138, -17139,
+    -17122, -17093, -17048, -16987, -16913, -16823, -16718, -16597, -16464, -16314,
+    -16149, -15971, -15777, -15569, -15347, -15111, -14859, -14595, -14318, -14026,
+    -13721, -13403, -13072, -12731, -12375, -12006, -11629, -11239, -10837, -10426,
+    -10003,  -9572,  -9129,  -8679,  -8219,  -7751,  -7274,  -6790,  -6298,  -5801,
+     -5296,  -4785,  -4270,  -3749,  -3223,  -2693,  -2159,  -1624,  -1084,   -542,
+         0,    544,   1090,   1635,   2181,   2725,   3269,   3813,   4353,   4891,
+      5426,   5958,   6485,   7009,   7527,   8042,   8549,   9050,   9546,  10034,
+     10515,  10988,  11454,  11911,  12359,  12798,  13227,  13647,  14056,  14455,
+     14843,  15220,  15585,  15939,  16281,  16611,  16929,  17234,  17526,  17805,
+     18071,  18323,  18564,  18789,  19001,  19200,  19383,  19553,  19710,  19853,
+     19981,  20097,  20196,  20284,  20355,  20415,  20459,  20489,  20507,  20512,
+     20501,  20479,  20442,  20391,  20329,  20254,  20167,  20067,  19956,  19832,
+     19697,  19550,  19392,  19224,  19045,  18856,  18657,  18447,  18229,  18002,
+     17766,  17523,  17271,  17011,  16743,  16469,  16189,  15903,  15610,  15312,
+     15010,  14704,  14392,  14076,  13757,  13435,  13109,  12781,  12452,  12121,
+     11788,  11455,  11122,  10788,  10454,  10121,   9789,   9459,   9129,   8802,
+      8477,   8156,   7837,   7521,   7207,   6900,   6595,   6295,   6000,   5709,
+      5425,   5144,   4870,   4601,   4339,   4083,   3833,   3589,   3353,   3123,
+      2901,   2684,   2476,   2275,   2080,   1895,   1715,   1545,   1380,   1225,
+      1076,    935,    802,    675,    558,    446,    342,    247,    157,     74,
+         0,    -68,   -130,   -185,   -233,   -276,   -313,   -344,   -369,   -388,
+      -403,   -413,   -417,   -419,   -414,   -407,   -394,   -380,   -361,   -340,
+      -316,   -290,   -262,   -232,   -199,   -168,   -134,   -101,    -67,    -33,
+         0,     31,     63,     95,    123,    149,    174,    196,    215,    231,
+       244,    253,    257,    258,    253,    245,    232,    211,    186,    156,
+       119,     76,     26,    -28,    -91,   -162,   -239,   -323,   -415,   -515,
+      -622,   -737,   -861,   -992,  -1132,  -1278,  -1435,  -1599,  -1772,  -1953,
+     -2143,  -2340,  -2546,  -2760,  -2983,  -3214,  -3452,  -3699,  -3954,  -4217,
+     -4488,  -4765,  -5051,  -5342,  -5642,  -5948,  -6261,  -6580,  -6906,  -7237,
+     -7575,  -7917,  -8264,  -8617,  -8975,  -9336,  -9702, -10071, -10443, -10819,
+    -11197, -11576, -11959, -12342, -12727, -13113, -13499, -13885, -14272, -14655,
+    -15040, -15422, -15801, -16179, -16555, -16925, -17294, -17656, -18015, -18370,
+    -18718, -19059, -19396, -19726, -20048, -20364, -20671, -20971, -21262, -21543,
+    -21816, -22077, -22329, -22571, -22801, -23022, -23229, -23424, -23608, -23779,
+    -23936, -24082, -24214, -24332, -24436, -24524, -24601, -24661, -24708, -24739,
+    -24754, -24755, -24740, -24708, -24662, -24600, -24520, -24427, -24316, -24190,
+    -24046, -23887, -23713, -23521, -23313, -23090, -22850, -22594, -22323, -22035,
+    -21732, -21415, -21081, -20733, -20368, -19991, -19596, -19189, -18769, -18335,
+    -17885, -17424, -16949, -16461, -15962, -15451, -14928, -14394, -13848, -13293,
+    -12727, -12152, -11567, -10976, -10374,  -9765,  -9147,  -8524,  -7892,  -7257,
+     -6615,  -5967,  -5317,  -4660,  -4001,  -3338,  -2673,  -2006,  -1338,   -668
+};
+
+
+/*
+ * Waveform name: ring_modulation_347, size: 1260 samples
+ * Osc. Freq. Divider:   4.0000
+ * Partial Distribution:
+ Order # |  1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+Ampld % |    |    |    | 35 |    | 35 |    |    | 35 |    |    |    |    |    |    |    |
+ * Peak ampld:  30400 (95 %FS)
+ */
+const  int16  ring_modulation_469[] =
+{
+         0,   1081,   2162,   3242,   4318,   5386,   6448,   7501,   8545,   9577,
+     10600,  11604,  12594,  13570,  14527,  15465,  16383,  17278,  18150,  19002,
+     19827,  20628,  21401,  22148,  22867,  23555,  24214,  24841,  25439,  26004,
+     26536,  27037,  27503,  27934,  28332,  28696,  29024,  29319,  29576,  29799,
+     29987,  30139,  30255,  30338,  30386,  30400,  30377,  30323,  30234,  30111,
+     29957,  29770,  29551,  29303,  29024,  28716,  28379,  28014,  27622,  27203,
+     26762,  26293,  25803,  25289,  24756,  24202,  23629,  23038,  22432,  21806,
+     21169,  20519,  19855,  19181,  18497,  17804,  17104,  16398,  15685,  14970,
+     14252,  13533,  12811,  12093,  11375,  10660,   9950,   9245,   8545,   7854,
+      7171,   6496,   5832,   5177,   4537,   3907,   3292,   2690,   2104,   1533,
+       978,    440,    -79,   -583,  -1067,  -1533,  -1979,  -2405,  -2814,  -3201,
+     -3568,  -3914,  -4241,  -4548,  -4834,  -5101,  -5345,  -5570,  -5775,  -5960,
+     -6125,  -6272,  -6397,  -6507,  -6597,  -6667,  -6722,  -6760,  -6781,  -6787,
+     -6778,  -6753,  -6715,  -6665,  -6601,  -6524,  -6437,  -6341,  -6232,  -6117,
+     -5993,  -5863,  -5726,  -5582,  -5434,  -5280,  -5126,  -4966,  -4806,  -4647,
+     -4484,  -4324,  -4166,  -4009,  -3855,  -3705,  -3559,  -3418,  -3282,  -3155,
+     -3033,  -2919,  -2814,  -2715,  -2628,  -2549,  -2481,  -2424,  -2377,  -2342,
+     -2317,  -2305,  -2304,  -2317,  -2341,  -2378,  -2428,  -2490,  -2565,  -2653,
+     -2753,  -2866,  -2991,  -3127,  -3277,  -3437,  -3611,  -3792,  -3988,  -4191,
+     -4406,  -4630,  -4862,  -5103,  -5353,  -5611,  -5874,  -6143,  -6418,  -6700,
+     -6983,  -7273,  -7563,  -7855,  -8151,  -8445,  -8742,  -9035,  -9327,  -9619,
+     -9905, -10187, -10467, -10740, -11005, -11267, -11518, -11761, -11995, -12220,
+    -12433, -12636, -12827, -13004, -13169, -13320, -13456, -13578, -13684, -13774,
+    -13849, -13906, -13945, -13969, -13973, -13961, -13928, -13877, -13808, -13720,
+    -13615, -13488, -13344, -13182, -12998, -12797, -12576, -12338, -12082, -11807,
+    -11513, -11204, -10877, -10535, -10175,  -9801,  -9412,  -9008,  -8588,  -8158,
+     -7714,  -7258,  -6793,  -6316,  -5829,  -5333,  -4829,  -4319,  -3802,  -3280,
+     -2753,  -2222,  -1689,  -1156,   -619,    -85,    449,    980,   1509,   2033,
+      2553,   3067,   3573,   4073,   4562,   5045,   5514,   5973,   6418,   6852,
+      7272,   7675,   8064,   8438,   8793,   9132,   9452,   9752,  10031,  10293,
+     10534,  10752,  10950,  11126,  11279,  11410,  11518,  11602,  11664,  11701,
+     11717,  11708,  11677,  11619,  11541,  11438,  11312,  11164,  10993,  10800,
+     10585,  10349,  10091,   9814,   9516,   9201,   8865,   8512,   8140,   7754,
+      7350,   6933,   6502,   6056,   5599,   5130,   4651,   4163,   3667,   3162,
+      2653,   2136,   1616,   1095,    569,     45,   -480,  -1004,  -1523,  -2042,
+     -2553,  -3058,  -3559,  -4050,  -4531,  -5004,  -5464,  -5911,  -6346,  -6766,
+     -7171,  -7557,  -7929,  -8282,  -8616,  -8929,  -9222,  -9493,  -9740,  -9968,
+    -10171, -10348, -10502, -10631, -10732, -10809, -10859, -10881, -10877, -10846,
+    -10789, -10701, -10588, -10446, -10277, -10080,  -9855,  -9602,  -9326,  -9020,
+     -8687,  -8330,  -7946,  -7538,  -7107,  -6650,  -6171,  -5669,  -5145,  -4600,
+     -4035,  -3453,  -2848,  -2230,  -1595,   -942,   -276,    402,   1095,   1798,
+      2508,   3231,   3959,   4693,   5434,   6176,   6922,   7671,   8418,   9163,
+      9905,  10644,  11376,  12104,  12824,  13536,  14235,  14924,  15599,  16262,
+     16909,  17538,  18150,  18745,  19319,  19873,  20405,  20912,  21396,  21857,
+     22291,  22699,  23079,  23431,  23755,  24049,  24313,  24544,  24747,  24917,
+     25057,  25161,  25235,  25275,  25282,  25256,  25195,  25102,  24974,  24814,
+     24620,  24393,  24132,  23841,  23517,  23161,  22772,  22354,  21905,  21426,
+     20918,  20382,  19816,  19228,  18610,  17968,  17301,  16611,  15898,  15162,
+     14410,  13636,  12842,  12034,  11210,  10371,   9516,   8651,   7776,   6888,
+      5993,   5092,   4183,   3271,   2355,   1434,    517,   -402,  -1320,  -2235,
+     -3146,  -4051,  -4950,  -5840,  -6722,  -7594,  -8454,  -9302, -10136, -10955,
+    -11759, -12547, -13315, -14068, -14799, -15510, -16201, -16868, -17513, -18136,
+    -18734, -19306, -19855, -20379, -20874, -21344, -21786, -22200, -22590, -22949,
+    -23281, -23584, -23859, -24107, -24327, -24518, -24681, -24816, -24923, -25003,
+    -25057, -25082, -25079, -25054, -25002, -24923, -24821, -24694, -24543, -24371,
+    -24177, -23959, -23721, -23466, -23188, -22894, -22579, -22250, -21905, -21544,
+    -21169, -20781, -20382, -19969, -19547, -19112, -18672, -18221, -17767, -17304,
+    -16836, -16364, -15890, -15412, -14933, -14453, -13973, -13494, -13017, -12543,
+    -12072, -11604, -11143, -10684, -10233,  -9788,  -9351,  -8921,  -8500,  -8088,
+     -7684,  -7291,  -6906,  -6534,  -6171,  -5818,  -5478,  -5149,  -4832,  -4529,
+     -4233,  -3953,  -3684,  -3424,  -3179,  -2944,  -2722,  -2509,  -2310,  -2120,
+     -1942,  -1775,  -1616,  -1469,  -1332,  -1202,  -1081,   -968,   -862,   -766,
+      -674,   -588,   -509,   -433,   -364,   -296,   -235,   -172,   -113,    -57,
+         0,     57,    113,    172,    235,    296,    364,    433,    509,    588,
+       674,    766,    862,    968,   1081,   1202,   1332,   1469,   1616,   1775,
+      1942,   2120,   2310,   2509,   2722,   2944,   3179,   3424,   3684,   3953,
+      4233,   4529,   4832,   5149,   5478,   5818,   6171,   6534,   6906,   7291,
+      7684,   8088,   8500,   8921,   9351,   9788,  10233,  10684,  11143,  11604,
+     12072,  12543,  13017,  13494,  13973,  14453,  14933,  15412,  15890,  16364,
+     16836,  17304,  17767,  18221,  18672,  19112,  19547,  19969,  20382,  20781,
+     21169,  21544,  21905,  22250,  22579,  22894,  23188,  23466,  23721,  23959,
+     24177,  24371,  24543,  24694,  24821,  24923,  25002,  25054,  25079,  25082,
+     25057,  25003,  24923,  24816,  24681,  24518,  24327,  24107,  23859,  23584,
+     23281,  22949,  22590,  22200,  21786,  21344,  20874,  20379,  19855,  19306,
+     18734,  18136,  17513,  16868,  16201,  15510,  14799,  14068,  13315,  12547,
+     11759,  10955,  10136,   9302,   8454,   7594,   6722,   5840,   4950,   4051,
+      3146,   2235,   1320,    402,   -517,  -1434,  -2355,  -3271,  -4183,  -5092,
+     -5993,  -6888,  -7776,  -8651,  -9516, -10371, -11210, -12034, -12842, -13636,
+    -14410, -15162, -15898, -16611, -17301, -17968, -18610, -19228, -19816, -20382,
+    -20918, -21426, -21905, -22354, -22772, -23161, -23517, -23841, -24132, -24393,
+    -24620, -24814, -24974, -25102, -25195, -25256, -25282, -25275, -25235, -25161,
+    -25057, -24917, -24747, -24544, -24313, -24049, -23755, -23431, -23079, -22699,
+    -22291, -21857, -21396, -20912, -20405, -19873, -19319, -18745, -18150, -17538,
+    -16909, -16262, -15599, -14924, -14235, -13536, -12824, -12104, -11376, -10644,
+     -9905,  -9163,  -8418,  -7671,  -6922,  -6176,  -5434,  -4693,  -3959,  -3231,
+     -2508,  -1798,  -1095,   -402,    276,    942,   1595,   2230,   2848,   3453,
+      4035,   4600,   5145,   5669,   6171,   6650,   7107,   7538,   7946,   8330,
+      8687,   9020,   9326,   9602,   9855,  10080,  10277,  10446,  10588,  10701,
+     10789,  10846,  10877,  10881,  10859,  10809,  10732,  10631,  10502,  10348,
+     10171,   9968,   9740,   9493,   9222,   8929,   8616,   8282,   7929,   7557,
+      7171,   6766,   6346,   5911,   5464,   5004,   4531,   4050,   3559,   3058,
+      2553,   2042,   1523,   1004,    480,    -45,   -569,  -1095,  -1616,  -2136,
+     -2653,  -3162,  -3667,  -4163,  -4651,  -5130,  -5599,  -6056,  -6502,  -6933,
+     -7350,  -7754,  -8140,  -8512,  -8865,  -9201,  -9516,  -9814, -10091, -10349,
+    -10585, -10800, -10993, -11164, -11312, -11438, -11541, -11619, -11677, -11708,
+    -11717, -11701, -11664, -11602, -11518, -11410, -11279, -11126, -10950, -10752,
+    -10534, -10293, -10031,  -9752,  -9452,  -9132,  -8793,  -8438,  -8064,  -7675,
+     -7272,  -6852,  -6418,  -5973,  -5514,  -5045,  -4562,  -4073,  -3573,  -3067,
+     -2553,  -2033,  -1509,   -980,   -449,     85,    619,   1156,   1689,   2222,
+      2753,   3280,   3802,   4319,   4829,   5333,   5829,   6316,   6793,   7258,
+      7714,   8158,   8588,   9008,   9412,   9801,  10175,  10535,  10877,  11204,
+     11513,  11807,  12082,  12338,  12576,  12797,  12998,  13182,  13344,  13488,
+     13615,  13720,  13808,  13877,  13928,  13961,  13973,  13969,  13945,  13906,
+     13849,  13774,  13684,  13578,  13456,  13320,  13169,  13004,  12827,  12636,
+     12433,  12220,  11995,  11761,  11518,  11267,  11005,  10740,  10467,  10187,
+      9905,   9619,   9327,   9035,   8742,   8445,   8151,   7855,   7563,   7273,
+      6983,   6700,   6418,   6143,   5874,   5611,   5353,   5103,   4862,   4630,
+      4406,   4191,   3988,   3792,   3611,   3437,   3277,   3127,   2991,   2866,
+      2753,   2653,   2565,   2490,   2428,   2378,   2341,   2317,   2304,   2305,
+      2317,   2342,   2377,   2424,   2481,   2549,   2628,   2715,   2814,   2919,
+      3033,   3155,   3282,   3418,   3559,   3705,   3855,   4009,   4166,   4324,
+      4484,   4647,   4806,   4966,   5126,   5280,   5434,   5582,   5726,   5863,
+      5993,   6117,   6232,   6341,   6437,   6524,   6601,   6665,   6715,   6753,
+      6778,   6787,   6781,   6760,   6722,   6667,   6597,   6507,   6397,   6272,
+      6125,   5960,   5775,   5570,   5345,   5101,   4834,   4548,   4241,   3914,
+      3568,   3201,   2814,   2405,   1979,   1533,   1067,    583,     79,   -440,
+      -978,  -1533,  -2104,  -2690,  -3292,  -3907,  -4537,  -5177,  -5832,  -6496,
+     -7171,  -7854,  -8545,  -9245,  -9950, -10660, -11375, -12093, -12811, -13533,
+    -14252, -14970, -15685, -16398, -17104, -17804, -18497, -19181, -19855, -20519,
+    -21169, -21806, -22432, -23038, -23629, -24202, -24756, -25289, -25803, -26293,
+    -26762, -27203, -27622, -28014, -28379, -28716, -29024, -29303, -29551, -29770,
+    -29957, -30111, -30234, -30323, -30377, -30400, -30386, -30338, -30255, -30139,
+    -29987, -29799, -29576, -29319, -29024, -28696, -28332, -27934, -27503, -27037,
+    -26536, -26004, -25439, -24841, -24214, -23555, -22867, -22148, -21401, -20628,
+    -19827, -19002, -18150, -17278, -16383, -15465, -14527, -13570, -12594, -11604,
+    -10600,  -9577,  -8545,  -7501,  -6448,  -5386,  -4318,  -3242,  -2162,  -1081
+};
+
+
+/*
+ * Waveform name: recorder_008271200, size: 1260 samples
  * Osc. Freq. Divider:   2.000
  * Hammond registration:
  * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
  * Setting | 0 | 0 | 8 | 2 | 7 | 1 | 2 | 0 | 0 |
  */
-const  int16  recorder_alto[] =
+const  int16  recorder_008271200[] =
 {
          0,    828,   1661,   2494,   3325,   4151,   4975,   5797,   6611,   7422,
       8229,   9027,   9819,  10607,  11383,  12152,  12913,  13661,  14403,  15132,
@@ -3126,7 +3503,7 @@ const  int16  mellow_reed_008042660[] =
  * Drawbar | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
  * Setting | 4 | 0 | 6 | 1 | 6 | 0 | 0 | 4 | 0 |
  */
-const  int16  jazz_organ_40616004[] =
+const  int16  jazz_organ_406160040[] =
 {
          0,    921,   1850,   2774,   3695,   4609,   5515,   6414,   7299,   8177,
       9040,   9889,  10721,  11538,  12336,  13117,  13875,  14612,  15329,  16022,
@@ -3693,7 +4070,7 @@ const  FlashWaveTable_t  g_FlashWaveTableDef[] =
         (int16 *) square_wave 
     },
     
-    {   // ID# 3: Sawtooth wave, lightly anti-alias filtered -- muffled, buzzy tone (cello?)
+    {   // ID# 3: Sawtooth wave, lightly anti-alias filtered -- buzzy tone (violin/cello?)
         1260,
         1.00,
         (int16 *) sawtooth_wave 
@@ -3705,31 +4082,31 @@ const  FlashWaveTable_t  g_FlashWaveTableDef[] =
         (int16 *) rounded_square
     },
     
-    {   // ID# 5: Blunt sawtooth wave -- dull, mellow sound
+    {   // ID# 5: Blunt sawtooth wave -- dull, mellow sound  -- replace ??? ********************
         1260,
         1.00,
         (int16 *) blunt_sawtooth
     },
     
-    {   // ID# 6: Clean bright flute -- flinty, metallic, rich modulated tone
+    {   // ID# 6: Clean bright flute -- flinty, metallic, modulated tone
         1260,
         1.00,
         (int16 *) clean_bright_flute  
     },
     
-    {   // ID# 7: reserved -- need another reedy woodwind  **************************************
+    {   // ID# 7: ring_modulation_347 -- experimental !
         1260,
-        1.00,
-        (int16 *) g_sinewave
+        3.00,
+        (int16 *) ring_modulation_347
     },
     
-    {   // ID# 8:  reserved -- need another rich, complex, synth sound  *************************
+    {   // ID# 8: ring_modulation_469 -- experimental !
         1260,
-        1.00,
-        (int16 *) g_sinewave
+        4.00,
+        (int16 *) ring_modulation_469
     },
     
-    {   // ID# 9: Alto saxophone  -- reedy, boxy sound in low register (similar to ... ?)
+    {   // ID# 9: Alto saxophone  -- reedy, boxy sound in low register (used in patch?)
         1260,
         2.00,  // take it down an octave!
         (int16 *) alto_saxophone
@@ -3747,16 +4124,16 @@ const  FlashWaveTable_t  g_FlashWaveTableDef[] =
         (int16 *) electric_clarinet
     },
     
-    {   // ID# 12: Mellow pipe #1 --  muffled mellow woodwind (OK)
+    {   // ID# 12: Mellow pipe #1 -- muted mellow woodwind (good - keep)
         1260,
         1.00,
         (int16 *) mellow_pipe_v1
     },
     
-    {   // ID# 13: Recorder (drawbars: 00 8271 200) -- classic odd harmonic spectrum
+    {   // ID# 13: Recorder (drawbars: 00 8271 200) -- classic mostly-odd harmonic spectrum
         1260,
         2.0,
-        (int16 *) recorder_alto
+        (int16 *) recorder_008271200
     },
     
     {   // ID# 14: Rock organ 8888 (drawbars: 88 8800 000) -- simple electric organ
@@ -3767,35 +4144,35 @@ const  FlashWaveTable_t  g_FlashWaveTableDef[] =
     
     {   // ID# 15: Rock organ 8080 (drawbars: 80 8000 000) -- very mellow organ
         1260,
-        1.0, 
+        2.0,
         (int16 *) hammond_rock_8080   
     },
     
     {   // ID# 16: Rock organ 0808 (drawbars: 08 0800 000) -- ring modulator effect
         1260,
-        1.0,      // pitch offset = +1 octave (2x fo)
+        2.0,
         (int16 *) hammond_rock_0808  
     },
 
-    {   // ID# 17: Jazz organ #1  (drawbars: 40 6160 040) -- used in patch "Hammond Organ #1"
+    {   // ID# 17: Jazz organ #1  (drawbars: 40 6160 040) 
         1260,
         2.0,  
-        (int16 *) jazz_organ_40616004  
+        (int16 *) jazz_organ_406160040
     },
     
-    {   // ID# 18: Jazz organ #2  (drawbars: 30 5060 040) -- used in patch "Hammond Organ #2"
+    {   // ID# 18: Jazz organ #2  (drawbars: 30 5060 040) 
         1260,
         2.0,  
         (int16 *) jazz_organ_305060040
     },
     
-    {   // ID# 19: Glockenspiel (drawbars: 00 8360 400) -- use vibe (percussive) envelope
+    {   // ID# 19: Glockenspiel (drawbars: 00 8360 400) -- timbre similar to recorder!
         1260,
         2.0, 
         (int16 *) glockenspiel_008360400
     },
     
-    {   // ID# 20: Pink Floyd organ (drawbars: 85 0005 000)  -- rich complex, flutey sound
+    {   // ID# 20: Pink Floyd organ (drawbars: 85 0005 000) -- rich complex, flutey sound
         1260,
         1.00,     // pitch offset = + 1 octave (2x fo)
         (int16 *) pink_floyd_organ_850005  
@@ -3813,17 +4190,18 @@ const  FlashWaveTable_t  g_FlashWaveTableDef[] =
         (int16 *) bauer_organ_008008432
     },
     
-    {   // ID# 23: Mellow reed (drawbars: 00 8042 660) -- pleasant, rounded, oboe-ish
+    {   // ID# 23: Mellow reed (drawbars: 00 8042 660) -- pleasant, rounded, oboe-ish (keep)
         1260,
         2.00,
         (int16 *) mellow_reed_008042660 
     },
-    
+/*    
     {   // ID# 24: reserved
         1260,
         2.00,  
         (int16 *) g_sinewave
     }
+*/
 };
 
 

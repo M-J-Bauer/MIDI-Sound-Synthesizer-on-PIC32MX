@@ -826,14 +826,14 @@ void    Cmnd_commit( int argCount, char * argValue[] )
     if (argCount == 2 && *argValue[1] == '?' )   // help wanted
     {
         putstr( "Usage:  commit [-y] \n" );
-        putstr( "Commit 'set' parameter values to non-volatile memory, i.e.\n" );
-        putstr( "make current values the power-on/restart defaults.\n" );
+        putstr( "Saves 'set' parameter values in non-volatile memory, \n" );
+        putstr( "to be restored on subsequent power-on/reset.\n" );
         return;
     }
 
     if (argCount == 1)  // Cmd name only...
     {
-        putstr( "Make current parameter values the defaults? (Y/N): " );
+        putstr( "Make current 'set' parameter values persistent? (Y/N): " );
         while (c < 0x20)
         {
             if (RxDataAvail()) c = getch();

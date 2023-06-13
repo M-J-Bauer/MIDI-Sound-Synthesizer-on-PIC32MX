@@ -201,7 +201,7 @@ static  const  GUI_ScreenDescriptor_t  m_ScreenDesc[] =
     {
         SCN_SET_MIDI_OUT_ENABLE,
         ScreenFunc_SetMidiOutEnable,
-        " MIDI OUT ENABLE"
+        " MIDI OUT PROCESS"
     },
     {
         SCN_SET_PITCH_BEND_MODE,
@@ -373,6 +373,14 @@ void  GUI_NavigationExec(void)
     static uint32 buttonScanPeriodStart;
     static bool  init_done;
     short  current, next;  // index values of current and next screens
+
+    if ((milliseconds() - buttonScanPeriodStart) >= 6)  // every 6ms...
+    {
+        ButtonInputService();
+        buttonScanPeriodStart = milliseconds();
+    }
+    
+    if (POT_MODULE_CONNECTED) ControlPotService();
     
     if (!isLCDModulePresent())  return;  // LCD not detected... bail
     
@@ -422,14 +430,6 @@ void  GUI_NavigationExec(void)
             m_lastUpdateTime = milliseconds();
             m_ElapsedTime_ms += SCREEN_UPDATE_INTERVAL;
         }
-    }
-    
-    if (POT_MODULE_CONNECTED) ControlPotService();
-    
-    if ((milliseconds() - buttonScanPeriodStart) >= 6)  // every 6ms...
-    {
-        ButtonInputService();
-        buttonScanPeriodStart = milliseconds();
     }
 }
 
@@ -556,7 +556,7 @@ PRIVATE  void  DisplayTitleBar(uint16 scnIndex)
  * Function:   Quantizes an unsigned integer (max. 100,000) so that the output value is a 
  *             multiple of 1, 2 or 5. The multiple is a power of 10 which depends on the  
  *             magnitude of the input value. Thus, the output value is a member of the set:
- *             { 0, 1, 2, 5, 10, 20, 50, 100, ... 100000 }.
+ *             { 0, 1, 2, 5, 10, 20, 50, 100, 200, 500 ... 100000 }.
  *
  * Entry arg:  (uint16) inValue = 16-bit integer to be quantized
  *
@@ -584,27 +584,31 @@ unsigned  QuantizeValue_1_2_5(unsigned inValue)
 }
 
 /*
- * Function:   Quantizes an unsigned integer (max. 100,000) so that the output value is
- *             rounded to the most significant digit times a power of 10.  Examples:
- *             0 -> 0, 9 -> 9, 14 -> 10, 15 -> 20, 23 -> 20, 94 -> 90, 99 -> 100, 105 -> 110
+ * Function:   Quantizes an unsigned integer value up to 1100 so that the output value is
+ *             rounded to the most significant digit times a power of 10, as per the set:
+ *             { 0, 10, 20, 30, 40, ... 100, 200, 300, 400, ... 1000, 1100 }
+ *             Above 1100, up to 10k, output values are quantized as per the set:
+ *             { 1200, 1500, 2000, 2500, 3000, 4000, 5000, 10000 }
  *
- * Entry arg:  (uint16) inValue = 16-bit integer to be quantized
+ * Entry arg:  (uint16) inValue = 16-bit integer to be quantized (max. 10k)
  *
  * Return val: (uint16) outValue = inValue, quantized per decade
  */
 unsigned  QuantizeValuePerDecade(unsigned inValue)
 {
     unsigned  outValue = 0;
-    unsigned  pow10 = 10;
     
-    if (inValue < 10)  return inValue;
-    
-    while (pow10 <= 100000)
-    {
-        outValue = ((inValue + pow10 / 2) / pow10) * pow10;  // rounded
-        pow10 = pow10 * 10;
-        if (inValue < pow10)  break;
-    }
+    if (inValue < 10)  outValue = 0;
+    else if (inValue < 100)   outValue = ((inValue + 5) / 10) * 10;  // rounded to N x 10
+    else if (inValue < 1100)  outValue = ((inValue + 50) / 100) * 100;  // rounded to N x 100
+    else if (inValue < 1400)  outValue = 1200;
+    else if (inValue < 1700)  outValue = 1500;
+    else if (inValue < 2200)  outValue = 2000;
+    else if (inValue < 2700)  outValue = 2500;
+    else if (inValue < 3500)  outValue = 3000;
+    else if (inValue < 4500)  outValue = 4000;
+    else if (inValue < 7000)  outValue = 5000;
+    else  outValue = 10000;
     
     return  outValue;
 }
@@ -738,7 +742,7 @@ uint8  ButtonCode(void)
 //-------------------------------------------------------------------------------------------------
 // Functions to support up to 6 control potentiometers on the front-panel.
 //-------------------------------------------------------------------------------------------------
-static  int32  m_PotReadingAve[6];  // rolling average of pot readings
+static  int32  m_PotReadingAve[6];  // Rolling average of pot readings [24:8 fixed-pt]
 static  bool   m_PotMoved[6];  // Flags: Pot reading changed since last read
 
 /*
@@ -747,19 +751,20 @@ static  bool   m_PotMoved[6];  // Flags: Pot reading changed since last read
  * Overview:  Service Routine for 6 front-panel control pots.
  *            Non-blocking "task" called frequently as possible.
  *
- * Detail:    The routine reads the 6 pot inputs and keeps a rolling average of raw ADC
- *            readings in fixed-point format (24:8 bits). 
+ * Detail:    The routine reads the pot inputs and keeps a rolling average of raw ADC
+ *            readings in fixed-point format (24:8 bits).  Reading range is 0.0 ~ 1023.0
  *            Each pot reading is compared with its respective reading on the previous pass.
- *            If a change of more than about 1% is found, then a flag is raised for the
- *            respective pot.
+ *            If a change of more than 1% (approx) is found, then a flag is raised.
+ * 
+ *            The state of the flag can be read by a call to function PotMoved(potnum).
+ *            The current pot position can be read by a call to function PotReading(n).
  * 
  * Outputs:   (bool) m_PotMoved[6],  (int32) m_PotReadingAve[6].
- *            The state of the flag can be read by a call to function PotMoved(potnum).
- *            The last pot position can be read by a call to function PotReading(n).
+ * 
  */
 void  ControlPotService()
 {
-    static uint8  potInput[] = POT_ADC_CHANNEL_LIST;  // defined in pic32_low_level.h
+    static uint8  potInput[] = POT_CHANNEL_LIST;  // defined in pic32_low_level.h
     static uint32 startInterval_3ms;
     static uint32 startInterval_37ms;
     static bool   prep_done;
@@ -772,6 +777,7 @@ void  ControlPotService()
     {
         startInterval_3ms = milliseconds();
         startInterval_37ms = milliseconds();
+        potSel = 0;
         prep_done = TRUE;
     }
     
@@ -789,8 +795,9 @@ void  ControlPotService()
         startInterval_3ms = milliseconds();
     }
     
-    // Every 37ms, choose a pot at random, check if it has been moved.
+    // Every 37ms*, choose a pot at random^, check if it has been moved.
     // On average, 6 pots will be serviced in under 240ms.
+    // [*Interval not critical. ^Why random, not cyclic? - Because it works!]
     if ((milliseconds() - startInterval_37ms) >= 37)
     {
         potRand = rand() % 6;  // 0..5
@@ -808,7 +815,7 @@ void  ControlPotService()
  *
  * Overview:     Clears all (6) "pot moved" flags in array m_PotMoved[].
  * 
- * Note:         To clear one individual pot flag, call PotMoved(num).
+ * Note:         To clear one individual flag, simply call PotMoved(num).
  */
 void  PotFlagsClear()
 {
@@ -821,10 +828,11 @@ void  PotFlagsClear()
  * Function:     PotMoved()
  *
  * Overview:     Returns a flag (TRUE or FALSE) indicating if the specified control pot
- *               (potnum) position has changed since the previous call to the function.
+ *               (potnum) position has changed since the previous call to the function
+ *               (with the same arg value).
  *
- * Note:         The flag is cleared on exit, so subsequent calls will return FALSE
- *               until the pot position changes again.
+ * Note:         The flag is cleared on exit, so subsequent calls (with the same arg value)
+ *               will return FALSE, until the pot position changes again.
  *
  * Arg val:      (uint8) ID number of required pot (0..5)
  *
@@ -851,7 +859,7 @@ bool  PotMoved(uint8 potnum)
  */
 uint8  PotReading(uint8 potnum)
 {
-    return  (uint8) (m_PotReadingAve[potnum] >> 10);
+    return  (uint8) (m_PotReadingAve[potnum] >> 10);  // = (Integer part) / 4
 }
 
 
@@ -1967,7 +1975,7 @@ PRIVATE  void  ScreenFunc_ValidateReverbMix(bool isNewScreen)
 
 PRIVATE  void  ScreenFunc_SystemInfoPage1(bool isNewScreen)
 {
-    char    textBuf[32];
+    char    textBuf[40];
 
     if (isNewScreen)  
     {
@@ -2071,7 +2079,7 @@ PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
 {
     static char *potLabel[] = { "Wave 1", "Wave 2", "Detune", "LFO Hz", "Vibr %", "Ramp ms" };
     static bool  doRefresh[6];
-    char   textBuf[40];
+    char   textBuf[40], numBuf[20];
     int    pot, setting, numSteps;
     uint16 xpos, ypos;  // display coords 
     
@@ -2163,13 +2171,23 @@ PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
     {
         if (doRefresh[pot])
         {
-            if (pot == 0) sprintf(textBuf, "%d", (int)g_Patch.Osc1WaveTable);
-            if (pot == 1) sprintf(textBuf, "%d", (int)g_Patch.Osc2WaveTable);
-            if (pot == 2) sprintf(textBuf, "%+d", (int)g_Patch.Osc2Detune);
-            if (pot == 3) sprintf(textBuf, "%2d.%1d", (int)g_Patch.LFO_Freq_x10 / 10,
-                                  (int)g_Patch.LFO_Freq_x10 % 10);
-            if (pot == 4) sprintf(textBuf, "%d", (int)g_Patch.LFO_FM_Depth);
-            if (pot == 5) sprintf(textBuf, "%d", (int)g_Patch.LFO_RampTime);
+            if (pot == 0) itoa(textBuf, (int)g_Patch.Osc1WaveTable, 10);
+            if (pot == 1) itoa(textBuf, (int)g_Patch.Osc2WaveTable, 10);
+            if (pot == 2) 
+            {
+                if (g_Patch.Osc2Detune < 0)  strcpy(textBuf, "-");
+                else if (g_Patch.Osc2Detune > 0)  strcpy(textBuf, "+");
+                else  strcpy(textBuf, "");  // zero: no sign
+                strcat(textBuf, itoa(numBuf, abs(g_Patch.Osc2Detune), 10));
+            }
+            if (pot == 3) 
+            {
+                itoa(textBuf, (int)g_Patch.LFO_Freq_x10 / 10, 10);  // Int part
+                strcat(textBuf, ".");
+                strcat(textBuf, itoa(numBuf, (int)g_Patch.LFO_Freq_x10 % 10, 10));  // Frac part
+            }
+            if (pot == 4) itoa(textBuf, (int)g_Patch.LFO_FM_Depth, 10);
+            if (pot == 5) itoa(textBuf, (int)g_Patch.LFO_RampTime, 10);
 
             xpos = (pot % 3) * 43 + 3;
             ypos = (pot < 3) ? 22 : 44;
@@ -2238,7 +2256,7 @@ PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
         }
         if (PotMoved(2))  // Contour Env Start Level (0..100 %)
         {
-            setting = ((int) PotReading(1) * 100) / 255;
+            setting = ((int) PotReading(2) * 100) / 255;
             g_Patch.ContourStartLevel = (uint8) setting;  // range 0..100
             doRefresh[2] = TRUE;
         }
@@ -2274,11 +2292,11 @@ PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
         if (doRefresh[pot])
         {
             if (pot == 0) strcpy(textBuf, mixerCtrlMode[g_Patch.MixerControl]);
-            if (pot == 1) sprintf(textBuf, "%d", (int)g_Patch.MixerOsc2Level);
-            if (pot == 2) sprintf(textBuf, "%d", (int)g_Patch.ContourStartLevel);
-            if (pot == 3) sprintf(textBuf, "%d", (int)g_Patch.ContourDelay_ms);
-            if (pot == 4) sprintf(textBuf, "%d", (int)g_Patch.ContourRamp_ms);
-            if (pot == 5) sprintf(textBuf, "%d", (int)g_Patch.ContourHoldLevel);
+            if (pot == 1) itoa(textBuf, (int)g_Patch.MixerOsc2Level, 10);
+            if (pot == 2) itoa(textBuf, (int)g_Patch.ContourStartLevel, 10);
+            if (pot == 3) itoa(textBuf, (int)g_Patch.ContourDelay_ms, 10);
+            if (pot == 4) itoa(textBuf, (int)g_Patch.ContourRamp_ms, 10);
+            if (pot == 5) itoa(textBuf, (int)g_Patch.ContourHoldLevel, 10);
 
             xpos = (pot % 3) * 43 + 3;
             ypos = (pot < 3) ? 22 : 44;
@@ -2298,7 +2316,7 @@ PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
 PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
 {
     static char  *potLabel[] = { "N Mode", "N Ctrl", "F Ctrl", "F Res", "FF (st)", "Note trk" };
-    static char  *noiseModeName[] = { "OFF", "0 wave", "+ wave", "% wave" };
+    static char  *noiseModeName[] = { "Off", "Noise", "Add %", "Mix %" };
     static char  *noiseCtrlName[] = { "Fixed", "ENV", "LFO", "Exprn", "Modn" };
     static char  *filtrCtrlName[] = { "Fixed", "Contur", "LFO", "Exprn", "Modn" };
     static bool  doRefresh[6];
@@ -2368,14 +2386,14 @@ PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
                 if (setting < 128)  // Below half-way mark (coarse adjust)
                 {
                     setting = (setting * 8000) / 127 + 1000;  // range 1000..9000
-                    setting = (setting / 100) * 100;  // quantize into 100's
+                    setting = (setting / 500) * 500;  // step size = 500 (.0500)
                 }
                 else  // Above half-way mark (fine adjust)
                 {
-                    setting = ((setting - 128) * 1000) / 127 + 9000;  // range 9000..10K
-                    setting = (setting / 10) * 10;  // quantize into 10's
+                    setting = ((setting - 128) * 1000) / 127 + 9000;  // range 9k..10k
+                    setting = (setting / 50) * 50;  // step size = 50 (.0050)
                 }
-                if (setting > 9990)  setting = 9990;  // cap at 9990
+                if (setting > 9950)  setting = 9950;  // cap at 9950 (.9950)
             }
             g_Patch.FilterResonance = (uint16) setting;  // range 0 | 1000..9990
             
@@ -2385,7 +2403,7 @@ PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
         if (PotMoved(4))  // Filter Frequency (offset), semitones
         {
             setting = (int) PotReading(4);  
-            setting = (setting * 108) / 255;  // range 0..108
+            setting = (setting * 108) / 255;  // pitch range 0..108
             g_Patch.FilterFrequency = (uint8) setting;
             doRefresh[4] = TRUE;
         }
@@ -2405,14 +2423,19 @@ PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
         {
             if (pot == 0) // show Noise Mode as a string
             {
-                strcpy(textBuf, "RM ");  // assume Ring Modulator enabled
+                strcpy(textBuf, "RMod");  // assume Ring Modulator enabled
                 if (g_Patch.NoiseMode < 4) strcpy(textBuf, noiseModeName[g_Patch.NoiseMode]);
                 else  strcat(textBuf, itoa(numBuf, (int)g_Patch.NoiseMode, 10)); 
             }
             if (pot == 1) strcpy(textBuf, noiseCtrlName[g_Patch.NoiseLevelCtrl]);
             if (pot == 2) strcpy(textBuf, filtrCtrlName[g_Patch.NoiseLevelCtrl]);
-            if (pot == 3) sprintf(textBuf, "%d", (int)g_Patch.FilterResonance);
-            if (pot == 4) sprintf(textBuf, "%d", (int)g_Patch.FilterFrequency);
+            if (pot == 3) 
+            {
+                strcpy(textBuf, ".");
+                if (g_Patch.FilterResonance == 0)  strcpy(textBuf, "Off");
+                else  strcat(textBuf, itoa(numBuf, (int)g_Patch.FilterResonance, 10));
+            }
+            if (pot == 4) itoa(textBuf, (int)g_Patch.FilterFrequency, 10);
             if (pot == 5)
             {
                 if (g_Patch.FilterNoteTrack) strcpy(textBuf, "On");
@@ -2489,13 +2512,14 @@ PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
             if (setting < 10)  setting = 0;  // reject 1..9, allow 0
             g_Patch.AmpldEnvPeak_ms = (uint16) setting;
             doRefresh[1] = TRUE;
+            doRefresh[2] = TRUE;
         }
         if (PotMoved(2))  // Env Decay time (10..5000 ms)
         {
             setting = (int) PotReading(2);  // unipolar setting 0..255
             setting = (setting * setting * 5000) / (255 * 255);  // square-law
             setting = QuantizeValuePerDecade(setting);  // range 10..5000
-            if (setting < 10)  setting = 0;  // reject 1..9, allow 0
+            if (setting < 10)  setting = 10;  // reject values 0..9
             g_Patch.AmpldEnvDecay_ms = (uint16) setting;
             doRefresh[2] = TRUE;
         }
@@ -2510,7 +2534,7 @@ PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
             setting = (int) PotReading(4);  // unipolar setting 0..255
             setting = (setting * setting * 2000) / (255 * 255);  // square-law
             setting = QuantizeValuePerDecade(setting);  // range 10..2000
-            if (setting < 10)  setting = 0;  // reject 1..9, allow 0
+            if (setting < 10)  setting = 10;  // reject values 0..9
             g_Patch.AmpldEnvRelease_ms = (uint16) setting;
             doRefresh[4] = TRUE;
         }
@@ -2526,12 +2550,20 @@ PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
     {
         if (doRefresh[pot])
         {
-            if (pot == 0) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvAttack_ms);
-            if (pot == 1) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvPeak_ms);
-            if (pot == 2) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvDecay_ms);
-            if (pot == 3) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvSustain);
-            if (pot == 4) sprintf(textBuf, "%d", (int) g_Patch.AmpldEnvRelease_ms);
-            if (pot == 5) sprintf(textBuf, "%d", dummyParam);  // temp.
+            if (pot == 0) itoa(textBuf, g_Patch.AmpldEnvAttack_ms, 10);
+            if (pot == 1) 
+            {
+                if (g_Patch.AmpldEnvPeak_ms == 0) strcpy(textBuf, "--");
+                else  itoa(textBuf, g_Patch.AmpldEnvPeak_ms, 10);
+            }
+            if (pot == 2) 
+            {
+                if (g_Patch.AmpldEnvPeak_ms == 0) strcpy(textBuf, "--");
+                else  itoa(textBuf, g_Patch.AmpldEnvDecay_ms, 10);
+            }
+            if (pot == 3) itoa(textBuf, g_Patch.AmpldEnvSustain, 10);
+            if (pot == 4) itoa(textBuf, g_Patch.AmpldEnvRelease_ms, 10);
+            if (pot == 5) itoa(textBuf, dummyParam, 10);  // temp.
 
             xpos = (pot % 3) * 43 + 3;
             ypos = (pot < 3) ? 22 : 44;

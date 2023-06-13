@@ -72,7 +72,6 @@ void  GenerateWaveTable(WaveformDesc_t  *waveDesc)
     int   i;
     
     TableSize = waveDesc->Size;
-    Osc1FreqDividerSet(waveDesc->FreqDiv);
     ClearWaveTable();
 
     for (i = 0;  i < 16;  i++)
@@ -139,7 +138,8 @@ void  Cmnd_wav(int argCount, char * argVal[])
         putstr( "Usage:  wav  <option>  [arg1] [arg2] ... \n" );
         putstr( "<option>----------------------------------------\n" );
         putstr( "  -n : New wave-table  [arg1 = table size]      \n" );
-        putstr( "  -f : Set Osc.Freq.Div <arg1> for sound test   \n" );
+        putstr( "  -f : Set Osc.Freq.Divider for sound test --   \n" );
+        putstr( "           <arg1> = Osc#, <arg2> = Freq.Div     \n" );
         putstr( "  -l : List wave-table and partial param's      \n" );
         putstr( "  -a : Add partial to wave-table buffer --      \n" );
         putstr( "           <arg1> = partial order (1..16)       \n" );
@@ -157,17 +157,16 @@ void  Cmnd_wav(int argCount, char * argVal[])
         return;
     }
 
-    if (argVal[1][0] == '-') option = tolower(argVal[1][1]);  else option = '$';
+    if (argVal[1][0] == '-') option = tolower(argVal[1][1]);  // argCount > 1
+    else  option = '$';
 
     // One-time initialization on first use of 'wav' command, except option '-x'
     if (!isPrepDone && option != 'x' && option != '$')
     {
         previousPatch = GetActivePatchID();  // Save active patch before corrupting it
-        WaveTableName[0] = 0;
-        SelectUserWaveTableOsc1();           // Use RAM wave-table buffer for OSC1
+        strcpy(WaveTableName, "untitled_wave");
         TableSize = 1260;                    // Set defaults for user wave-table
         WaveTableSizeSet(TableSize);
-        Osc1FreqDividerSet(1.0);
         AliasFilter_K = 50;                  // Set Anti-alias filter TC default
         ClearWaveTable();
         srand(TMR2 | 1);                     // Seed rand() with an odd number
@@ -178,27 +177,32 @@ void  Cmnd_wav(int argCount, char * argVal[])
     {
     case 'n':           // New wave-table
     {
-        int     arg1 = atoi(argVal[2]);
+        int   arg1, sizeMax = WAVE_TABLE_MAXIMUM_SIZE;
 
-        if (argCount == 2)  // size not specified - use default
+        if (argCount == 2) 
         {
             putstr("Table size not specified - using default: 1260 \n");
             TableSize = 1260;
         }
-        else if (arg1 >= 200 && arg1 <= WAVE_TABLE_MAXIMUM_SIZE)
+        else if (argCount >= 3)
         {
-            TableSize = arg1;
-        }
-        else  // size out of range
-        {
-            sprintf(textBuf, "! Table size must be 200..%d samples. \n", WAVE_TABLE_MAXIMUM_SIZE);
-            putstr(textBuf);
-            break;
+            arg1 = atoi(argVal[2]);
+            if (arg1 >= 200 && arg1 <= WAVE_TABLE_MAXIMUM_SIZE) TableSize = arg1;
+            else
+            {
+                sprintf(textBuf, "! Table size must be 200..%d samples. \n", sizeMax);
+                putstr(textBuf);
+                break;
+            }
         }
 
+        g_Patch.Osc1WaveTable = 0;  // Set patch wave-tables = RAM buffer
+        g_Patch.Osc2WaveTable = 0;
+        SynthPrepare();
         WaveTableSizeSet(TableSize);
-        Osc1FreqDividerSet(1.0);
-        WaveTableName[0] = 0;
+        OscFreqDividerSet(1, 1.0);
+        OscFreqDividerSet(2, 1.0);
+        strcpy(WaveTableName, "untitled_wave");
         ClearWaveTable();
         isHammond = FALSE;
         putstr("Output buffer is empty... Ready to add partial.\n");
@@ -206,12 +210,20 @@ void  Cmnd_wav(int argCount, char * argVal[])
     }
     case 'f':           // Set Osc. Freq. Divider for sound test
     {
-        float   arg = atof(argVal[2]);
+        int    arg1;
+        float  arg2;
 
-        if (argCount == 3 && arg >= 0.001)  Osc1FreqDividerSet(arg);
-
-        sprintf(textBuf, "Osc.Freq.Div: %8.4f \n", Osc1FreqDividerGet());
+        if (argCount >= 4)
+        {
+            arg1 = atoi(argVal[2]);  // OSC number
+            arg2 = atof(argVal[3]);  // Freq. Div.
+            if ((arg1 == 1 || arg1 == 2) && arg2 >= 0.001)  OscFreqDividerSet(arg1, arg2);
+            else  putstr("! Invalid arg value(s) \n");
+        }
+        sprintf(textBuf, "Osc.Freq.Div:  OSC1 %7.3f, OSC2 %7.3f \n", 
+                OscFreqDividerGet(1), OscFreqDividerGet(2));
         putstr(textBuf);
+            
         break;
     }
     case 'l':           // List wave-table & partial stat's
@@ -221,9 +233,12 @@ void  Cmnd_wav(int argCount, char * argVal[])
     }
     case 'a':           // Add partial to wave-table buffer
     {
-        int   order = atoi(argVal[2]);
-        int   ampld = atoi(argVal[3]);
-        int   peak_ampld;
+        int  order, ampld, peak_ampld;
+        
+        if (argCount < 4)  break;  // Not enough arg's
+        
+        order = atoi(argVal[2]);
+        ampld = atoi(argVal[3]);
 
         if (order < 1 || order > 16)
         {
@@ -260,27 +275,28 @@ void  Cmnd_wav(int argCount, char * argVal[])
     }
     case 'c':           // Clear partial from wave-table
     {
-        int   order = atoi(argVal[2]);
-
-        if (order < 1 || order > 16)
-        {
-            putstr("! Invalid order - nothing changed. \n");
-            break;
-        }
+        int  order;
         
-        RemovePartialFromWaveTable(order);
-        putstr("* Partial removed from waveform.\n");
+        if (argCount >= 3)
+        {
+            if ((order = atoi(argVal[2])) < 1 || order > 16)
+            {
+                putstr("! Invalid order - nothing changed. \n");
+                break;
+            }
+            RemovePartialFromWaveTable(order);
+            putstr("* Partial removed from waveform.\n");
+        }
         break;
     }
-    case 'h':           // Create wave-table using Hammond drawbar settings
+    case 'h':           // Create new wave-table using Hammond drawbar settings
     {
-        if (argCount < 3)   // more help wanted
+        if (argCount < 3)   // help wanted
         {
             putstr("Create a wave-table using Hammond organ drawbar settings. \n");
             putstr("Command usage: \n");
             putstr("wav -h  [arg1] [arg2] [arg3] ... [arg9] \n");
             putstr("   where <arg1>..<arg9> are drawbar settings (range 0..8) \n");
-            putstr("The table peak level is scaled to the highest drawbar setting.\n");
             putstr("Set Osc.Freq.Divider = 2.0 in the wave-table descriptor.\n\n");
 
             putstr("  +----------------------------------------------------------+ \n");
@@ -289,15 +305,21 @@ void  Cmnd_wav(int argCount, char * argVal[])
             putstr("  | Partial # |  1  |  3  |  2 |  4 |  6 |  8 | 10 | 12 | 16 | \n");
             putstr("  +----------------------------------------------------------+ \n\n");
         }
-        else  GenerateWaveTableFromDrawbars(argCount, argVal);
-        
+        else  
+        {
+            g_Patch.Osc1WaveTable = 0;  // Set patch wave-tables = RAM buffer
+            g_Patch.Osc2WaveTable = 0;
+            SynthPrepare();
+            GenerateWaveTableFromDrawbars(argCount, argVal);
+        }
         break;
     }
     case 'z':           // Scale samples in wave buffer
     {
-        uint16   peak_pc = atoi(argVal[2]);
-
-        if (argCount < 3 || peak_pc > 100)  peak_pc = 96;
+        uint16   peak_pc = 96;  // percent of full-scale
+        
+        if (argCount >= 3)  peak_pc = atoi(argVal[2]);
+        if (peak_pc >= 100)  peak_pc = 96;  // default
 
         if (!isTableEmpty)
         {
@@ -330,7 +352,7 @@ void  Cmnd_wav(int argCount, char * argVal[])
         }
 
         g_Config.UserWaveform.Size = TableSize;
-        g_Config.UserWaveform.FreqDiv = Osc1FreqDividerGet();
+        g_Config.UserWaveform.FreqDiv = OscFreqDividerGet(1);
 
         for (i = 0;  i < 16;  i++)
         {
@@ -346,10 +368,10 @@ void  Cmnd_wav(int argCount, char * argVal[])
     {
         int  k = 50;
 
-        if (argCount >= 3) k = atoi(argVal[2]);
+        if (argCount >= 3)  k = atoi(argVal[2]);
         else  putstr("! Missing arg - using default (K = 50).\n");
         
-        if (k <= 0 || k > 500)  
+        if (k < 1 || k > 500)  
             putstr("! Arg out of bounds. - Filter not applied.\n");
         else
         {
@@ -404,13 +426,8 @@ PRIVATE  void   ListWaveParameters(void)
     char  textBuf[80];
     bool  isAdditiveWave = 0;  
 
-    if (strlen(WaveTableName) > 2)  // have name
-    {
-        putstr("Table name:   ");  putstr(WaveTableName);  putstr("\n");
-    }
-    putstr("Table size:   ");  putDecimal(TableSize, 1);  putstr(" samples \n");
-    sprintf(textBuf, "Osc.Freq.Div: %7.3f \n", Osc1FreqDividerGet());
-    putstr(textBuf);
+    putstr("Table name: ");  putstr(WaveTableName);  putstr("\n");
+    putstr("Table size: ");  putDecimal(TableSize, 1);  putstr(" samples \n");
 
     if (isTableEmpty)  
     {
@@ -649,6 +666,7 @@ PRIVATE  void  ScaleTablePeakMagnitude(uint16 peakPercent)
  * The buffered waveform is low-pass filtered to remove high-order partials which might
  * otherwise cause aliasing with the sample frequency.  The filter works by averaging a
  * finite number of consecutive samples (= AliasFilter_K).
+ * The filter may be applied N times to get steeper "roll-off" (filter order = N).
  */
 PRIVATE  void   ApplyAntiAliasFilter()
 {
@@ -684,9 +702,6 @@ PRIVATE  void   ApplyAntiAliasFilter()
 /*`````````````````````````````````````````````````````````````````````````````````````````````````
  * Function outputs the wave-table as an array of sample values (decimal integers),
  * in C source syntax, i.e. initialized array of constants.
- * Called by "wav -c" command option. Intended for development purposes only.
- *
- * Entry arg. format = 0 for brief, 1 to show partial distribution
  */
 PRIVATE  void  DumpWaveTable(void)
 {
@@ -696,14 +711,9 @@ PRIVATE  void  DumpWaveTable(void)
 
     // Print wave-table info as C comment block
     putstr("\n\n/* \n");
-    if (strlen(WaveTableName) > 2)  // Have table name
-    {
-        putstr(" * Wave-table name: ");  putstr(WaveTableName);  putstr("\n");
-    }
-    sprintf(outBuf, " * Size: %d samples \n", WaveTableName, TableSize);
-    putstr(outBuf);
-    sprintf(outBuf, " * Osc. Freq. Divider: %7.3f \n", Osc1FreqDividerGet());
-    putstr(outBuf);
+    putstr(" * Wave-table name: ");  putstr(WaveTableName);  putstr("\n");
+    sprintf(outBuf, " * Size:  %d samples \n", TableSize);  putstr(outBuf);
+    putstr(" * Osc. Freq. Divider: TBA \n");
 
     if (isHammond)
     {
@@ -718,12 +728,7 @@ PRIVATE  void  DumpWaveTable(void)
         putstr("\n");
     }
     putstr(" */ \n");
-
-    if (strlen(WaveTableName) > 2)  // Have table name
-    {
-        sprintf(outBuf, "const  int16  %s[] = \n{ ", WaveTableName);  putstr(outBuf);
-    }
-    else  putstr("const  int16  untitled_wave[] = \n{ ");
+    sprintf(outBuf, "const  int16  %s[] = \n{ ", WaveTableName);  putstr(outBuf);
 
     for (i = 0;  i < TableSize;  i++)
     {
@@ -742,23 +747,27 @@ PRIVATE  void  DumpWaveTable(void)
 /*`````````````````````````````````````````````````````````````````````````````````````````````````
  * Populate a wave-table according to Hammond organ drawbar settings.
  * Called by "wav -h" command option.  (See help text for -h option.)
+ * 
+ * Drawbar scale is non-linear.  Array ampld_pc[] values represent the drawbar
+ * logarithmic amplitude curve (approx.).
+ * Partial amplitudes are scaled proportionally to avoid clipping.
  */
 PRIVATE  void   GenerateWaveTableFromDrawbars(int argCount, char * argVal[])
 {
     static  int   partial[] = { 1, 3, 2, 4, 6, 8, 10, 12, 16 };
     static  int   ampld_pc[] = { 0, 3, 5, 10, 18, 32, 50, 71, 99 };  // %FS
 
-    int  idx, setting, peak_ampld;
-    int  ampld_sum = 0;
-    int  max_setting = 0;
+    int  idx, setting, ampld_sum = 0;
+    bool isClipped = FALSE;
 
     isHammond = TRUE;
     WaveTableSizeSet(1260);
-    Osc1FreqDividerSet(2.0);
-    WaveTableName[0] = 0;
+    OscFreqDividerSet(1, 2.0);
+    OscFreqDividerSet(2, 2.0);
+    strcpy(WaveTableName, "untitled_wave");
     ClearWaveTable();
     
-    for (idx = 0;  idx < 9;  idx++)  // Extract up to 9 args;  find max_setting
+    for (idx = 0;  idx < 9;  idx++)  // Extract up to 9 args
     {
         if (idx >= (argCount - 2))  setting = 0;  // no more arg's
         else  setting = atoi(argVal[idx + 2]);    
@@ -767,27 +776,20 @@ PRIVATE  void   GenerateWaveTableFromDrawbars(int argCount, char * argVal[])
         {
             drawbar_setting[idx] = setting;
             ampld_sum += ampld_pc[setting];
-            if (setting > max_setting)  max_setting = setting;
         }
         else  drawbar_setting[idx] = 0;  // arg out of range
     }
 
     for (idx = 0;  idx < 9;  idx++)  // process 9 drawbar settings
     {
+        setting = drawbar_setting[idx];  // apply non-linear curve
         PartialOrder = partial[idx];
-        setting = drawbar_setting[idx];
-        PartialAmpld = (100 * ampld_pc[setting]) / ampld_sum;  // %FS
-        peak_ampld = AddPartialToWaveTable();
-        if (peak_ampld == ERROR)  break;
+        PartialAmpld = (100 * ampld_pc[setting]) / ampld_sum;  // scale
+        if (AddPartialToWaveTable() == ERROR)  isClipped = TRUE;
     }
 
-    if (peak_ampld == ERROR)  // Highly unlikely!
-        putstr("! Clipping occurred... Wave-table build terminated.\n");
-    else  
-    {   // Scale wave-table samples according to highest drawbar setting
-        ScaleTablePeakMagnitude(ampld_pc[max_setting]);
-        ListWaveParameters();  // done!
-    }
+    if (isClipped)  putstr("! Clipping occurred... Wave-table may be unusable.\n");
+    else  ListWaveParameters();
 }
 
 

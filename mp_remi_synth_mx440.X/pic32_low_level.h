@@ -42,9 +42,14 @@
 //
 #endif
 
-#define NUMBER_OF_ANALOG_INPUTS  10   // Application-specific
+
 #define SIGNAL_ACQUISITION        0
 #define WAITING_FOR_CONVERSION    1
+
+#define NUMBER_OF_ANALOG_INPUTS  10  
+#define ADC_CHANNEL_LIST    { 1, 2, 3, 4, 8, 9, 10, 11, 12, 14 }  // All ADC inputs (any order)
+#define POT_CHANNEL_LIST    { 1, 2, 3, 4, 8, 9 }  // Pot inputs (sub-set of ADC chan list)
+
 
 // Arg u32 is a variable of type uint32
 #define READ_CPU_CORE_COUNT_REG(u32)  asm volatile("mfc0   %0, $9" : "=r"(u32));
@@ -72,9 +77,6 @@
 #define MASK_BUTTON_D              0b00001000
 #define MASK_BUTTON_HASH           0b00010000  
 #define MASK_BUTTON_STAR           0b00100000
-
-// Specify the 6 ADC inputs assigned to Control Panel pots -- platform specific:
-#define POT_ADC_CHANNEL_LIST       { 1, 2, 3, 4, 8, 9 } 
 
 // Macros to control and monitor LCD backlight LED on pin RD9
 #define LCD_BACKLIGHT_SET_HIGH()   LATDbits.LATD4 = 1

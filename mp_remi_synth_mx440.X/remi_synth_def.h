@@ -103,7 +103,7 @@ typedef  struct  synth_patch_param_table
     uint8   NoiseLevelCtrl;         // 0:Fixed, 1:Amp.Env, 2:LFO, 3:Exprn, 4:Modn
     uint8   FilterControl;          // 0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn
     uint16  FilterResonance;        // 0..9999  (0: bypass filter)
-    uint8   FilterFrequency;        // 0..108 (MIDI note number)
+    uint8   FilterFrequency;        // 0..120 (MIDI note number)
     uint8   FilterNoteTrack;        // 0:Off, 1:On
     // Amplitude Envelope 
     uint16  AmpldEnvAttack_ms;      // 1..10k ms
@@ -145,6 +145,7 @@ extern  const  PatchParamTable_t  g_PatchProgram[];       // Array of pre-define
 extern  const  WaveformDesc_t     g_RegenWaveformDef[];   // Array of regenerating waveforms
 extern  const  FlashWaveTable_t   g_FlashWaveTableDef[];  // Array of flash-based wave-tables
 
+extern  float  g_ExpressionCalibr;      // Expression gain adjust (0.25 ~ 2.5)
 extern  float  g_FilterInputAtten;      // Filter input atten/gain (.01 ~ 2.5)
 extern  float  g_FilterOutputGain;      // Filter output atten/gain (0.1 ~ 25)
 extern  float  g_NoiseFilterGain;       // Noise gen. gain adjustment (0.1 ~ 25)
@@ -187,14 +188,11 @@ PatchParamTable_t  *GetActivePatchTable();
 bool   isNoteOn();
 int    GetActivePatchID();
 int    GetTableIndexOfPatchID(uint16 patchID);
-void   SelectUserWaveTableOsc1();
 int    GetActiveWaveTable(void);
 void   WaveTableSizeSet(uint16 size);
-void   Osc1FreqDividerSet(float freqDiv);
-float  Osc1FreqDividerGet();
-void   OscFreqMultiplierSet(float  mult);
+void   OscFreqDividerSet(short oscnum, float freqDiv);
+float  OscFreqDividerGet(short oscnum);
 bool   isSynthActive();
-void   SetAudioOutputLevel(fixed_t level_pu);
 void   SetVibratoMode(unsigned mode);
 void   SetFilterFreqIndex(uint8 freqIndex);
 uint8  GetFilterFreqIndex();
