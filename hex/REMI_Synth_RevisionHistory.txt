@@ -158,10 +158,6 @@ To do:
 ``````
 > When v3.0.xx is fully tested, release as v3.1.00.
 
-> Implement IIR real-time anti-alias filters in oscillators, with settable 
-  time-constant (K).  (Cascade 2 stages to make 2nd-order filter.)
-  If this works, replace square and sawtooth wave-tables with pure waveforms.
-
 
 ================================================================================
 REMI_Synth_RevisionHistory.txt                                   www.mjbauer.biz  
