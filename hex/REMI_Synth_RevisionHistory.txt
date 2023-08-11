@@ -122,8 +122,8 @@ v3.0.25  2023-05-02
 Removed redundant and uninteresting wave-tables.
 Removed/replaced some patch definitions, added some more.
 
-v3.0.33  2023-05-31
-```````````````````
+v3.0.33  2023-05-31  [mk2 mx340 build]
+``````````````````````````````````````
 Added more 'Control Panel' functions in GUI.  There are now 4 Control Panel 
 screens, allowing adjustment of all (23) patch parameters using 6 pots.  
 
@@ -133,8 +133,8 @@ i.e. increase or decrease sensitivity to MIDI breath pressure level.
 
 Modified some patch definitions, eg. "Reeded Woodwind", "Electric Clarinet".
 
-v3.0.50  2023-06-12
-```````````````````
+v3.0.50  2023-06-12  [mk2 mx340 build]
+``````````````````````````````````````
 Fixed some bugs in GUI 'Control Panel' screens.
 
 Renamed patches:  "Vinyl-cello" (30), "Jazz-Rock Organ 1" (41), 
@@ -152,11 +152,104 @@ Added more "experimental" wave-tables:
 
 Made minor (cosmetic) changes to some CLI commands and GUI screens.
 
+v3.0.52  2023-06-14  [mk2 mx340 build]
+``````````````````````````````````````
+Added patch command option "patch -a <id>" to load and activate a patch
+without assigning it to the currently selected Preset.
+
+Modified patch command option "patch -p <id>" to load and activate a patch
+AND to assign the patch to the currently selected Preset, persistently.
+This command no longer dumps the (new) active patch parameters.
+
+Modified patch command option "patch -l" (list predefined patches),
+so that the printout is formatted into 2 columns.
+
+Fixed a bug in function ContourEnvelopeShaper() which could cause a fatal error,
+i.e. divide by zero when g_Patch.LFO_RampTime == 0.
+Solution: g_Patch.LFO_RampTime cannot be set to zero... minimum 5ms.
+
+Fixed a bug in function VibratoRampGenerator() which could cause a fatal error,
+i.e. divide by zero when g_Patch.ContourRamp_ms == 0.
+Solution: g_Patch.ContourRamp_ms cannot be set to zero... minimum 5ms.
+
+v3.0.55  2023-06-15  [mk3 mx440 build]
+``````````````````````````````````````
+Same as build v3.0.52, except...
+
+GUI Control Panel screens with patch param's in percentage units (%) modified
+so the param values are quantized in steps of 5 units.
+
+Modified GUI Control Panel screen #1 - Oscillators...  LFO Freq settings are
+now quantized using a lookup table (25 steps).
+
+Added patch parameter 'AL' - Audio Level Adjust (5..250 %)
+to allow "normalisation" (consistency) of output level across most patches.
+
+v3.0.65  2023-06-24  [mk2 mx340 build]
+``````````````````````````````````````
+Fixed a bug in GUI...  Filter control mode now displayed correctly.
+
+Added pure sawtooth waveform generator -- not using wave-table.
+To activate sawtooth, set patch osc waveform ID (W1 or W2) to 77.
+Frequency is quantized, so some notes will be slightly off-pitch;
+also vibrato doesn't work (because fine-tuning of frequency is impossible).
+
+Added test patch #92 which uses raw sawtooth in OSC2, square wave in OSC1.
+Mixer control mode is set to use expression (CC02) to morph from OSC1 to OSC2.
+(Change to Contour for MIDI keyboard controller or sequencer.)
+
+v3.0.70  2023-06-30  [mk2 mx340 build]
+``````````````````````````````````````
+Modified GUI Control Panel #3 screen... 
+Filter resonance range is 0.900 ~ 0.995, or zero (0 = filter off).
+(Resonance values below 0.9 are not useful, but still may be set with CLI.)
+
+Fixed a defect which was causing faint clicks at note-on, but not with legato,
+and only with the bi-quad filter enabled.
+The filter coefficient a1 was being re-initialized at note-on, sometimes 
+resulting in a step change of the filter output signal.  Coeff a1 should be 
+adjusted in function FilterFrequencyControl() -- nowhere else.  
+The following code was removed from function SynthNoteOn()...
+
+    // Set filter coefficient values to be applied in the audio ISR
+    TIMER2_IRQ_DISABLE();
+    v_coeff_b0 = m_FiltCoeff_b0;
+    v_coeff_b2 = 0 - m_FiltCoeff_b0;  // b2 = -b0
+    v_coeff_a1 = 0 - m_FiltCoeff_c[noteNum];  // !!! Causing clicks !!!
+    v_coeff_a2 = m_FiltCoeff_a2;        
+    TIMER2_IRQ_ENABLE();
+
+Coefficient values (except a1 which is freq-dependent) are now initialized
+in function SynthPrepare().
+
+Fixed a minor annoyance which occurred in EWI mode, i.e. using breath pressure
+to control audio level, the note continued to sound faintly after note-off.
+The output of the expression level smoothing filter would not diminish to zero
+after the input expression level dropped to zero (at note off).
+Easy fix:  Forced the output level to zero when it drops below a set minimum.
+Note:  With reverb on, the signal will still linger for a second or two.
+
+v3.0.71  2023-06-30  [mk3 mx440 build]
+``````````````````````````````````````
+Same as v3.0.70, but compiled for MAM board (MX440 MCU).
+
 
 --------------------------------------------------------------------------------
 To do:
 ``````
-> When v3.0.xx is fully tested, release as v3.1.00.
+> Pitch bend and modulation using Analog CV inputs 1 and 2 (resp).
+
+> When v3.0.7x is fully tested, release as v3.1.00.
+
+> Extend number of User Patches to 6 (id# 0..5), stored in 24LC08 EEPROM.
+  Modify CLI commands "patch -s <id> [name]" and "patch -u <id>" 
+    to include user patch ID number argument <id>.
+  Modify CLI commands "patch -a <id>", "patch -p <id>", "preset -p <id>"
+    to extend range of argument <id> to include user patches.
+  Modify GUI PRESET screen to allow a saved User Patch to be assigned.
+
+> Support higher-capacity EEPROM -- 24LC64.  (Write driver code)
+  Extend number of User Patches to 20 (id# 0..19), or more.
 
 
 ================================================================================
