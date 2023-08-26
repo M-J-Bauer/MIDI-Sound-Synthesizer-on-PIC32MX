@@ -45,7 +45,7 @@ void  DefaultConfigData(void)
     
     // Calibration constants (default settings)
     g_Config.ExpressionCalibr = 1.0;       // range 0.25 ~ 2.5
-    g_Config.FilterInputAtten = 0.25; 
+    g_Config.FilterInputAtten = 0.20; 
     g_Config.FilterOutputGain = 4.0;   
     g_Config.NoiseFilterGain = 4.0; 
 

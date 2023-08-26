@@ -20,10 +20,13 @@
 #define WAVE_TABLE_MAXIMUM_SIZE  2600    // samples
 #define REVERB_DELAY_MAX_SIZE    2000    // samples (max. 0.05 sec.)
 #define SINE_WAVE_TABLE_SIZE     1260    // samples (for g_sinewave[] LUT)
+#define SQUARE_WAVE_ID             44    // waveform ID for square-wave
+#define SAWTOOTH_WAVE_ID           77    // waveform ID for sawtooth-wave
 
-#define FIXED_MIN_LEVEL  (1)                     // Minimum normalized signal level (0.0001)
-#define FIXED_MAX_LEVEL  (IntToFixedPt(1) - 1)   // Full-scale normalized signal level (0.9999)
+#define FIXED_MIN_LEVEL    (1)                   // Minimum non-zerosignal level (0.000001)
+#define FIXED_MAX_LEVEL  (IntToFixedPt(1) - 1)   // Full-scale normalized signal level
 #define FIXED_PT_HALF    (IntToFixedPt(1) / 2)   // Constant 0.5 in fixed_t format
+#define AUDIO_FLOOR_LEVEL  (20)                  // Audio "floor" level (approx. 0.00002)
 
 // Possible values for patch parameter: m_Patch.MixerControl
 #define MIXER_CTRL_FIXED            0    // Osc. mix is constant (MixerOsc2Level %)
@@ -111,7 +114,7 @@ typedef  struct  synth_patch_param_table
     uint16  AmpldEnvDecay_ms;       // 1..10k ms
     uint16  AmpldEnvRelease_ms;     // 1..10k ms
     uint8   AmpldEnvSustain;        // 0..100 % (square-law curve)
-    uint8   reserved;               // (deprecated param.)
+    uint8   AudioLevelAdjust;       // 5..250 % (linear gain factor)
 
 } PatchParamTable_t;
 
@@ -159,8 +162,8 @@ extern  const  uint16  g_base2exp[];
 extern  int16  WaveTableBuffer[];        // Wave-table buffer in data RAM
 extern  PatchParamTable_t  g_Patch;      // active (working) patch parameters
 
-extern  uint16   g_Osc1WaveTableSize;    // Number of samples in OSC1 wave-table
-extern  uint16   g_Osc2WaveTableSize;    // Number of samples in OSC2 wave-table
+extern  int      g_Osc1WaveTableSize;    // Number of samples in OSC1 wave-table
+extern  int      g_Osc2WaveTableSize;    // Number of samples in OSC2 wave-table
 extern  float    g_Osc1FreqDiv;          // OSC1 frequency divider
 extern  float    g_Osc2FreqDiv;          // OSC2 frequency divider
 

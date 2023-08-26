@@ -500,7 +500,7 @@ void  DisplayMenuOption(uint16 x, uint16 y, char symbol, char *text)
 /*
  * This function displays a text string (str) centred in a specified field width (nplaces)
  * using 8pt mono-spaced font, at the specified upper-left screen position (x, y).
- * On exit, the display write mode is restored to 'SET_PIXELS'.
+ * On exit, the pixel write mode is restored to SET_PIXELS, regardless of mode on entry.
  */
 void  DisplayTextCenteredInField(uint16 x, uint16 y, char *str, uint8 nplaces)
 {
@@ -525,7 +525,7 @@ void  DisplayTextCenteredInField(uint16 x, uint16 y, char *str, uint8 nplaces)
  * Function renders the Title Bar (background plus text) of a specified screen.
  * The title bar text (if any) is defined in the respective screen descriptor
  * given by the argument scnIndex. The function is called by GUI_NavigationExec();
- * it is not meant to be called directly by application-specific screen functions.
+ * it is not meant to be called directly by application functions.
  *
  * The location and size of the Title Bar and the font used for its text string
  * are fixed inside the function.
@@ -1532,7 +1532,7 @@ PRIVATE  void  ScreenFunc_SetPitchBendMode(bool isNewScreen)
 {
     static uint8  ctrlMode;   // may be: 0, 1, or 2
     static char  *pitchBendModeName[] = 
-            { "Disabled", "MIDI PB msg", "MIDI Exprn", "Analog CV (TBD!)" };
+            { "Disabled", "MIDI PB msg", "MIDI Exprn", "Analog CV.IN1" };
     char   textBuf[40];
     bool   doRefresh = 0;
 
@@ -1565,7 +1565,7 @@ PRIVATE  void  ScreenFunc_SetPitchBendMode(bool isNewScreen)
             }
             if (ButtonCode() == 'C')  // change mode -- scroll thru options
             {
-                if (++ctrlMode >= 4)  ctrlMode = 0;  
+                if (++ctrlMode >= 3)  ctrlMode = 0;    // *** change to 4 if Analog CV option ***
                 g_Config.PitchBendCtrlMode = ctrlMode;
                 StoreConfigData();
                 SynthPrepare();  // instate new setting
@@ -2077,7 +2077,9 @@ PRIVATE  void  ScreenFunc_SystemInfoPage2(bool isNewScreen)
  */
 PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
 {
-    static char *potLabel[] = { "Wave 1", "Wave 2", "Detune", "LFO Hz", "Vibr %", "Ramp ms" };
+    static char  *potLabel[] = { "Wave 1", "Wave 2", "Detune", "LFO Hz", "Vibr %", "Ramp ms" };
+    static uint8  LFOfreqStep[] = { 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 35, 
+                                    40, 45, 50, 60, 70, 80, 100, 120, 150, 200, 250, 255 };
     static bool  doRefresh[6];
     char   textBuf[40], numBuf[20];
     int    pot, setting, numSteps;
@@ -2143,15 +2145,19 @@ PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
             g_Patch.Osc2Detune = (int16) setting;  // range 0..+/-100 (cents))
             doRefresh[2] = TRUE;
         }
-        if (PotMoved(3))  // LFO freq. in steps of 0.1 Hz
+        if (PotMoved(3))  // LFO freq. in variable step size
         {
-            setting = ((int) PotReading(3) * 250) / 255;  // range 0..250
+            setting = (int) PotReading(3);  // range 0..255
+            setting = LFOfreqStep[setting/10];  // LUT index range: 0..25
+            if (setting == 0)  setting = 1;     // minimum setting
+            if (setting > 250)  setting = 250;  // maximum setting
             g_Patch.LFO_Freq_x10 = setting;
             doRefresh[3] = TRUE;
         }
         if (PotMoved(4))  // LFO/Vibrato Depth (cents | % FS)
         {
             setting = ((int) PotReading(4) * 200) / 255;  // range 0..200
+            setting = (setting / 10) * 10;  // quantize, step size = 10
             g_Patch.LFO_FM_Depth = setting;
             doRefresh[4] = TRUE;
         }
@@ -2160,7 +2166,7 @@ PRIVATE  void  ScreenFunc_ControlPanel1(bool isNewScreen)
             setting = (int) PotReading(5);
             setting = (setting * setting * 2000) / (255 * 255);  // square-law
             setting = QuantizeValuePerDecade(setting);  // range 0..2000
-            if (setting < 10)  setting = 0;  // reject values 1..9, allow 0
+            if (setting < 10)  setting = 5;  // minimum 5ms
             g_Patch.LFO_RampTime = setting;
             doRefresh[5] = TRUE;
         }
@@ -2244,20 +2250,22 @@ PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
         
         if (PotMoved(0))  // Mixer Control Mode
         {
-            setting = ((int) PotReading(0) * 5) / 256;  // 5 steps 
+            setting = ((int) PotReading(0) * 5) / 255;  // 5 steps 
             g_Patch.MixerControl = (uint8) setting;  // range 0..4
             doRefresh[0] = TRUE;
         }
         if (PotMoved(1))  // OSC2 Mix Level (0..100 %)
         {
-            setting = ((int) PotReading(1) * 100) / 255;
-            g_Patch.MixerOsc2Level = (uint8) setting;  // range 0..100
+            setting = ((int) PotReading(1) * 100) / 255;  // range 0..100
+            setting = (setting / 5) * 5;  // quantize, step size = 5
+            g_Patch.MixerOsc2Level = (uint8) setting;
             doRefresh[1] = TRUE;
         }
         if (PotMoved(2))  // Contour Env Start Level (0..100 %)
         {
-            setting = ((int) PotReading(2) * 100) / 255;
-            g_Patch.ContourStartLevel = (uint8) setting;  // range 0..100
+            setting = ((int) PotReading(2) * 100) / 255;  // range 0..100
+            setting = (setting / 5) * 5;  // quantize, step size = 5
+            g_Patch.ContourStartLevel = (uint8) setting;
             doRefresh[2] = TRUE;
         }
         if (PotMoved(3))  // Contour Delay Time (ms)
@@ -2274,14 +2282,15 @@ PRIVATE  void  ScreenFunc_ControlPanel2(bool isNewScreen)
             setting = (int) PotReading(4);  // unipolar setting 0..255
             setting = (setting * setting * 2000) / (255 * 255);  // square-law
             setting = QuantizeValuePerDecade(setting);  // range 0..2000
-            if (setting < 10)  setting = 0;  // reject 1..9, but allow 0
+            if (setting < 10)  setting = 5;  // minimum 5ms
             g_Patch.ContourRamp_ms = setting;
             doRefresh[4] = TRUE;
         }
         if (PotMoved(5))  // Contour Env Hold (End) Level (0..100 %)
         {
-            setting = ((int) PotReading(5) * 100) / 255;
-            g_Patch.ContourHoldLevel = (uint8) setting;  // range 0..100
+            setting = ((int) PotReading(5) * 100) / 255;  // range 0..100
+            setting = (setting / 5) * 5;  // quantize, step size = 5
+            g_Patch.ContourHoldLevel = (uint8) setting;
             doRefresh[5] = TRUE;
         }
     }
@@ -2381,22 +2390,14 @@ PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
         if (PotMoved(3))  // Filter Resonance (Q)
         {
             setting = (int) PotReading(3);  // unipolar setting 0..255
-            if (setting != 0) 
+            if (setting >= 12) 
             {
-                if (setting < 128)  // Below half-way mark (coarse adjust)
-                {
-                    setting = (setting * 8000) / 127 + 1000;  // range 1000..9000
-                    setting = (setting / 500) * 500;  // step size = 500 (.0500)
-                }
-                else  // Above half-way mark (fine adjust)
-                {
-                    setting = ((setting - 128) * 1000) / 127 + 9000;  // range 9k..10k
-                    setting = (setting / 50) * 50;  // step size = 50 (.0050)
-                }
-                if (setting > 9950)  setting = 9950;  // cap at 9950 (.9950)
+                setting = ((setting - 12) * 1000) / 255 + 9000;  // range 9k..10k
+                setting = (setting / 50) * 50;  // step size = 50 (.0050)
             }
-            g_Patch.FilterResonance = (uint16) setting;  // range 0 | 1000..9990
-            
+            else  setting = 0;  // Filter Off
+            if (setting > 9950)  setting = 9950;  // cap at 9950 (.9950)
+            g_Patch.FilterResonance = (uint16) setting;  // range 0 | 9000..9950
             DisplayMenuOption(44, 56, 'A', "Assert");  // Assert required
             doRefresh[3] = TRUE;
         }
@@ -2428,12 +2429,12 @@ PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
                 else  strcat(textBuf, itoa(numBuf, (int)g_Patch.NoiseMode, 10)); 
             }
             if (pot == 1) strcpy(textBuf, noiseCtrlName[g_Patch.NoiseLevelCtrl]);
-            if (pot == 2) strcpy(textBuf, filtrCtrlName[g_Patch.NoiseLevelCtrl]);
+            if (pot == 2) strcpy(textBuf, filtrCtrlName[g_Patch.FilterControl]);
             if (pot == 3) 
             {
                 strcpy(textBuf, ".");
                 if (g_Patch.FilterResonance == 0)  strcpy(textBuf, "Off");
-                else  strcat(textBuf, itoa(numBuf, (int)g_Patch.FilterResonance, 10));
+                else  strcat(textBuf, itoa(numBuf, (int)g_Patch.FilterResonance/10, 10));
             }
             if (pot == 4) itoa(textBuf, (int)g_Patch.FilterFrequency, 10);
             if (pot == 5)
@@ -2459,9 +2460,8 @@ PRIVATE  void  ScreenFunc_ControlPanel3(bool isNewScreen)
  */
 PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
 {
-    static char  *potLabel[] = { "Attk ms", "Hold ms", "Decay ms", "Sust %", "Release", "" };
+    static char  *potLabel[] = { "Attk ms", "Hold ms", "Decay ms", "Sust %", "Release", "Level %" };
     static bool  doRefresh[6];
-    static int   dummyParam;  // temp.
     char   textBuf[40];
     int    pot, setting;
     uint16 xpos, ypos;  // display coords 
@@ -2525,8 +2525,9 @@ PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
         }
         if (PotMoved(3))  // Env Sustain Level (0..100%)
         {
-            setting = ((int) PotReading(3) * 100) / 255;
-            g_Patch.AmpldEnvSustain = (uint8) setting;  // range 0..100
+            setting = ((int) PotReading(3) * 100) / 255;  // range 0..100
+            setting = (setting / 5) * 5;  // quantize, step size = 5
+            g_Patch.AmpldEnvSustain = (uint8) setting;
             doRefresh[3] = TRUE;
         }
         if (PotMoved(4))  // Env Release time (10..2000 ms)
@@ -2538,9 +2539,12 @@ PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
             g_Patch.AmpldEnvRelease_ms = (uint16) setting;
             doRefresh[4] = TRUE;
         }
-        if (PotMoved(5))  // Reserved param, TBA (maybe)
+        if (PotMoved(5))  // Audio Level Adjust (5..250 %)
         {
-            dummyParam = ((int) PotReading(5) * 100) / 255;  // range 0..100
+            setting = ((int) PotReading(5) * 250) / 255;  // range 0..250
+            setting = (setting / 10) * 10;   // quantize, step size = 10
+            if (setting < 10)  setting = 5;  // minimum = 5%
+            g_Patch.AudioLevelAdjust = (uint8) setting;
             doRefresh[5] = TRUE;
         }
     }
@@ -2563,7 +2567,7 @@ PRIVATE  void  ScreenFunc_ControlPanel4(bool isNewScreen)
             }
             if (pot == 3) itoa(textBuf, g_Patch.AmpldEnvSustain, 10);
             if (pot == 4) itoa(textBuf, g_Patch.AmpldEnvRelease_ms, 10);
-            if (pot == 5) itoa(textBuf, dummyParam, 10);  // temp.
+            if (pot == 5) itoa(textBuf, g_Patch.AudioLevelAdjust, 10);
 
             xpos = (pot % 3) * 43 + 3;
             ypos = (pot < 3) ? 22 : 44;

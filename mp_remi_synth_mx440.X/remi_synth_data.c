@@ -17,7 +17,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
     //--------  R E C O R D E R S,  F L U T E S   &   P I P E S  ---------
     {
         10,     // Patch ID Number
-        "Recorder, simple",
+        "Recorder",
         13,     // W1: OSC1 Wave-table ID (0..99) = recorder_alto
         13,     // W2: OSC2 Wave-table ID (0..99) = recorder_alto
         0,      // OD: OSC2 Detune, cents (+/-1200)
@@ -44,17 +44,17 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
         11,     // Patch ID Number
-        "Recorder, celeste",
+        "Recorder celeste",
         2,      // W1: OSC1 Wave-table ID (0..99) = square_wave
         13,     // W2: OSC2 Wave-table ID (0..99) = recorder_alto
-        -7,     // OD: OSC2 Detune, cents (+/-1200)
+        -3,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
-        50,     // VD: Vibrato Depth, cents (0..200)
+        20,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
         0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
@@ -76,7 +76,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },    
 
     {
@@ -108,7 +108,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -140,7 +140,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
 
     //---------------  R E E D E D   W O O D W I N D S  --------------------
@@ -149,7 +149,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         "Reeded Woodwind",  // Breath-controlled wave morph... sax-like
         2,      // W1: OSC1 Wave-table ID (0..99)
         9,      // W2: OSC2 Wave-table ID (0..99)
-       -3,      // OD: OSC2 Detune, cents (+/-1200)
+        -3,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
         500,    // VR: Vibrato Ramp time (5..5000+ ms)
@@ -164,7 +164,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Off, 1:Fixed, 2:Env, 3:Exprn, 4:Modn)
         0,      // FC: Filter Ctrl (0:Fixed, 1:Contour, 2:Env+, 3:Env-, 4:LFO, 5:Modn)
-        9800,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
+        9700,   // FR: Filter Resonance x10000  (0..9990, 0:Bypass)
         15,     // FF: Filter Freq/Offset (semitone#, 0..108)
         1,      // FT: Filter Note Tracking (0:Off, 1:On)
 
@@ -173,7 +173,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        150,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -205,7 +205,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
 
     {
@@ -237,24 +237,24 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
 
     {
         25,     // Patch ID Number   
         "Psychedelic Oboe",
-        10,     // W1: OSC1 Wave-table ID (0..99)
-        9,      // W2: OSC2 Wave-table ID (0..99)
+        9,      // W1: OSC1 Wave-table ID (0..99)
+        10,     // W2: OSC2 Wave-table ID (0..99)
         -7,     // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+        300,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        25,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
-        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        1,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
+        10,     // CS: Contour Env Start level (0..100 %)
+        50,     // CD: Contour Env Delay time (5..5000+ ms)
+        500,    // CR: Contour Env Ramp time (5..5000+ ms)
         80,     // CH: Contour Env Hold level (0..100 %)
         
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
@@ -269,7 +269,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
 
     {
@@ -292,7 +292,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
         0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
         0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9500,   // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
+        9700,   // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
         9,      // FF: Filter Freq/Offset (semitone#, 0..108)
         1,      // FT: Filter Note Tracking (0:Off, 1:On)
                 
@@ -301,7 +301,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        150,    // AL: Audio Level Adjust (10..250 %)
     },
     
     //----------------  B O W E D   S T R I N G   I N S T R U M E N T S  ------------
@@ -313,12 +313,12 @@ const  PatchParamTable_t  g_PatchProgram[] =
         3,      // OD: OSC2 Detune, cents (+/-1200)
         50,     // LF: LFO Freq x10 Hz (1..250)
         30,     // VD: Vibrato Depth, cents (0..200)
-        330,    // VR: Vibrato Ramp time, (5..5000+ ms)
+        300,    // VR: Vibrato Ramp time, (5..5000+ ms)
 
-        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        1,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
         50,     // ML: Mixer OSC2 Level in Fixed mode (0..100 %)
-        0,      // CS: Contour Env Start level (0..100 %)
-        0,      // CD: Contour Env Delay time (5..5000+ ms)
+        20,     // CS: Contour Env Start level (0..100 %)
+        10,     // CD: Contour Env Delay time (5..5000+ ms)
         200,    // CR: Contour Env Ramp time (5..5000+ ms)
         80,     // CH: Contour Env Hold level (0..100 %)
         
@@ -334,13 +334,13 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
 
     //------------------  O R G A N S   &  A C C O R D I O N  -----------------
     {
         40,     // Patch ID Number
-        "Jazz Organ, celeste",  // Experiment with wave-tables  **************************
+        "Jazz Organ celeste",  // Experiment with wave-tables  **************************
         14,     // W1: OSC1 Wave-table ID (0..99) = jazz_organ_v1
         14,     // W2: OSC2 Wave-table ID (0..99) = jazz_organ_v1
         -6,     // OD: OSC2 Detune, cents (+/-1200)
@@ -367,7 +367,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         5,      // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
         80,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -399,7 +399,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         100,    // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
 
     {
@@ -431,7 +431,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         100,    // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -463,7 +463,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         100,    // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -495,7 +495,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         5,      // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -527,7 +527,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         100,    // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -559,7 +559,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         100,    // ED: Envelope Decay time (5..5000+ ms)
         10,     // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -591,7 +591,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         100,    // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -623,7 +623,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         100,    // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         70,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
    
     //----------------  P E R C U S S I V E    I N S T R U M E N T S  ------------
@@ -656,7 +656,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         500,    // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         0,      // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -688,7 +688,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         1000,   // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         0,      // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -720,40 +720,40 @@ const  PatchParamTable_t  g_PatchProgram[] =
         1000,   // ED: Envelope Decay time (5..5000+ ms)
         1000,   // ER: Envelope Release time (5..5000+ ms)
         0,      // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     //----------  E X P E R I M E N T A L   S O U N D   E F F E C T S  ------------
     {
         80,     // Patch ID Number
-        "Noise",  // Wave mixed with pitched noise
+        "Pitched Noise",  // Pure pitched noise, no wave-table mix 
         2,      // W1: OSC1 Wave-table ID (0..99)
         4,      // W2: OSC2 Wave-table ID (0..99)
         0,      // OD: OSC2 Detune, cents (+/-1200)
-        50,     // LF: LFO Freq x10 Hz (1..250)
+        70,     // LF: LFO Freq x10 Hz (1..250)
         50,     // VD: Vibrato Depth, cents (0..200)
-        500,    // VR: Vibrato Ramp time, (5..5000+ ms)
+        5,      // VR: Vibrato Ramp time (5..5000+ ms)
 
         0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        10,     // ML: Mixer OSC2/Noise Level in Fixed mode (0..100 %)
+        50,     // ML: Mixer OSC2 [& Noise] Level in Fixed mode (%)
         0,      // CS: Contour Env Start level (0..100 %)
         5,      // CD: Contour Env Delay time (5..5000+ ms)
         500,    // CR: Contour Env Ramp time (5..5000+ ms)
         100,    // CH: Contour Env Hold level (0..100 %)
-        
-        2,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:Pitch)
-        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Ampld.Env, 2:LFO, 3:Exprn, 4:Modn)
-        0,      // FC: Filter Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
-        9800,   // FR: Filter Resonance x10000 (0..9990, 0:Bypass)
-        24,     // FF: Filter Freq/Offset (MIDI note number, 0..108)
+
+        1,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:R.Mod)
+        1,      // NC: Noise Level Ctrl (0:Fixed, 1:Amp.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Ctrl (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        9800,   // FR: Filter Resonance x10000 (0..9999, 0:Off/Bypass)
+        24,     // FF: Filter Freq/Offset (semitone#, 0..108)
         1,      // FT: Filter Note Tracking (0:Off, 1:On)
-                
+
         10,     // EA: Envelope Attack time (5..5000+ ms)
         0,      // EP: Envelope Peak time (0..5000+ ms)
         5,      // ED: Envelope Decay time (5..5000+ ms)
         50,     // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },    
     
     {
@@ -785,7 +785,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         1000,   // ED: Envelope Decay time (5..5000+ ms)
         1000,   // ER: Envelope Release time (5..5000+ ms)
         0,      // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -817,7 +817,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         1000,   // ED: Envelope Decay time (5..5000+ ms)
         1000,   // ER: Envelope Release time (5..5000+ ms)
         0,      // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     //---------------  T E S T   &   D E M O   P A T C H E S  ------------------------
@@ -850,7 +850,7 @@ const  PatchParamTable_t  g_PatchProgram[] =
         1000,   // ED: Envelope Decay time (5..5000+ ms)
         100,    // ER: Envelope Release time (5..5000+ ms)
         80,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
     },
     
     {
@@ -882,7 +882,39 @@ const  PatchParamTable_t  g_PatchProgram[] =
         10,     // ED: Envelope Decay time (5..5000+ ms)
         500,    // ER: Envelope Release time (5..5000+ ms)
         90,     // ES: Envelope Sustain level (0..100 %)
-        0,      // ??: (reserved)
+        100,    // AL: Audio Level Adjust (10..250 %)
+    },
+    
+    {
+        92,     // Patch ID Number
+        "Raw Sawtooth",
+        77,     // W1: OSC1 Wave-table ID (0..99)
+        77,     // W2: OSC2 Wave-table ID (0..99)
+        0,      // OD: OSC2 Detune, cents (+/-1200)
+        30,     // LF: LFO Freq x10 Hz (1..250)
+        30,     // VD: Vibrato Depth, cents (0..200)
+        300,    // VR: Vibrato Ramp time (5..5000+ ms)
+
+        0,      // MC: Mixer Control (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // ML: Mixer OSC2 [& Noise] Level in Fixed mode (%)
+        0,      // CS: Contour Env Start level (0..100 %)
+        5,      // CD: Contour Env Delay time (5..5000+ ms)
+        200,    // CR: Contour Env Ramp time (5..5000+ ms)
+        80,     // CH: Contour Env Hold level (0..100 %)
+
+        0,      // NM: Noise Mode (0:Off, 1:Noise, 2:Add wave, 3:Mix wave; +4:R.Mod)
+        0,      // NC: Noise Level Ctrl (0:Fixed, 1:Amp.Env, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FC: Filter Ctrl (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)
+        0,      // FR: Filter Resonance x10000 (0..9990, 0:Off/Bypass)
+        0,      // FF: Filter Freq/Offset (semitone#, 0..108)
+        0,      // FT: Filter Note Tracking (0:Off, 1:On)
+
+        30,     // EA: Envelope Attack time (5..5000+ ms)
+        0,      // EP: Envelope Peak time (0..5000+ ms)
+        10,     // ED: Envelope Decay time (5..5000+ ms)
+        200,    // ER: Envelope Release time (5..5000+ ms)
+        90,     // ES: Envelope Sustain level (0..100 %)
+        100,    // AL: Audio Level adjust (5..250 %)
     },
     
 };
@@ -1306,7 +1338,142 @@ const  int16  rounded_square[] =
 
 /*
  * Waveform name: sawtooth_wave, size: 1260 samples
- * Anti-Alias filter params: K = 60, N = 2
+ * Anti-alias filtering: None - pure sawtooth
+ *__
+const short  sawtooth_wave[] =
+{
+    -31999, -31948, -31897, -31846, -31795, -31745, -31694, -31643, -31592, -31541,
+    -31491, -31440, -31389, -31338, -31288, -31237, -31186, -31135, -31084, -31034,
+    -30983, -30932, -30881, -30831, -30780, -30729, -30678, -30627, -30577, -30526,
+    -30475, -30424, -30374, -30323, -30272, -30221, -30170, -30120, -30069, -30018,
+    -29967, -29916, -29866, -29815, -29764, -29713, -29663, -29612, -29561, -29510,
+    -29459, -29409, -29358, -29307, -29256, -29206, -29155, -29104, -29053, -29002,
+    -28952, -28901, -28850, -28799, -28749, -28698, -28647, -28596, -28545, -28495,
+    -28444, -28393, -28342, -28291, -28241, -28190, -28139, -28088, -28038, -27987,
+    -27936, -27885, -27834, -27784, -27733, -27682, -27631, -27581, -27530, -27479,
+    -27427, -27376, -27326, -27275, -27224, -27173, -27123, -27072, -27021, -26970,
+    -26919, -26869, -26818, -26767, -26716, -26666, -26615, -26564, -26513, -26462,
+    -26412, -26361, -26310, -26259, -26208, -26158, -26107, -26056, -26005, -25955,
+    -25904, -25853, -25802, -25751, -25701, -25650, -25599, -25548, -25498, -25447,
+    -25396, -25345, -25294, -25244, -25193, -25142, -25091, -25041, -24990, -24939,
+    -24888, -24837, -24787, -24736, -24685, -24634, -24583, -24533, -24482, -24431,
+    -24380, -24330, -24279, -24228, -24177, -24126, -24076, -24025, -23974, -23923,
+    -23873, -23822, -23771, -23720, -23669, -23619, -23568, -23517, -23466, -23416,
+    -23365, -23314, -23263, -23212, -23162, -23111, -23060, -23009, -22958, -22908,
+    -22856, -22805, -22754, -22704, -22653, -22602, -22551, -22500, -22450, -22399,
+    -22348, -22297, -22247, -22196, -22145, -22094, -22043, -21993, -21942, -21891,
+    -21840, -21790, -21739, -21688, -21637, -21586, -21536, -21485, -21434, -21383,
+    -21333, -21282, -21231, -21180, -21129, -21079, -21028, -20977, -20926, -20875,
+    -20825, -20774, -20723, -20672, -20622, -20571, -20520, -20469, -20418, -20368,
+    -20317, -20266, -20215, -20165, -20114, -20063, -20012, -19961, -19911, -19860,
+    -19809, -19758, -19708, -19657, -19606, -19555, -19504, -19454, -19403, -19352,
+    -19301, -19250, -19200, -19149, -19098, -19047, -18997, -18946, -18895, -18844,
+    -18793, -18743, -18692, -18641, -18590, -18540, -18489, -18438, -18387, -18336,
+    -18285, -18234, -18183, -18132, -18082, -18031, -17980, -17929, -17878, -17828,
+    -17777, -17726, -17675, -17625, -17574, -17523, -17472, -17421, -17371, -17320,
+    -17269, -17218, -17167, -17117, -17066, -17015, -16964, -16914, -16863, -16812,
+    -16761, -16710, -16660, -16609, -16558, -16507, -16457, -16406, -16355, -16304,
+    -16253, -16203, -16152, -16101, -16050, -16000, -15949, -15898, -15847, -15796,
+    -15746, -15695, -15644, -15593, -15542, -15492, -15441, -15390, -15339, -15289,
+    -15238, -15187, -15136, -15085, -15035, -14984, -14933, -14882, -14832, -14781,
+    -14730, -14679, -14628, -14578, -14527, -14476, -14425, -14375, -14324, -14273,
+    -14222, -14171, -14121, -14070, -14019, -13968, -13917, -13867, -13816, -13765,
+    -13713, -13663, -13612, -13561, -13510, -13459, -13409, -13358, -13307, -13256,
+    -13206, -13155, -13104, -13053, -13002, -12952, -12901, -12850, -12799, -12749,
+    -12698, -12647, -12596, -12545, -12495, -12444, -12393, -12342, -12291, -12241,
+    -12190, -12139, -12088, -12038, -11987, -11936, -11885, -11834, -11784, -11733,
+    -11682, -11631, -11581, -11530, -11479, -11428, -11377, -11327, -11276, -11225,
+    -11174, -11124, -11073, -11022, -10971, -10920, -10870, -10819, -10768, -10717,
+    -10666, -10616, -10565, -10514, -10463, -10413, -10362, -10311, -10260, -10209,
+    -10159, -10108, -10057, -10006,  -9956,  -9905,  -9854,  -9803,  -9752,  -9702,
+     -9651,  -9600,  -9549,  -9499,  -9448,  -9397,  -9346,  -9295,  -9245,  -9194,
+     -9142,  -9091,  -9041,  -8990,  -8939,  -8888,  -8837,  -8787,  -8736,  -8685,
+     -8634,  -8583,  -8533,  -8482,  -8431,  -8380,  -8330,  -8279,  -8228,  -8177,
+     -8126,  -8076,  -8025,  -7974,  -7923,  -7873,  -7822,  -7771,  -7720,  -7669,
+     -7619,  -7568,  -7517,  -7466,  -7416,  -7365,  -7314,  -7263,  -7212,  -7162,
+     -7111,  -7060,  -7009,  -6958,  -6908,  -6857,  -6806,  -6755,  -6705,  -6654,
+     -6603,  -6552,  -6501,  -6451,  -6400,  -6349,  -6298,  -6248,  -6197,  -6146,
+     -6095,  -6044,  -5994,  -5943,  -5892,  -5841,  -5791,  -5740,  -5689,  -5638,
+     -5587,  -5537,  -5486,  -5435,  -5384,  -5333,  -5283,  -5232,  -5181,  -5130,
+     -5080,  -5029,  -4978,  -4927,  -4876,  -4826,  -4775,  -4724,  -4673,  -4623,
+     -4571,  -4520,  -4469,  -4418,  -4368,  -4317,  -4266,  -4215,  -4165,  -4114,
+     -4063,  -4012,  -3961,  -3911,  -3860,  -3809,  -3758,  -3708,  -3657,  -3606,
+     -3555,  -3504,  -3454,  -3403,  -3352,  -3301,  -3250,  -3200,  -3149,  -3098,
+     -3047,  -2997,  -2946,  -2895,  -2844,  -2793,  -2743,  -2692,  -2641,  -2590,
+     -2540,  -2489,  -2438,  -2387,  -2336,  -2286,  -2235,  -2184,  -2133,  -2083,
+     -2032,  -1981,  -1930,  -1879,  -1829,  -1778,  -1727,  -1676,  -1625,  -1575,
+     -1524,  -1473,  -1422,  -1372,  -1321,  -1270,  -1219,  -1168,  -1118,  -1067,
+     -1016,   -965,   -915,   -864,   -813,   -762,   -711,   -661,   -610,   -559,
+      -508,   -458,   -407,   -356,   -305,   -254,   -204,   -153,   -102,    -51,
+         0,     50,    101,    152,    203,    253,    304,    355,    406,    457,
+       507,    558,    609,    660,    710,    761,    812,    863,    914,    964,
+      1015,   1066,   1117,   1167,   1218,   1269,   1320,   1371,   1421,   1472,
+      1523,   1574,   1625,   1675,   1726,   1777,   1828,   1878,   1929,   1980,
+      2031,   2082,   2132,   2183,   2234,   2285,   2335,   2386,   2437,   2488,
+      2539,   2589,   2640,   2691,   2742,   2792,   2843,   2894,   2945,   2996,
+      3046,   3097,   3148,   3199,   3250,   3300,   3351,   3402,   3453,   3503,
+      3554,   3605,   3656,   3707,   3757,   3808,   3859,   3910,   3960,   4011,
+      4062,   4113,   4164,   4214,   4265,   4316,   4367,   4417,   4468,   4519,
+      4571,   4622,   4672,   4723,   4774,   4825,   4875,   4926,   4977,   5028,
+      5079,   5129,   5180,   5231,   5282,   5333,   5383,   5434,   5485,   5536,
+      5586,   5637,   5688,   5739,   5790,   5840,   5891,   5942,   5993,   6043,
+      6094,   6145,   6196,   6247,   6297,   6348,   6399,   6450,   6500,   6551,
+      6602,   6653,   6704,   6754,   6805,   6856,   6907,   6958,   7008,   7059,
+      7110,   7161,   7211,   7262,   7313,   7364,   7415,   7465,   7516,   7567,
+      7618,   7668,   7719,   7770,   7821,   7872,   7922,   7973,   8024,   8075,
+      8125,   8176,   8227,   8278,   8329,   8379,   8430,   8481,   8532,   8583,
+      8633,   8684,   8735,   8786,   8836,   8887,   8938,   8989,   9040,   9090,
+      9142,   9193,   9244,   9294,   9345,   9396,   9447,   9498,   9548,   9599,
+      9650,   9701,   9751,   9802,   9853,   9904,   9955,  10005,  10056,  10107,
+     10158,  10208,  10259,  10310,  10361,  10412,  10462,  10513,  10564,  10615,
+     10666,  10716,  10767,  10818,  10869,  10919,  10970,  11021,  11072,  11123,
+     11173,  11224,  11275,  11326,  11376,  11427,  11478,  11529,  11580,  11630,
+     11681,  11732,  11783,  11833,  11884,  11935,  11986,  12037,  12087,  12138,
+     12189,  12240,  12291,  12341,  12392,  12443,  12494,  12544,  12595,  12646,
+     12697,  12748,  12798,  12849,  12900,  12951,  13001,  13052,  13103,  13154,
+     13205,  13255,  13306,  13357,  13408,  13458,  13509,  13560,  13611,  13662,
+     13713,  13764,  13815,  13866,  13916,  13967,  14018,  14069,  14120,  14170,
+     14221,  14272,  14323,  14374,  14424,  14475,  14526,  14577,  14627,  14678,
+     14729,  14780,  14831,  14881,  14932,  14983,  15034,  15084,  15135,  15186,
+     15237,  15288,  15338,  15389,  15440,  15491,  15541,  15592,  15643,  15694,
+     15745,  15795,  15846,  15897,  15948,  15999,  16049,  16100,  16151,  16202,
+     16252,  16303,  16354,  16405,  16456,  16506,  16557,  16608,  16659,  16709,
+     16760,  16811,  16862,  16913,  16963,  17014,  17065,  17116,  17166,  17217,
+     17268,  17319,  17370,  17420,  17471,  17522,  17573,  17624,  17674,  17725,
+     17776,  17827,  17877,  17928,  17979,  18030,  18081,  18131,  18182,  18233,
+     18285,  18335,  18386,  18437,  18488,  18539,  18589,  18640,  18691,  18742,
+     18792,  18843,  18894,  18945,  18996,  19046,  19097,  19148,  19199,  19250,
+     19300,  19351,  19402,  19453,  19503,  19554,  19605,  19656,  19707,  19757,
+     19808,  19859,  19910,  19960,  20011,  20062,  20113,  20164,  20214,  20265,
+     20316,  20367,  20417,  20468,  20519,  20570,  20621,  20671,  20722,  20773,
+     20824,  20875,  20925,  20976,  21027,  21078,  21128,  21179,  21230,  21281,
+     21332,  21382,  21433,  21484,  21535,  21585,  21636,  21687,  21738,  21789,
+     21839,  21890,  21941,  21992,  22042,  22093,  22144,  22195,  22246,  22296,
+     22347,  22398,  22449,  22500,  22550,  22601,  22652,  22703,  22753,  22804,
+     22856,  22907,  22958,  23008,  23059,  23110,  23161,  23211,  23262,  23313,
+     23364,  23415,  23465,  23516,  23567,  23618,  23668,  23719,  23770,  23821,
+     23872,  23922,  23973,  24024,  24075,  24125,  24176,  24227,  24278,  24329,
+     24379,  24430,  24481,  24532,  24583,  24633,  24684,  24735,  24786,  24836,
+     24887,  24938,  24989,  25040,  25090,  25141,  25192,  25243,  25293,  25344,
+     25395,  25446,  25497,  25547,  25598,  25649,  25700,  25750,  25801,  25852,
+     25903,  25954,  26004,  26055,  26106,  26157,  26208,  26258,  26309,  26360,
+     26411,  26461,  26512,  26563,  26614,  26665,  26715,  26766,  26817,  26868,
+     26918,  26969,  27020,  27071,  27122,  27172,  27223,  27274,  27325,  27375,
+     27427,  27478,  27529,  27580,  27630,  27681,  27732,  27783,  27833,  27884,
+     27935,  27986,  28037,  28087,  28138,  28189,  28240,  28291,  28341,  28392,
+     28443,  28494,  28544,  28595,  28646,  28697,  28748,  28798,  28849,  28900,
+     28951,  29001,  29052,  29103,  29154,  29205,  29255,  29306,  29357,  29408,
+     29458,  29509,  29560,  29611,  29662,  29712,  29763,  29814,  29865,  29916,
+     29966,  30017,  30068,  30119,  30169,  30220,  30271,  30322,  30373,  30423,
+     30474,  30525,  30576,  30626,  30677,  30728,  30779,  30830,  30880,  30931,
+     30982,  31033,  31083,  31134,  31185,  31236,  31287,  31337,  31388,  31439,
+     31490,  31541,  31591,  31642,  31693,  31744,  31794,  31845,  31896,  31947
+};
+___*/ 
+
+/*
+ * Waveform name: sawtooth_wave, size: 1260 samples
+ * Anti-Alias filter params: K = 60, N = 2  (lightly filtered)
  */
 const  int16  sawtooth_wave[] =
 {

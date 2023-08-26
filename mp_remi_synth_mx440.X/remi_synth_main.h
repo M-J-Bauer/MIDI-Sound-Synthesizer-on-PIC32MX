@@ -14,7 +14,7 @@
 //
 #define BUILD_VER_MAJOR   3
 #define BUILD_VER_MINOR   0
-#define BUILD_VER_DEBUG   50
+#define BUILD_VER_DEBUG   73
 //
 // =======================================================================================
 
@@ -54,6 +54,7 @@
 // MIDI System Exclusive message types unique to REMI...
 #define REMI_PRESET_MSG   0x07     // 'REMI PRESET' msg type (set Preset #)
 #define REMI_IDENT_MSG    0x30     // 'REMI IDENT' msg type (periodic ID)
+
 #define MIDI_MON_BUFFER_SIZE        512    // bytes
 #define HANDSET_CONNECTION_TIMEOUT  2000   // ms
 

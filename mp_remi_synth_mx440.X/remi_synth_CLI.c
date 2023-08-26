@@ -69,7 +69,7 @@ const  CmndTableEntry_t  AppCommands[] =
 // Table of user-settable parameters, for use with the "set" command.
 // These parameters are stored in data RAM, must be declared as global and type float.
 // Default values are assigned at start-up. Intended mainly for development purposes.
-//
+// 
 const  UserSettableParameter_t  UserParam[] =
 {
     // nickname      disp   (float *) &g_VarName      min,  max
@@ -78,6 +78,7 @@ const  UserSettableParameter_t  UserParam[] =
     { "noiseGain",   'r',  &g_NoiseFilterGain,        0.1,  25    }, 
     { "filtAtten",   'r',  &g_FilterInputAtten,       0.1,  2.5   },
     { "filtGain",    'r',  &g_FilterOutputGain,       0.1,  25    },
+//  { "aafiltc",     'r',  &g_AliasFilterTcn,         0.0,  15    },
     //----------------------------------------------------------------
     { "$",           'r',  NULL,                      0,    0     }  // end of table
 };
@@ -313,7 +314,7 @@ void  Cmnd_preset(int argCount, char * argValue[])
         putstr( "Usage (2):  preset  <opt>  [arg]   | Configure Preset...  \n" );
         putstr( "  where <opt> = \n" );
         putstr( " -l  : List all Preset configurations \n");
-        putstr( " -p  : Set Patch ID (arg = 0..99) for active Preset \n");
+        putstr( " -p  : Set Patch for current Preset (arg = Patch ID) \n");
         putstr( " -n  : Set MIDI OUT program/voice Number (arg = 0..127) \n");
         putstr( " -v  : Set Vibrato mode (arg = O:off, M:mod'n, A:auto) \n");
         putstr( " -t  : Set pitch Transpose, semitones (arg = -24..+24) \n");
@@ -339,9 +340,10 @@ void  Cmnd_preset(int argCount, char * argValue[])
         if (patch_ID == 0)  patchName = g_Config.UserPatch.PatchName;  // User Patch
         else  patchName = (char *) g_PatchProgram[patch_idx].PatchName;
         
-        if (activePreset == 0)  preset = 8;  else  preset = activePreset;  // for display
+        if (activePreset == 0)  preset = 8;  // for display only
+        else  preset = activePreset;  
         
-        sprintf(textBuf, "Active Preset: %d : Patch #%d %s \n", preset, patch_ID, patchName);  
+        sprintf(textBuf, "Active Preset: %d -- Patch: #%d '%s' \n", preset, patch_ID, patchName);  
         putstr(textBuf);
     }
     else  // Set Preset parameter
@@ -350,7 +352,7 @@ void  Cmnd_preset(int argCount, char * argValue[])
         
         switch (option)
         {
-        case 'p':  // set REMI synth patch number for activePreset
+        case 'p':  // Assign Patch for active Preset
         {
             int  patchCount = GetNumberOfPatchesDefined();
 
@@ -365,6 +367,12 @@ void  Cmnd_preset(int argCount, char * argValue[])
                 g_Preset.Descr[activePreset].PatchNumber = arg;
                 StorePresetData();
                 InstrumentPresetSelect(activePreset);  // activate the new setting
+                putstr("Patch #");  putDecimal(g_Patch.PatchNumber, 1);
+                putstr(" '");  putstr(g_Patch.PatchName);
+                putstr("' loaded and assigned to Preset ");
+                if (activePreset == 0)  putch('8');
+                else  putDecimal(activePreset, 1);  
+                putNewLine();
             }
             else
             {
@@ -416,8 +424,8 @@ void  Cmnd_preset(int argCount, char * argValue[])
 
     if (option == 'l')   // List all Presets configurations
     {
-        putstr("PRESET | Patch                   | MIDI Prgm | Vibrato   | Transpose   \n");
-        putstr("```````````````````````````````````````````````````````````````````````\n");
+        putstr("PRESET | Patch                   | MIDI Prgm | Vibrato   | Transpose \n");
+        putstr("`````````````````````````````````````````````````````````````````````\n");
             
         for (preset = 1;  preset <= 8;  preset++)   // List order: 1..8
         {
@@ -452,12 +460,12 @@ void  Cmnd_preset(int argCount, char * argValue[])
             sprintf(textBuf, "%+4d \n", g_Preset.Descr[pr_idx].PitchTranspose);
             putstr(textBuf);
         }
-        putstr("_______________________________________________________________________\n");
+        putstr("_____________________________________________________________________\n");
         
         if (activePreset == 0)  preset = 8;  else  preset = activePreset;
         patch_ID = g_PatchProgram[patch_idx].PatchNumber;
         patchName = (char *) g_PatchProgram[patch_idx].PatchName;
-        sprintf(textBuf, "Active Preset: %d : Patch #%d %s \n", preset, patch_ID, patchName);  
+        sprintf(textBuf, "Active Preset: %d   Patch: #%d %s \n", preset, patch_ID, patchName);  
         putstr(textBuf);
     }
 }
@@ -480,21 +488,22 @@ void  Cmnd_patch(int argCount, char *argValue[])
     if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted
     {
         putstr( "View or modify the active (selected) patch \n" );
-        putstr( "``````````````````````````````````````````````````````````` \n" );
-        putstr( "Usage (1):  patch  <opt>  [arg] \n" );
+        putstr( "```````````````````````````````````````````````````````````\n" );
+        putstr( "Usage (1):  patch  <opt>  [arg]  \n" );
         putstr( "  where <opt> = \n" );
         putstr( " -l  : List/enumerate predefined patches. \n");
-        putstr( " -d  : Dump active patch param's in C format \n");
-        putstr( " -s  : Save active patch as User Patch [arg = name] \n");
-        putstr( " -u  : Select User patch \n");
-        putstr( " -p  : Select Predefined patch (arg = Patch ID) \n");
-        putstr( " -w  : Wave-table info (active patch) \n");
-        putstr( "``````````````````````````````````````````````````````````` \n" );
+        putstr( " -d  : Dump patch parameters in C source format \n");
+        putstr( " -a  : Load patch and Activate (arg = Patch ID) \n");
+        putstr( " -p  : Load patch for current Preset (arg = Patch ID) \n");
+        putstr( " -s  : Save patch as User patch [arg = name] \n");
+        putstr( " -u  : Load User patch and activate \n");
+        putstr( " -w  : List Wave-table patch assignments \n");
+        putstr( "```````````````````````````````````````````````````````````\n" );
         putstr( "Usage (2):  patch  <param_ID> [=] <value> \n" );
         putstr( "  where <param_ID> is a 2-letter mnemonic (see dump) \n");
-        putstr( "  Example: To set Vibrato Depth to 50 cents, enter:- \n" );
+        putstr( "  Example: To set Vibrato Depth to 50 cents, enter: \n" );
         putstr( "           patch VD 50   [Alt:  patch vd = 50] \n" );
-        putstr( "___________________________________________________________ \n" );
+        putstr( "```````````````````````````````````````````````````````````\n" );
         return;
     }
     
@@ -506,27 +515,30 @@ void  Cmnd_patch(int argCount, char *argValue[])
         {
         case 'l':  // List/enumerate pre-defined patches in flash PM
         {
-            int   spaces;
+            static  char  *heading =   "  ID  Patch Name            W1  W2  ";
+            static  char  *underline = "````````````````````````````````````";
+            short   numPatches = GetNumberOfPatchesDefined();
+            short   spaces, column, ix = 0;  // ix = patch def'n table index
 
-            putstr("  ID#  Patch Name               W1   W2  \n");
-            putstr("````````````````````````````````````````` \n");
+            putstr(heading);  putch('|');  putstr(heading);  putNewLine();
+            putstr(underline);  putch('|');  putstr(underline);  putNewLine();
 
-            for (i = 0;  i < GetNumberOfPatchesDefined();  i++)
+            while (ix < numPatches)
             {
-                putstr("  ");
-                putDecimal(g_PatchProgram[i].PatchNumber, 3);
-                putstr("  ");
-                putstr((char *) g_PatchProgram[i].PatchName);
-                spaces = 24 - strlen(g_PatchProgram[i].PatchName);
-                while (spaces > 0)
-                    { putch(' ');  spaces--; }
-                putDecimal(g_PatchProgram[i].Osc1WaveTable, 3);
-                putstr("  ");
-                putDecimal(g_PatchProgram[i].Osc2WaveTable, 3);
-                putstr("\n");
+                for (column = 0;  column < 2;  column++)  // print in 2 columns
+                {
+                    putstr("  ");  putDecimal(g_PatchProgram[ix].PatchNumber, 2);
+                    putstr("  ");  putstr((char *) g_PatchProgram[ix].PatchName);
+                    spaces = 22 - strlen(g_PatchProgram[ix].PatchName);
+                    while (spaces-- > 0)  { putch(' '); }
+                    putDecimal(g_PatchProgram[ix].Osc1WaveTable, 2);
+                    putDecimal(g_PatchProgram[ix].Osc2WaveTable, 4);
+                    if (column == 0)  putstr("  |");
+                    if (++ix >= numPatches)  break;
+                }
+                putNewLine();
             }
-
-            putstr("_________________________________________ \n");
+            putNewLine();
             break;
         }
         case 'd':  // Dump active patch param's in C source format
@@ -554,23 +566,83 @@ void  Cmnd_patch(int argCount, char *argValue[])
             DumpActivePatchParams();
             break;
         }
-        case 'p':  // Load & activate a predefined patch (from flash PM)
+        case 'a':  // Load & activate a predefined patch (from flash PM)
         {
-            int   patchNum = atoi(argValue[2]);
-            int   status = 0;
+            int   arg;
+            int   status = ERROR;
 
-            if (argCount == 3 && patchNum != 0)
-                status = SynthPatchSelect(patchNum);
-            else  status = ERROR;
+            if (argCount >= 3)
+            {
+                arg = atoi(argValue[2]);
+                if (arg != 0) status = SynthPatchSelect(arg);
+            }
 
-            if (status == ERROR)  putstr("! Missing or invalid patch ID number.\n");
-            else  DumpActivePatchParams();
+            if (status == ERROR)  putstr("! Missing or invalid patch ID.\n");
+            else  
+            {
+                putstr("Patch #");  putDecimal(g_Patch.PatchNumber, 1);
+                putstr(" '");  putstr(g_Patch.PatchName);
+                putstr("' loaded and activated. (Preset patch unchanged.)\n");
+            }
             break;
         }
-        case 'w':  // View patch active wave-table data
+        case 'p':  // Set PRESET Patch, load (from flash PM) and activate
         {
-            PrintWaveTableInfo(1);  
-            PrintWaveTableInfo(2);  
+            short  activePreset = g_Config.PresetLastSelected;  // 0..7
+            short  numPatches = GetNumberOfPatchesDefined();
+            int    arg, status = ERROR;
+            
+            if (argCount >= 3)  
+            {
+                arg = atoi(argValue[2]);    // Patch ID#
+                // Search table of defined patches for patchNum...
+                for (i = 0;  i < numPatches;  i++)
+                {
+                    if (g_PatchProgram[i].PatchNumber == arg)  break;
+                }
+
+                if (arg == 0 || i < numPatches) 
+                {
+                    g_Preset.Descr[activePreset].PatchNumber = arg;
+                    StorePresetData();
+                    InstrumentPresetSelect(activePreset);  // activate the new setting
+                    status = SUCCESS;
+                }
+            }
+            
+            if (status == ERROR)  putstr("! Missing or invalid patch ID.\n");
+            else  
+            {
+                putstr("Patch #");  putDecimal(g_Patch.PatchNumber, 1);
+                putstr(" '");  putstr(g_Patch.PatchName);
+                putstr("' loaded and assigned to Preset ");
+                if (activePreset == 0)  putch('8');
+                else  putDecimal(activePreset, 1);  
+                putNewLine();
+            }
+            break;
+        }
+        case 'w':  // List Wave-table patch assignments
+        {
+            short  numberWaveTables = GetHighestWaveTableID() + 1;
+            short  numberPatchDefs = GetNumberOfPatchesDefined();
+            short  iwav, ipat;
+            
+            putstr("Wavetable # | Found in Patch ID(s) ...\n");
+
+            for (iwav = 1;  iwav < numberWaveTables;  iwav++ )
+            {
+                putstr("      ");  putDecimal(iwav, 2);  putstr("    |  ");
+                for (ipat = 0;  ipat < numberPatchDefs;  ipat++)
+                {
+                    if (g_PatchProgram[ipat].Osc1WaveTable == iwav    // W1 found
+                    ||  g_PatchProgram[ipat].Osc2WaveTable == iwav )  // W2 found
+                    {
+                        putDecimal(g_PatchProgram[ipat].PatchNumber, 4);
+                    }
+                }
+                putNewLine();
+            } 
             break;
         }
         default:
@@ -600,7 +672,7 @@ void  Cmnd_patch(int argCount, char *argValue[])
     }
 }
 
-
+/*  Deprecated function
 PRIVATE  void   PrintWaveTableInfo(unsigned oscNum)
 {
     char   textBuf[120];
@@ -659,7 +731,7 @@ PRIVATE  void   PrintWaveTableInfo(unsigned oscNum)
     putstr(textBuf);
     putstr("```````````````````````````````\n");
 }
-
+*/
 
 /*
  * This function lists names and values of the active patch parameters in a format
@@ -673,9 +745,8 @@ PRIVATE  void   DumpActivePatchParams()
 {
     char    textBuf[120];
 
-    putstr("Patch ID#:  ");  putDecimal(g_Patch.PatchNumber, 1);
-    putstr(" -> ");  putstr(g_Patch.PatchName);
-    putstr("\n\n");
+    putstr("Active Patch ID# ");  putDecimal(g_Patch.PatchNumber, 1);
+    putstr(" ");  putstr(g_Patch.PatchName);  putstr("\n\n");
 
     //-------------  Oscillators, Detune and Vibrato ------------------------------------
 
@@ -736,7 +807,7 @@ PRIVATE  void   DumpActivePatchParams()
             "\t%d,\t// FC: Filter Ctrl (0:Fixed, 1:Contour, 2:LFO, 3:Exprn, 4:Modn)\n",
             (int) g_Patch.FilterControl);
     putstr(textBuf);
-    sprintf(textBuf, "\t%d,\t// FR: Filter Resonance x10000 (0..9999, 0:Off/Bypass)\n",
+    sprintf(textBuf, "\t%d,\t// FR: Filter Resonance x10000 (0..9990, 0:Off/Bypass)\n",
             (int) g_Patch.FilterResonance);
     putstr(textBuf);
     sprintf(textBuf, "\t%d,\t// FF: Filter Freq/Offset (semitone#, 0..108)\n",
@@ -747,7 +818,7 @@ PRIVATE  void   DumpActivePatchParams()
     putstr(textBuf);
     putstr("\n");
 
-    //-------------  Amplitude Envelope Generator  --------------------------------------
+    //-------------  Amplidude Envelope Generator and Audio Level Adjust  ----------------
 
     sprintf(textBuf, "\t%d,\t// EA: Envelope Attack time (5..5000+ ms)\n",
             (int) g_Patch.AmpldEnvAttack_ms);
@@ -763,6 +834,9 @@ PRIVATE  void   DumpActivePatchParams()
     putstr(textBuf);
     sprintf(textBuf, "\t%d,\t// ES: Envelope Sustain level (0..100 %%)\n",
             (int) g_Patch.AmpldEnvSustain);
+    putstr(textBuf);
+    sprintf(textBuf, "\t%d,\t// AL: Audio Level adjust (5..250 %%)\n",
+            (int) g_Patch.AudioLevelAdjust);
     putstr(textBuf);
     putstr("\n");
 }
@@ -792,14 +866,14 @@ PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal)
         //-------------  Oscillators, Pitch Bend and Vibrato --------------------------------
         case PARAM_HASH_VALUE('W', '1'):
         {
-            if (paramVal <= GetHighestWaveTableID())  
+            if (paramVal >= 0 && paramVal <= 99)  
                 g_Patch.Osc1WaveTable = paramVal;
             else  isBadValue = 1;
             break;
         }
         case PARAM_HASH_VALUE('W', '2'):
         {
-            if (paramVal <= GetHighestWaveTableID())
+            if (paramVal >= 0 && paramVal <= 99)
                 g_Patch.Osc2WaveTable = paramVal;
             else  isBadValue = 1;
             break;
@@ -939,6 +1013,13 @@ PRIVATE  void   SetPatchParameter(char *paramAbbr, int paramVal)
         case PARAM_HASH_VALUE('E', 'S'):
         {
             if (paramVal <= 100)  g_Patch.AmpldEnvSustain = paramVal;
+            else  isBadValue = 1;
+            break;
+        }
+        case PARAM_HASH_VALUE('A', 'L'):
+        {
+            if (paramVal >= 5 && paramVal <= 250)  
+                g_Patch.AudioLevelAdjust = paramVal;
             else  isBadValue = 1;
             break;
         }
@@ -1308,6 +1389,7 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
 {
     static bool    diagEnabled;
     static uint32  intervalStart;
+    char   textBuf[80];
     char   option;
     int    arg;
 
@@ -1323,8 +1405,8 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
         putstr( " -d  :  LCD backlight toggle \n");
         putstr( " -e  :  Expression peak value \n");
         putstr( " -i  :  Test I2C bus signals \n");
+        putstr( " -o  :  Audio Output level \n");
         putstr( " -p  :  Pitch Bend (arg: +/-8000) \n");
-        putstr( " -r  :  Reverb mix setting \n");
         putstr( " -s  :  Disable/enable Synth ISR (arg: 0|1) \n");
         putstr( " -u  :  UART errors.\n");
         putstr( " -y  :  CPU core cYcle timer \n");
@@ -1435,6 +1517,14 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
         Stop_I2C1();
         break;
     }
+    case 'o':  // Show audio Output level (control variable)
+    {
+        float  outputLevel = FixedToFloat(v_OutputLevel);
+        
+        sprintf(textBuf, "v_OutputLevel = %9.6f \n", outputLevel);
+        putstr(textBuf);
+        break;
+    }
     case 'p':  // Pitch bend test
     {
         if (argCount >= 3) 
@@ -1447,15 +1537,6 @@ void  DiagnosticCommandExec(int argCount, char * argValue[])
             putstr("While note is sounding, enter command with arg = 0..+/-8000.\n"); 
             putstr("Value is scaled according to g_Config.PitchBendRange. \n"); 
         }
-        break;
-    }
-    case 'r':  // Show *active* Reverb Mix setting (% wet)
-    {
-        int  setting = (GetReverbMixSetting() * 100 + 5) / 128;  // rounded
-        
-        putstr("Active Reverb Mix (% wet): ");
-        putDecimal(setting, 1);
-        putNewLine();        
         break;
     }
     case 's':  // Suspend or activate synth audio ISR
@@ -1600,10 +1681,7 @@ void  Cmnd_util(int argCount, char *argValue[])
 {
     char   textbuf[120];
     char   option;
-    short  ipat, iwav;
-    short  numberWaveTables = GetHighestWaveTableID() + 1;
-    short  numberPatchDefs = GetNumberOfPatchesDefined();
-    
+
     if (argCount == 1 || (argCount == 2 && *argValue[1] == '?'))   // help wanted
     {
         putstr( "Run a specified Utility...   \n" );
@@ -1611,11 +1689,8 @@ void  Cmnd_util(int argCount, char *argValue[])
         putstr( "<opt> \n" );
         
         putstr( "  -b : Test Base2exp() function (no arg's) \n");
-        putstr( "  -f : Test Fixed-point mult. ((norm)arg1 x (int)arg2) / 1000 \n");
-        putstr( "  -w : Show Wavetable instances in patch def's \n");
-            ;
-            ;
-            ;
+        putstr( "  -f : Test Fixed-point calc. ((norm)arg1 x (int)arg2) / 1000 \n");
+        putstr( "       (Valid range of arg1: -2.0 ~ +2.0,  arg2: 0 ~ 1000) \n");
         return;
     }
     
@@ -1643,29 +1718,11 @@ void  Cmnd_util(int argCount, char *argValue[])
             product = (multiplicand * multiplier) / 1000;  // fixed-point
             outValue = FixedToFloat(product) + 0.0000005f;  // rounded
             
-            sprintf(textbuf, "  Scalar multiply: (%8.5f x %d) / 1000 = %8.5f ", 
+            sprintf(textbuf, "  (%8.5f x %d) / 1000 = %8.5f ", 
                     FixedToFloat(multiplicand),  multiplier, outValue );
             putstr(textbuf);
-            if (multiplicand >= 0 && outValue < 0.0)  putstr("! overflow error");
-            putNewLine();
-        }
-        break;
-    }
-    case 'w':
-    {
-        putstr("Wavetable # | Found in Patch ID(s) ...\n");
-        
-        for (iwav = 1;  iwav < numberWaveTables;  iwav++ )
-        {
-            putstr("      ");  putDecimal(iwav, 2);  putstr("    |  ");
-            for (ipat = 0;  ipat < numberPatchDefs;  ipat++)
-            {
-                if (g_PatchProgram[ipat].Osc1WaveTable == iwav    // W1 found
-                ||  g_PatchProgram[ipat].Osc2WaveTable == iwav )  // W2 found
-                {
-                    putDecimal(g_PatchProgram[ipat].PatchNumber, 4);
-                }
-            }
+            if ((multiplicand >= 0 && outValue < 0.0) || (multiplicand < 0 && outValue >= 0.0))  
+                putstr("<!> overflow error");
             putNewLine();
         }
         break;

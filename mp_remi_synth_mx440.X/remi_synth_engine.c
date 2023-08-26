@@ -35,22 +35,24 @@ PatchParamTable_t  g_Patch;        // active (working) patch parameters
 fixed_t  g_ExpressionPeak;         // Peak (max.) value of expression (fixed-pt)
 int32    g_TraceBuffer[100][5];
 
-uint16   g_Osc1WaveTableSize;      // Number of samples in OSC1 wave-table
-uint16   g_Osc2WaveTableSize;      // Number of samples in OSC2 wave-table
+int      g_Osc1WaveTableSize;      // Number of samples in OSC1 wave-table
+int      g_Osc2WaveTableSize;      // Number of samples in OSC2 wave-table
 float    g_Osc1FreqDiv;            // OSC1 frequency divider
 float    g_Osc2FreqDiv;            // OSC2 frequency divider
 
 // These global variables may be modified only by the CLI 'set' command;
 // initialized at power-on/reset to values strored in EEPROM (with config param's)...
-float  g_ExpressionCalibr;      // Expression gain adjust (0.25 ~ 2.5)
-float  g_FilterInputAtten;      // Filter input atten/gain (.01 ~ 2.5)
-float  g_FilterOutputGain;      // Filter output atten/gain (0.1 ~ 25)
-float  g_NoiseFilterGain;       // Noise gen. gain adjustment (0.1 ~ 25)
+float  g_ExpressionCalibr;         // Expression gain adjust (0.25 ~ 2.5)
+float  g_FilterInputAtten;         // Filter input atten/gain (.01 ~ 2.5)
+float  g_FilterOutputGain;         // Filter output atten/gain (0.1 ~ 25)
+float  g_NoiseFilterGain;          // Noise gen. gain adjustment (0.1 ~ 25)
 
 static int16   *m_WaveTable1;             // Pointer to OSC1 wave-table
 static int16   *m_WaveTable2;             // Pointer to OSC2 wave-table
 static fixed_t  m_Osc1StepMedian;         // Median value of v_Osc1Step (as at Note-On)
 static fixed_t  m_Osc2StepMedian;         // Median value of v_Osc2Step (as at Note-On)
+static fixed_t  m_SawtoothPeakAmpld;      // Sawtooth waveform peak amplitude
+static fixed_t  m_FundamentalPeriod;      // Waveform period, equiv. 2*pi radians
 static int32    m_LFO_Step;               // LFO "phase step" (fixed-point 24:8 bit format)
 static fixed_t  m_LFO_output;             // LFO output signal, normalized, bipolar (+/-1.0)
 static fixed_t  m_PressureLevel;          // Breath pressure, linear response (0..+1.0)
@@ -62,7 +64,8 @@ static uint8    m_VibratoControl;         // 0:None, 1:FX.Sw, 2:CC(Mod.Lvr), 3:A
 static fixed_t  m_RampOutput;             // Vibrato Ramp output level, normalized (0..1)
 static fixed_t  m_AmpldEnvOutput;         // Amplitude envelope output (0 ~ 0.9995)
 
-static fixed_t  m_ContourEnvOutput;       // Mixer contour output, normalized (0..1)
+static short    m_NumberOfWavetables;     // Number of Wavetables defined in flash PM
+static fixed_t  m_ContourEnvOutput;       // Mixer contour output, normalized (0 ~ 1.0)
 static fixed_t  m_AttackVelocity;         // Attack Velocity, normalized (0 ~ 0.999)
 static bool     m_TriggerAttack;          // Signal to put ampld envelope into attack
 static bool     m_TriggerRelease;         // Signal to put ampld envelope into release
@@ -71,32 +74,32 @@ static bool     m_LegatoNoteChange;       // Signal Legato note change to Vibrat
 static uint8    m_Note_ON;                // TRUE if Note ON, ie. "gated", else FALSE
 static uint8    m_NotePlaying;            // MIDI note number of note playing
 static uint8    m_ExprnCalibr_pc;         // Expression calibration factor (25..250)
+static uint8    m_AliasFilterTcn;         // Anti-alias filter time-constant N = log2(1/K)
 static uint8    m_FilterAtten_pc;         // Filter input atten/gain (%)
 static uint8    m_FilterGain_x10;         // Filter output gain x10 (1..250)
 static uint8    m_NoiseGain_x10;          // Noise filter gain x10 (1..250)
 static fixed_t  m_FiltCoeff_c[110];       // Bi-quad filter coeff. c  (a1 = -c)
-static fixed_t  m_FiltCoeff_a2;           // Bi-quad filter coeff. a2
-static fixed_t  m_FiltCoeff_b0;           // Bi-quad filter coeff. b0  (b2 = -b0)
-static int      m_FilterIndex;            // Index into LUT: m_FiltCoeff_c[]  (0..108)
 static int      m_RvbDelayLen;            // Reverb. delay line length (samples)
 static fixed_t  m_RvbDecay;               // Reverb. decay factor
 static uint16   m_RvbAtten;               // Reverb. attenuation factor (0..127)
 static uint16   m_RvbMix;                 // Reverb. wet/dry mix ratio (0..127)
 
-volatile bool     v_SynthEnable;      // Signal to enable synth engine
-volatile int32    v_Osc1Angle;        // sample pos'n in wave-table, OSC1 [16:16]
-volatile int32    v_Osc2Angle;        // sample pos'n in wave-table, OSC2 [16:16]
-volatile int32    v_Osc1Step;         // sample pos'n increment, OSC1 [16:16 fixed-pt]
-volatile int32    v_Osc2Step;         // sample pos'n increment, OSC2 [16:16 fixed-pt]
-volatile uint16   v_Mix2Level;        // Osc2 Mixer input level x1000 (0..1000)
-volatile fixed_t  v_NoiseLevel;       // Noise level control (normalized)
-volatile fixed_t  v_OutputLevel;      // Audio output level control (normalized)
-volatile fixed_t  v_coeff_b0;         // Bi-quad filter coeff b0 (active)
-volatile fixed_t  v_coeff_b2;         // Bi-quad filter coeff b2 (active)
-volatile fixed_t  v_coeff_a1;         // Bi-quad filter coeff a1 (active)
-volatile fixed_t  v_coeff_a2;         // Bi-quad filter coeff a2 (active)
-volatile bool     v_Clipping;         // Mixer output clipping (flag)
-volatile uint32   v_ISRexecTime;      // ISR execution time (core cycle count)
+volatile bool     v_SynthEnable;          // Signal to enable synth engine
+volatile int32    v_Osc1Angle;            // sample pos'n in wave-table, OSC1 [16:16]
+volatile int32    v_Osc2Angle;            // sample pos'n in wave-table, OSC2 [16:16]
+volatile int32    v_Osc1Step;             // sample pos'n increment, OSC1 [16:16 fixed-pt]
+volatile int32    v_Osc2Step;             // sample pos'n increment, OSC2 [16:16 fixed-pt]
+volatile fixed_t  v_Osc1SawtoothIncr;     // sawtooth wave ampld increment, OSC1
+volatile fixed_t  v_Osc2SawtoothIncr;     // sawtooth wave ampld increment, OSC2
+volatile uint16   v_Mix2Level;            // Osc2 Mixer input level x1000 (0..1000)
+volatile fixed_t  v_NoiseLevel;           // Noise level control (normalized)
+volatile fixed_t  v_OutputLevel;          // Audio output level control (normalized)
+volatile fixed_t  v_coeff_a1;             // Bi-quad filter coeff a1 (active)
+volatile fixed_t  v_coeff_a2;             // Bi-quad filter coeff a2 (active)
+volatile fixed_t  v_coeff_b0;             // Bi-quad filter coeff b0 (active)
+volatile fixed_t  v_coeff_b2;             // Bi-quad filter coeff b2 (active)
+volatile bool     v_Clipping;             // Mixer output clipping (flag)
+volatile uint32   v_ISRexecTime;          // ISR execution time (core cycle count)
 
 
 // Look-up table giving frequencies of notes on the chromatic scale.
@@ -142,8 +145,6 @@ const  float  m_NoteFrequency[] =
  *
  * Overview:     This function must be called following any change in the synth patch
  *               or synth configuration parameter, before playing a note.
- *
- * Note:         On entry, and exit, the signal v_SynthEnable is set False.
  */
 void  SynthPrepare()
 {
@@ -165,23 +166,25 @@ void  SynthPrepare()
         m_RvbDecay = FloatToFixed( powf(0.001f, rvbDecayFactor) );
         prepDone = TRUE;
     }
-
+    
     WaveTableSelect(1, g_Patch.Osc1WaveTable);
     WaveTableSelect(2, g_Patch.Osc2WaveTable);
 
+    m_NumberOfWavetables = GetHighestWaveTableID() + 1;
+    m_SawtoothPeakAmpld = (IntToFixedPt(1) * 95) / 100;  // = 0.95
+    m_FundamentalPeriod = 1260 << 16;  // 1 cycle of fundamental (2*pi radians)
     m_VibratoControl = g_Preset.Descr[preset].VibratoMode;
     m_PitchBendControl = g_Config.PitchBendCtrlMode; 
-    m_ContourEnvOutput = IntToFixedPt(g_Patch.ContourStartLevel) / 100;
     m_RvbAtten = ((uint16)g_Config.ReverbAtten_pc << 7) / 100;  // = 0..127
     m_RvbMix = ((uint16)g_Config.ReverbMix_pc << 7) / 100;  // = 0..127
 
     // Find coefficients for bi-quad filter according to patch Filter Resonance
     res = (float) g_Patch.FilterResonance / 10000;   // range 0 ~ 0.9999
     res_sq = res * res;
-    m_FiltCoeff_a2 = FloatToFixed(res_sq);
-    m_FiltCoeff_b0 = FloatToFixed(0.5f - (res_sq / 2.0f));
-
-    // Coeff a1 (a1 = -c) is both resonance and frequency dependent...  
+    v_coeff_a2 = FloatToFixed(res_sq);
+    v_coeff_b0 = FloatToFixed(0.5f - (res_sq / 2.0f));
+    v_coeff_b2 = 0 - v_coeff_b0;  // b2 = -b0
+    // Coeff a1 = -c is both resonance and frequency dependent...  
     for (idx = 0 ; idx <= 108 ; idx++)    // populate LUT
     {
         freq_rat = m_NoteFrequency[idx] / SAMPLE_RATE_HZ;   // Fr = Fc / Fs
@@ -193,7 +196,7 @@ void  SynthPrepare()
 /*`````````````````````````````````````````````````````````````````````````````````````````````````
  * Function:     Select (activate) a wave-table for a given synth oscillator.
  *               This then becomes the "active" wave-table, over-riding the table
- *               selected by any prior call to SynthPatchSelect().
+ *               selected by any prior call to SynthPatchSelect(). ^ See note ^
  *
  * Entry args:   osc_num = oscillator assigned to wave-table, 1 -> OSC1, 2 -> OSC2
  *               wave_id = ID number of wave-table, range 0..250
@@ -202,15 +205,17 @@ void  SynthPrepare()
  *               wave_id > 0 selects a flash-based wave-table
  * 
  *             ^ The User Wave-table is regenerated in the RAM buffer by the function
- *               SynthPatchSelect() from the user waveform descriptor in EEPROM.
- *               The User Wave-table may be replaced by the Wave-table Creator utility.
+ *               SynthPatchSelect() from the user waveform descriptor in EEPROM,
+ *               if either OSC1 or OSC2 is to be driven from the User Wave-table. 
+ *               The buffered wave-table may be over-written by the Wave-table Creator
+ *               utility which should also set the wave-table size and Osc.Freq.Div.
  */
 PRIVATE  void  WaveTableSelect(uint8 osc_num, uint8 wave_id)
 {
-    if (wave_id == 0)  // User wave-table -- regenerated in RAM buffer
+    if (wave_id == 0)  // User wave-table -- resident in RAM buffer
     {
         if (osc_num == 1)  m_WaveTable1 = (int16 *) WaveTableBuffer; 
-        else if (osc_num == 2)  m_WaveTable2 = (int16 *) WaveTableBuffer; 
+        if (osc_num == 2)  m_WaveTable2 = (int16 *) WaveTableBuffer; 
     }
     else if (wave_id <= GetHighestWaveTableID())  // Flash-based wave-table
     {
@@ -220,7 +225,7 @@ PRIVATE  void  WaveTableSelect(uint8 osc_num, uint8 wave_id)
             g_Osc1FreqDiv = g_FlashWaveTableDef[wave_id].FreqDiv;
             m_WaveTable1 = (int16 *) g_FlashWaveTableDef[wave_id].Address;
         }
-        else if (osc_num == 2)
+        if (osc_num == 2)
         {
             g_Osc2WaveTableSize = g_FlashWaveTableDef[wave_id].Size;
             g_Osc2FreqDiv = g_FlashWaveTableDef[wave_id].FreqDiv;
@@ -237,18 +242,18 @@ PRIVATE  void  WaveTableSelect(uint8 osc_num, uint8 wave_id)
  *               If the given patch ID number cannot be found, the function will copy
  *               parameters from a "default" patch (idx == 0) and return ERROR (-1).
  *
- * Entry args:   patchNum = ID number of patch parameter table to be set up.
+ * Entry args:   patchNum = ID number of patch parameter table to be accessed.
  *               <!> This is *not* an index into the patch definitions array, g_PatchProgram[].
  *
  * Return val:   ERROR (-1) if the given patch ID cannot be found, else OK (0).
  */
 short  SynthPatchSelect(int patchNum)
 {
-    short  status = 0;
+    short  status = SUCCESS;
     int    i;
     int    patchCount = GetNumberOfPatchesDefined();
 
-    if (patchNum != 0)
+    if (patchNum >= 10)  // e.g. NUMBER_OF_USER_PATCHES = 10  *** todo ***
     {
         for (i = 0;  i < patchCount;  i++)
         {
@@ -263,28 +268,25 @@ short  SynthPatchSelect(int patchNum)
 
         memcpy(&g_Patch, &g_PatchProgram[i], sizeof(PatchParamTable_t));
     }
-    else  // if (patchNum == 0)
+    else  // if (patchNum < NUMBER_OF_USER_PATCHES)   *** todo: add user patches ***
     {
         // Copy User Patch (persistent data in EEPROM) to active patch
         memcpy(&g_Patch, &g_Config.UserPatch, sizeof(PatchParamTable_t));
     }
     
-    // Restore User Wave-table in RAM buffer in case g_Patch.Osc#WaveTable == 0:
-    GenerateWaveTable( (WaveformDesc_t *) &g_Config.UserWaveform );
-    //
-    if (g_Patch.Osc1WaveTable == 0)  // OSC1 needs User Wave-table
+    if (g_Patch.Osc1WaveTable == 0)  // Restore User Wavetable for OSC1
     {
+        GenerateWaveTable( (WaveformDesc_t *) &g_Config.UserWaveform );
         g_Osc1WaveTableSize = g_Config.UserWaveform.Size;
         g_Osc1FreqDiv = g_Config.UserWaveform.FreqDiv;
-        m_WaveTable1 = (int16 *) WaveTableBuffer; 
     }
-    if (g_Patch.Osc2WaveTable == 0)  // OSC2 needs User Wave-table
+    if (g_Patch.Osc2WaveTable == 0)  // Restore User Wavetable for OSC2
     {
+        GenerateWaveTable( (WaveformDesc_t *) &g_Config.UserWaveform );
         g_Osc2WaveTableSize = g_Config.UserWaveform.Size;
         g_Osc2FreqDiv = g_Config.UserWaveform.FreqDiv;
-        m_WaveTable2 = (int16 *) WaveTableBuffer; 
-    }   
-
+    }
+    
     // Ensure minimum values are assigned to envelope transition times...
     // (except for peak-hold time, which may be zero)
     if (g_Patch.AmpldEnvAttack_ms < 5) g_Patch.AmpldEnvAttack_ms = 5;
@@ -322,25 +324,25 @@ void  SynthNoteOn(uint8 noteNum, uint8 velocity)
 
         oscFreqLFO = (((int) g_Patch.LFO_Freq_x10) << 8) / 10;  // set LFO freq.
         m_LFO_Step = (oscFreqLFO * SINE_WAVE_TABLE_SIZE) / 1000;  // LFO Fs = 1000Hz
-        m_AmpldEnvOutput = 0;   // Zero the ampld envelope output signal
+//      m_LFO_output = 0;
+        m_AmpldEnvOutput = 0;
+        m_ContourEnvOutput = IntToFixedPt(g_Patch.ContourStartLevel) / 100;
 
         // A square-law curve is applied to velocity
         m_AttackVelocity = IntToFixedPt((int) velocity) / 128;  // normalized
         m_AttackVelocity = MultiplyFixed(m_AttackVelocity, m_AttackVelocity);  // squared
         
-        // Refresh synth working variables from global (non-patch) settable params.
+        // Refresh synth operational variables from global (non-patch) settable params.
         m_ExprnCalibr_pc = (uint8) (g_ExpressionCalibr * 100);
         m_NoiseGain_x10 = (uint8) (g_NoiseFilterGain * 10);
         m_FilterAtten_pc = (uint8) (g_FilterInputAtten * 100); 
         m_FilterGain_x10 = (uint8) (g_FilterOutputGain * 10); 
-
-        TIMER2_IRQ_DISABLE();
-        v_Osc1Angle = 0;
-        v_Osc2Angle = 0;
-        v_Mix2Level = (1000 * (int) g_Patch.MixerOsc2Level) / 100;
-        v_NoiseLevel = 0;   
-        v_OutputLevel = 0;
-        TIMER2_IRQ_ENABLE();
+        
+//      v_Osc1Angle = 0;           // redundant code ??? 
+//      v_Osc2Angle = 0;
+//      v_Mix2Level = (1000 * (int) g_Patch.MixerOsc2Level) / 100;
+//      v_NoiseLevel = 0;   
+//      v_OutputLevel = 0;
 
         m_LegatoNoteChange = 0;    // Not a Legato event
         m_TriggerAttack = 1;       // Let 'er rip, Boris
@@ -374,7 +376,6 @@ void  SynthNoteChange(uint8 noteNum)
     fixed_t osc1Step, osc2Step;
     float   osc2detune;      // ratio:  osc2Freq / osc1Freq;
     fixed_t detuneNorm;
-    int     filterIdx;    // unit = MIDI note number (semitone)
     int     cents, noteTransposed;
     int     preset = g_Config.PresetLastSelected;
 
@@ -401,35 +402,19 @@ void  SynthNoteChange(uint8 noteNum)
     osc2Freq = osc2Freq / g_Osc2FreqDiv;   // Apply OSC2 Freq.Divider parameter
 
     // Initialize oscillator variables for use in audio ISR
-    osc1Step = (int32)((osc1Freq * g_Osc1WaveTableSize * 65536) / SAMPLE_RATE_HZ);
-    osc2Step = (int32)((osc2Freq * g_Osc2WaveTableSize * 65536) / SAMPLE_RATE_HZ);
+    osc1Step = (int32) ((osc1Freq * (g_Osc1WaveTableSize << 16)) / SAMPLE_RATE_HZ);
+    osc2Step = (int32) ((osc2Freq * (g_Osc2WaveTableSize << 16)) / SAMPLE_RATE_HZ);
+    
+    if (g_Patch.Osc1WaveTable >= m_NumberOfWavetables)  // Pure sawtooth or square
+        osc1Step = (int32) ((m_FundamentalPeriod * osc1Freq) / SAMPLE_RATE_HZ);
     
     m_Osc1StepMedian = osc1Step;  // for Osc FM (vibrato, pitch-bend, etc)
     m_Osc2StepMedian = osc2Step;
     
-    // Calculate filter corner freq (pitch offset) for new note...
-    if (g_Patch.FilterNoteTrack)  // Note Tracking enabled
-    {
-        filterIdx = (noteNum - 12) + g_Patch.FilterFrequency;  // 0..108
-        m_FilterIndex = filterIdx;
-    }
-    else  m_FilterIndex = (int) g_Patch.FilterFrequency;  // 0..108
-    
-    if (m_FilterIndex < 0)  m_FilterIndex = 0;      // Min at C0 (~16Hz)
-    if (m_FilterIndex > 108)  m_FilterIndex = 108;  // Max at C9 (~8kHz)
-    
-    // Use Fc = 16 Hz (minimum) for pitched noise option
-    if (g_Patch.NoiseMode & NOISE_PITCHED)  m_FilterIndex = 0;  
-
-    TIMER2_IRQ_DISABLE();  
+//  TIMER2_IRQ_DISABLE();  
     v_Osc1Step = osc1Step;
     v_Osc2Step = osc2Step;
-    // Set filter coefficient values to be applied in the audio ISR
-    v_coeff_b0 = m_FiltCoeff_b0;
-    v_coeff_b2 = 0 - m_FiltCoeff_b0;      // b2 = -b0
-    v_coeff_a1 = 0 - m_FiltCoeff_c[m_FilterIndex];  // a1 = -c
-    v_coeff_a2 = m_FiltCoeff_a2;
-    TIMER2_IRQ_ENABLE();
+//  TIMER2_IRQ_ENABLE();
 }
 
 
@@ -441,7 +426,7 @@ void  SynthNoteChange(uint8 noteNum)
  * If noteNum == 0, the note will be terminated regardless of m_NotePlaying.  
  * This deviation from the MIDI standard is provided to support the REMI 2 handset.
  *
- * The function puts envelope shapers into the 'Release' phase. The note will be
+ * The function puts the amplitude envelope into the 'Release' phase. The note will be
  * terminated by the synth process (B/G task) when the release time expires, or if
  * a new note is initiated prior.
  */
@@ -577,7 +562,7 @@ void   SynthProcess()
         count5ms = 0;
         ContourEnvelopeShaper();
         VibratoRampGenerator();
-        OscFreqModulation();       // Process pitch-bend and/or vibrato
+        OscFreqModulation();       // Process pitch-bend or vibrato
         OscMixRatioModulation();   // Wave-table morphing routine
         NoiseLevelControl();       // Noise level control routine
         FilterFrequencyControl();  // Bi-quad filter freq. control
@@ -728,6 +713,7 @@ PRIVATE  void   AudioLevelController()
     }
     
     if (outputAmpld > FIXED_MAX_LEVEL)  outputAmpld = FIXED_MAX_LEVEL;
+    if (outputAmpld < AUDIO_FLOOR_LEVEL) outputAmpld = 0;  // below 0.00002
 
     v_OutputLevel = outputAmpld;  // accessed by audio ISR
     
@@ -856,7 +842,7 @@ PRIVATE  void   VibratoRampGenerator()
 
     if (rampState == 0)  // Idle - waiting for Note-On
     {
-		rampStep = IntToFixedPt(5) / (int) g_Patch.LFO_RampTime;
+        rampStep = IntToFixedPt(5) / (int) g_Patch.LFO_RampTime;
         if (m_Note_ON)  { m_RampOutput = 0;  delayTimer_ms = 0;  rampState = 1; }
     }
     else if (rampState == 1)  // Delaying before ramp-up begins
@@ -870,12 +856,12 @@ PRIVATE  void   VibratoRampGenerator()
         if (m_RampOutput > FIXED_MAX_LEVEL)  m_RampOutput = FIXED_MAX_LEVEL;
     }
     else  rampState = 0;  // Undefined state... reset
-	
-	// Check for Note-Off or Note-Change event while ramp is progressing
+    
+    // Check for Note-Off or Note-Change event while ramp is progressing
     if ((rampState != 0) && (!m_Note_ON || m_LegatoNoteChange))
     {
         if (m_LegatoNoteChange)  
-		  { m_LegatoNoteChange = 0;  m_RampOutput = 0;  delayTimer_ms = 0;  rampState = 1; }
+            { m_LegatoNoteChange = 0;  m_RampOutput = 0;  delayTimer_ms = 0;  rampState = 1; }
         else  rampState = 0;
     }
 }
@@ -921,10 +907,10 @@ PRIVATE  void   OscFreqModulation()
         modnLevel = (m_PressureLevel * g_Config.PitchBendRange) / 1200;
         freqMult = Base2Exp(modnLevel);
     }
-    else if (m_PitchBendControl == PITCH_BEND_BY_ANALOG_CV) 
-    {
-        ;  // *****  todo !  *****
-    }
+//    else if (m_PitchBendControl == PITCH_BEND_BY_ANALOG_CV) 
+//    {
+//        ;  // *****  todo !  *****
+//    }
     else  freqMult = IntToFixedPt( 1 );  // No pitch modulation
 
     if (m_VibratoControl || m_PitchBendControl)
@@ -935,6 +921,10 @@ PRIVATE  void   OscFreqModulation()
         v_Osc1Step = MultiplyFixed(m_Osc1StepMedian, smoothFreqMult);
         v_Osc2Step = MultiplyFixed(m_Osc2StepMedian, smoothFreqMult);
     }
+    
+    // Sawtooth amplitude increment (step) = (peak_ampld) / number_of_steps_in_period
+    v_Osc1SawtoothIncr = (m_SawtoothPeakAmpld) / (m_FundamentalPeriod / v_Osc1Step);
+    v_Osc2SawtoothIncr = (m_SawtoothPeakAmpld) / (m_FundamentalPeriod / v_Osc2Step);
 }
 
 
@@ -964,7 +954,7 @@ PRIVATE  void  OscMixRatioModulation()
     }
     else if (g_Patch.MixerControl == MIXER_CTRL_LFO)
     {
-        // Use LFO depth param (0..1200) to set contour LFO modulation depth.
+        // Use LFO depth param (0..1200) to set LFO modulation depth.
         modnLevel = (m_RampOutput * g_Patch.LFO_FM_Depth) / 1200;
         LFO_scaled = MultiplyFixed(m_LFO_output, modnLevel);  // range -1.0 ~ +1.0
         mixRatioLFO = (IntToFixedPt(1) + LFO_scaled) / 2;     // range  0.0 ~ +1.0
@@ -1002,9 +992,10 @@ PRIVATE  void   NoiseLevelControl()
     
     if (noiseCtrlSource == NOISE_LVL_FIXED)           // option 0 (Fixed %)
     {
-        if ((g_Patch.NoiseMode & 3) == NOISE_WAVE_ADDED
+        if ((g_Patch.NoiseMode & 3) == NOISE_WAVE_ADDED 
         ||  (g_Patch.NoiseMode & 3) == NOISE_WAVE_MIXED )
             v_NoiseLevel = (IntToFixedPt( 1 ) * g_Patch.MixerOsc2Level) / 100;
+        else  v_NoiseLevel = FIXED_MAX_LEVEL;  // Noise only
     }
     else if (noiseCtrlSource == NOISE_LVL_AMPLD_ENV)  // option 1
         v_NoiseLevel = m_AmpldEnvOutput;
@@ -1015,7 +1006,6 @@ PRIVATE  void   NoiseLevelControl()
     else if (noiseCtrlSource == NOISE_LVL_MODULN)     // option 4
         v_NoiseLevel = (m_ModulationLevel >> 1);
     else  v_NoiseLevel = 0;  // invalid option (Noise OFF)
-        
 }
 
 
@@ -1029,42 +1019,56 @@ PRIVATE  void   NoiseLevelControl()
  * filter coeff's do not need to be updated here.
  * The actual DSP filter algorithm is incorporated in the audio ISR.
  * 
- * Input variable:  m_FilterIndex = index into filter coeff LUT, varies with fc,
- *                                  determined at Note_ON and legato note change.
- *     
- * Output variables:  v_coeff_a1  = real-time filter coeff (fixed-point value)
+ * Output variable:  v_coeff_a1  = real-time filter coeff (fixed-point value)
  */
 PRIVATE  void   FilterFrequencyControl()
 {
-    fixed_t  devn;   // deviation from quiescent value (+/-0.5 max)
-    int  fc_idx;     // index into filter coeff (c) look-up table
+    fixed_t  devn;     // deviation from quiescent value (+/-0.5 max)
+    int  filterIndex;  // index into filter coeff (a1 = -c) look-up table
+    int  fc_idx;       //  ..     ..     ..    ..
+    
+    // Determine LUT index (filterIndex) for variable filter corner frequency
+    if (g_Patch.FilterNoteTrack)  // Note Tracking enabled
+        filterIndex = (m_NotePlaying - 12) + g_Patch.FilterFrequency;  // 0..108
+    else  filterIndex = (int) g_Patch.FilterFrequency;  // 0..108
+    
+    if (filterIndex < 0)  filterIndex = 0;      // Min at C0 (~16Hz)
+    if (filterIndex > 108)  filterIndex = 108;  // Max at C9 (~8kHz)
 
-    if (g_Patch.NoiseMode)  
-        return;  // wave filter is bypassed while noise is enabled
+    if (g_Patch.NoiseMode)  // Bypass filter modulation if noise is enabled
+    {
+        if (g_Patch.NoiseMode & NOISE_PITCHED)  filterIndex = 0;  // ~ 16Hz
+        v_coeff_a1 = 0 - m_FiltCoeff_c[filterIndex];  // update the coeff a1 = -c
+        return;  
+    }
 
+    // ------------ Filter frequency modulation -----------------------
+    //
     if (g_Patch.FilterControl == FILTER_CTRL_CONTOUR)  // mode 1
     {
-        fc_idx = m_FilterIndex + IntegerPart(m_ContourEnvOutput * 108) - 50;
+        fc_idx = filterIndex + IntegerPart(m_ContourEnvOutput * 54) - 27;
     }
     else if (g_Patch.FilterControl == FILTER_CTRL_LFO)  // mode 2
     {
-        devn = (m_LFO_output * g_Patch.LFO_FM_Depth) / 200;  // deviation (+/-0.5 max)
-        fc_idx = m_FilterIndex + IntegerPart(devn * 108);
+        devn = (m_LFO_output * g_Patch.LFO_FM_Depth) / 200;
+        fc_idx = filterIndex + IntegerPart(devn * 108);
     }
-    //
-    // else if (g_Patch.FilterControl == FILTER_CTRL_EXPRESS)  // mode 3  *** to do ***
-    //
+    else if (g_Patch.FilterControl == FILTER_CTRL_EXPRESS)  // mode 3
+    {
+        devn = (m_PressureLevel * 25) / 100;  // deviation (0.25 max)
+        fc_idx = filterIndex + IntegerPart(devn * 108);
+    }
     else if (g_Patch.FilterControl == FILTER_CTRL_MODULN)  // mode 4
     {
-        devn = (m_ModulationLevel * 50) / 100;  // deviation (+0.5 max)
-        fc_idx = m_FilterIndex - IntegerPart(devn * 108);  // Fc decreases with mod'n level
+        devn = (m_ModulationLevel * 50) / 100;  // deviation (0.5 max)
+        fc_idx = filterIndex - IntegerPart(devn * 108);
     }
-    else  fc_idx = m_FilterIndex;  // filter Fc is constant or note tracking (offset)
+    else  fc_idx = filterIndex;  // filter Fc is constant or note tracking (offset)
 
-    if (fc_idx > 108)  fc_idx = 108;   // max. (~8 kHz)
-    if (fc_idx < 0)  fc_idx = 0;       // min. (~16 Hz)
+    if (fc_idx > 108)  fc_idx = 108;   // max. ~ 8kHz
+    if (fc_idx < 0)  fc_idx = 0;       // min. ~ 16Hz
 
-    v_coeff_a1 = 0 - m_FiltCoeff_c[fc_idx];  // a1 = -c
+    v_coeff_a1 = 0 - m_FiltCoeff_c[fc_idx];  // update coeff a1 = -c
 }
 
 
@@ -1087,6 +1091,8 @@ PRIVATE  void   FilterFrequencyControl()
  */
 void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
 {
+    static  fixed_t  osc1SawtoothAmpld;   // osc1 sawtooth sample amplitude
+    static  fixed_t  osc2SawtoothAmpld;   // osc2 sawtooth sample amplitude
     static  fixed_t  filter_in_1;         // bi-quad filter input delayed 1 sample
     static  fixed_t  filter_in_2;         // bi-quad filter input delayed 2 samples
     static  fixed_t  filter_out_1;        // bi-quad filter output delayed 1 sample
@@ -1101,7 +1107,7 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
     fixed_t  osc1Sample, osc2Sample;      // outputs from OSC1 and OSC2
     fixed_t  noiseSample;                 // output from white noise algorithm
     fixed_t  noiseGenOut;                 // output from noise generator 
-    fixed_t  waveRatio;                   // wave to noise ratio (0 ~ 1.0))
+    fixed_t  wave2NoiseRatio;             // wave to noise ratio (0 ~ 1.0))
     fixed_t  mixerIn1, mixerIn2;          // inputs to wave-osc mixer
     fixed_t  waveMixerOut;                // output from wave-osc mixer 
     fixed_t  totalMixOut;                 // output from wave + noise mixers
@@ -1118,19 +1124,45 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
 
     if (v_SynthEnable)
     {
-        // OSC1 Wave-table oscillator 
-        idx = v_Osc1Angle >> 16;  // integer part of v_Osc1Angle
-        osc1Sample = (fixed_t) m_WaveTable1[idx] << 5;  // normalize
-        v_Osc1Angle += v_Osc1Step;
-        if (v_Osc1Angle >= (g_Osc1WaveTableSize << 16))
-            v_Osc1Angle -= (g_Osc1WaveTableSize << 16);
+        if (g_Patch.Osc1WaveTable < m_NumberOfWavetables)  // OSC1 using Wave-table
+        {
+            idx = v_Osc1Angle >> 16;  // integer part of v_Osc1Angle
+            osc1Sample = (fixed_t) m_WaveTable1[idx] << 5;  // normalize
+            v_Osc1Angle += v_Osc1Step;
+            if (v_Osc1Angle >= (g_Osc1WaveTableSize << 16))
+                v_Osc1Angle -= (g_Osc1WaveTableSize << 16);
+        }
+        else  // OSC1 is "Pure Sawtooth" oscillator
+        {
+            osc1Sample = osc1SawtoothAmpld;
+            osc1SawtoothAmpld += v_Osc1SawtoothIncr;
+            v_Osc1Angle += v_Osc1Step;
+            if (v_Osc1Angle >= m_FundamentalPeriod)
+            {
+                v_Osc1Angle = 0;
+                osc1SawtoothAmpld = 0 - m_SawtoothPeakAmpld;
+            }
+        }
 
-        // OSC2 Wave-table oscillator 
-        idx = v_Osc2Angle >> 16;  // integer part of v_Osc2Angle
-        osc2Sample = (fixed_t) m_WaveTable2[idx] << 5;  // normalize
-        v_Osc2Angle += v_Osc2Step;
-        if (v_Osc2Angle >= (g_Osc2WaveTableSize << 16))
-            v_Osc2Angle -= (g_Osc2WaveTableSize << 16);
+        if (g_Patch.Osc2WaveTable < m_NumberOfWavetables)  // OSC2 using Wave-table
+        {
+            idx = v_Osc2Angle >> 16;  // integer part of v_Osc2Angle
+            osc2Sample = (fixed_t) m_WaveTable2[idx] << 5;  // normalize
+            v_Osc2Angle += v_Osc2Step;
+            if (v_Osc2Angle >= (g_Osc2WaveTableSize << 16))
+                v_Osc2Angle -= (g_Osc2WaveTableSize << 16);
+        }
+        else  // OSC2 is "Pure Sawtooth" oscillator
+        {
+            osc2Sample = osc2SawtoothAmpld;
+            osc2SawtoothAmpld += v_Osc2SawtoothIncr;
+            v_Osc2Angle += v_Osc2Step;
+            if (v_Osc2Angle >= m_FundamentalPeriod)
+            {
+                v_Osc2Angle = 0;
+                osc2SawtoothAmpld = 0 - m_SawtoothPeakAmpld;
+            }
+        }
         
         // Wave Mixer -- add OSC1 and OSC2 samples, scaled according to mix ratio
         mixerIn1 = (osc1Sample * (1000 - v_Mix2Level)) >> 10;
@@ -1174,8 +1206,8 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
             }
             else if ((g_Patch.NoiseMode & 3) == NOISE_WAVE_MIXED)  // Ratiometric mix
             {
-                waveRatio = IntToFixedPt(1) - v_NoiseLevel;  // wave:noise ratio (0 ~ 1.0)
-                totalMixOut = MultiplyFixed(waveMixerOut, waveRatio);
+                wave2NoiseRatio = IntToFixedPt(1) - v_NoiseLevel;  // 0 ~ 1.0
+                totalMixOut = MultiplyFixed(waveMixerOut, wave2NoiseRatio);
                 totalMixOut += MultiplyFixed(noiseGenOut, v_NoiseLevel);
             }
             else  totalMixOut = MultiplyFixed(noiseGenOut, v_NoiseLevel);  // Noise only
@@ -1208,6 +1240,8 @@ void  __ISR(_TIMER_2_VECTOR, IPL6AUTO)  Timer_2_IRQService(void)
 
         // Variable-gain output attenuator -- Apply expression, envelope, etc.
         attenOut = MultiplyFixed(totalMixOut, v_OutputLevel); 
+        // Adjust output level to get consistent amplitude across patches
+        attenOut = (attenOut * g_Patch.AudioLevelAdjust) / 100;
 
         // Reverberation effect (Courtesy of Dan Mitchell, ref. "BasicSynth")
         if (m_RvbMix != 0)  
@@ -1400,26 +1434,26 @@ void  SetVibratoMode(unsigned mode)
 }
 
 /*
- * Function:     Set bi-quad filter resonant frequency (m_FilterIndex) temporarily.
+ * Function:     Set bi-quad filter resonant frequency (filterIndex) temporarily.
  *               Called by diagnostic routines only.
  * 
- * Note:    <!>  m_FilterIndex is restored to that defined by the active Preset
+ * Note:    <!>  filterIndex is restored to that defined by the active Preset
  *               whenever an Instrument Preset is selected.
  * 
  * Input arg:    freqIndex = index into filter coeff. LUT (0..108)
  */
 void  SetFilterFreqIndex(uint8 freqIndex)
 {
-    if (freqIndex <= 108)  m_FilterIndex = freqIndex;
+//  if (freqIndex <= 108)  filterIndex = freqIndex;  //>
 }
 
 /*
- * Function:     Get bi-quad filter resonant frequency (m_FilterIndex)
+ * Function:     Get bi-quad filter resonant frequency (filterIndex)
  *               Called by diagnostic routines only.
  */
 uint8  GetFilterFreqIndex()
 {
-    return  m_FilterIndex;
+//  return  filterIndex;
 }
 
 

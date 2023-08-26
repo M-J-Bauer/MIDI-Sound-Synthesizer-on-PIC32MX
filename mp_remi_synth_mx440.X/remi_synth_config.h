@@ -69,7 +69,7 @@ typedef struct Eeprom_block0_structure
     PatchParamTable_t  UserPatch;     // User-programmable patch parameters
     WaveformDesc_t     UserWaveform;  // User Wave-table descriptor
     //
-    uint32  padding;                  // Toggle line comment to force default on FW update
+//  uint32  padding;                  // Toggle line comment to force default on FW update
     uint32  EndOfDataBlockCode;       // Last entry, to test if block format has changed
 
 } EepromBlock0_t;
