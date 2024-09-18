@@ -1,5 +1,5 @@
 # MIDI-Sound-Synthesizer-on-PIC32MX
-Monophonic MIDI-controlled Sound Synthesizer application runs on PIC32MX microcontroller, easily adaptable to other devices.
+Monophonic MIDI-controlled Sound Synthesizer application runs on PIC32MX microcontroller; may be adapted to a different 32-bit MCU.
 
 # Overview
 
@@ -21,10 +21,10 @@ The "REMI" Synth Module is a monophonic MIDI-controlled sound synthesizer design
     . Reverberation effect
 
 A PIC32MX on-chip timer module is used to generate a PWM audio output signal. The PWM "DAC" has a resolution of 11 bits,
-which gives adequate sound quality. For improved sound quality, an optional 12-bit SPI DAC chip may be added.
+which gives adequate sound quality. For improved sound quality, an optional 12-bit SPI DAC chip (MCP4921) may be added.
 Software DSP computations use 32-bit normalized fixed-point numbers with 20-bit fractional part, allowing the application
 to run on 32-bit microcontrollers without hardware floating-point capability.
 
-For details of the project, visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth.htm
+For details of the project, visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth_mk2.htm
 
 If you need a custom firmware variant, e.g. to support LCD with ST7920 controller, or whatever, send me a request.
