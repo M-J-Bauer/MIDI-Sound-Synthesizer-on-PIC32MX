@@ -1,9 +1,9 @@
-# MIDI-Sound-Synthesizer-on-PIC32MX
-Monophonic MIDI-controlled Sound Synthesizer application runs on PIC32MX microcontroller; may be adapted to a different 32-bit MCU.
+# MIDI Sound Synthesizer on PIC32MX MCU
+MIDI-controlled monophonic sound synthesizer application runs on a PIC32MX340 microcontroller.
 
 # Overview
 
-The "REMI" Synth Module is a monophonic MIDI-controlled sound synthesizer designed primarily for use with electronic wind instument (EWI) MIDI controllers. Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a keyboard with classic MIDI output. Using a low-cost USB-MIDI adapter/cable, the synth can also be controlled by a computer running music software, for example a MIDI sequencer. 
+The "REMI" Synth Module was designed primarily for use with electronic wind instrument (EWI) MIDI controllers. Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a MIDI keyboard. Using a low-cost USB-MIDI adapter/cable, the synth may be controlled by a computer running music software, for example a MIDI sequencer. 
 
 # Features
 
