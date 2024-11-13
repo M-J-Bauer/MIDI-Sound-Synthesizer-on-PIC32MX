@@ -1,5 +1,5 @@
 # MIDI Sound Synthesizer on PIC32MX MCU
-MIDI-controlled monophonic sound synthesizer application runs on a PIC32MX340 microcontroller.
+MIDI-controlled monophonic sound synthesizer application runs on a PIC32MX microcontroller.
 
 # Overview
 
