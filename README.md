@@ -3,7 +3,7 @@ MIDI-controlled monophonic sound synthesizer application runs on a PIC32MX340 mi
 
 # Overview
 
-The "REMI" Synth Module was designed primarily for use with electronic wind instrument (EWI) MIDI controllers. Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a MIDI keyboard. Using a low-cost USB-MIDI adapter/cable, the synth may be controlled by a computer running music software, for example a MIDI sequencer. 
+The "REMI" Synth Module was designed originally for use with electronic wind instrument (EWI) MIDI controllers. Provision of a standard 'MIDI IN' port allows the synth to be played by any MIDI controller, for example a MIDI keyboard. Using a low-cost USB-MIDI adapter/cable, the synth can be controlled by a computer running music software, for example a sequencer. 
 
 # Features
 
@@ -27,4 +27,6 @@ to run on 32-bit microcontrollers without hardware floating-point capability.
 
 For details of the project, visit the author's web page: http://www.mjbauer.biz/Build_the_REMI_synth_mk2.htm
 
-If you need a custom firmware variant, e.g. to support LCD with ST7920 controller, or whatever, send me a request.
+Note that variants of the REMI synth design exist using different hardware configurations requiring different firmware. 
+For example, there is a variant based on a PIC32MX440 MCU and a synth "Lite" variant designed especially for the REMI 2 (EWI controller).
+If you need firmware for any variant, please contact me via email: mjbauer@iprimus.com.au
