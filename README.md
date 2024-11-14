@@ -29,4 +29,4 @@ For details of the project, visit the author's web page: http://www.mjbauer.biz/
 
 Note that variants of the REMI synth design exist using different hardware configurations requiring different firmware. 
 For example, there is a variant based on a PIC32MX440 MCU and a synth "Lite" variant designed especially for the REMI 2 (EWI controller).
-If you need firmware for any variant, please contact me via email: mjbauer@iprimus.com.au
+If you need firmware for any variant, please contact me via email (address on website).
